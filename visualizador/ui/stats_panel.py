@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 from PySide6.QtWidgets import (
-    QFrame, QGridLayout, QLabel, QProgressBar, QSizePolicy, QVBoxLayout,
+    QFrame, QGridLayout, QLabel, QProgressBar, QSizePolicy, QVBoxLayout, QGraphicsOpacityEffect,
 )
+
+from PySide6.QtCore import QEasingCurve, QPropertyAnimation
 
 from core.stats import ProgramStats, format_duration, format_length
 
@@ -50,10 +52,24 @@ class StatCard(QFrame):
 
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
-    def set_value(self, text: str, detail: str = "") -> None:
+    def set_value(self, text: str, detail: str = "", animate: bool = False) -> None:
         self._value.setText(text)
         self._detail.setText(detail)
         self._detail.setVisible(bool(detail))
+        if animate:
+            self._play_pop_in()
+
+    def _play_pop_in(self) -> None:
+        effect = QGraphicsOpacityEffect(self)
+        self.setGraphicsEffect(effect)
+        animation = QPropertyAnimation(effect, b"opacity", self)
+        animation.setDuration(220)
+        animation.setStartValue(0.35)
+        animation.setEndValue(1.0)
+        animation.setEasingCurve(QEasingCurve.Type.OutCubic)
+        animation.finished.connect(lambda: self.setGraphicsEffect(None))
+        animation.start(QPropertyAnimation.DeletionPolicy.DeleteWhenStopped)
+        self._pop_animation = animation
 
     def resizeEvent(self, event) -> None:
         super().resizeEvent(event)

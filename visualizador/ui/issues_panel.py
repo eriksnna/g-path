@@ -68,6 +68,7 @@ class IssuesPanel(QFrame):
 
         self._list.setVisible(has_issues)
         self._empty.setVisible(not has_issues)
+        self._detail.setVisible(has_issues)  # nova linha
         self._summary.setText(
             f"{errors} erro(s)   ·   {warnings} aviso(s)" if has_issues else ""
         )

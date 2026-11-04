@@ -9,7 +9,6 @@ from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
-    QDialogButtonBox,
     QDoubleSpinBox,
     QFormLayout,
     QGroupBox,
@@ -263,16 +262,20 @@ class SettingsDialog(QDialog):
         body.addWidget(self._nav)
         body.addWidget(self._pages, stretch=1)
 
-        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
-        buttons.rejected.connect(self.reject)
-        buttons.accepted.connect(self.accept)
-        close_button = buttons.button(QDialogButtonBox.StandardButton.Close)
-        if close_button is not None:
-            close_button.clicked.connect(self.accept)
+        close_button = QPushButton("Fechar")
+        close_button.clicked.connect(self.accept)
+
+        button_row = QHBoxLayout()
+        button_row.addStretch()
+        button_row.addWidget(close_button)
 
         root = QVBoxLayout(self)
         root.addLayout(body)
-        root.addWidget(buttons)
+        root.addLayout(button_row)
+
+        root = QVBoxLayout(self)
+        root.addLayout(body)
+        root.addLayout(button_row)
 
         self._nav.setCurrentRow(0)
 

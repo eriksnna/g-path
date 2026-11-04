@@ -3,12 +3,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QElapsedTimer, QSettings, QTimer
+from PySide6.QtCore import Qt, QElapsedTimer, QSettings, QTimer, QEasingCurve, QPropertyAnimation
 from PySide6.QtGui import QIcon, QCloseEvent, QAction, QKeySequence
 from PySide6.QtWidgets import (
     QFileDialog, QFrame, QHBoxLayout, QLabel, QMainWindow, QPushButton,
     QScrollArea, QSplitter, QVBoxLayout, QWidget, QMessageBox, QStackedWidget,
-    QLayout
+    QLayout, QGraphicsOpacityEffect,
 )
 
 from config import APP_TITLE, GCODE_FILTER, ICON_PATH, TICK_MS, WINDOW_SIZE
@@ -40,7 +40,7 @@ class _ElidingLabel(QLabel):
     def __init__(self, text: str = "", parent=None) -> None:
         super().__init__(parent)
         self._full_text = text
-        self.setMinimumWidth(60)
+        self.setMinimumWidth(140)
         super().setText(text)
 
     def setText(self, text: str) -> None:
@@ -268,6 +268,19 @@ class MainWindow(QMainWindow):
         self._player.setVisible(True)
         self.menuBar().setVisible(True)
         self._stack.setCurrentIndex(1)
+
+    def _fade_in_current_page(self) -> None:
+        page = self._stack.currentWidget()
+        effect = QGraphicsOpacityEffect(page)
+        page.setGraphicsEffect(effect)
+        animation = QPropertyAnimation(effect, b"opacity", self)
+        animation.setDuration(180)
+        animation.setStartValue(0.0)
+        animation.setEndValue(1.0)
+        animation.setEasingCurve(QEasingCurve.Type.OutCubic)
+        animation.finished.connect(lambda: page.setGraphicsEffect(None))
+        animation.start(QPropertyAnimation.DeletionPolicy.DeleteWhenStopped)
+        self._page_fade = animation  # mantém viva até terminar
 
     def _restore_window_state(self) -> None:
         """Restaura a geometria da janela e reabre o último arquivo, se ele ainda existir."""

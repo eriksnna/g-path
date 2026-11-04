@@ -4,10 +4,10 @@ from __future__ import annotations
 import math
 from contextlib import contextmanager
 
-from PySide6.QtCore import QPointF, QRectF, QSize, Qt, Signal
+from PySide6.QtCore import QPointF, QRectF, QSize, Qt, Signal, QEasingCurve, QPropertyAnimation
 from PySide6.QtGui import QColor, QPainter
 from PySide6.QtWidgets import (
-    QFrame, QHBoxLayout, QLabel, QPushButton, QSlider, QVBoxLayout,
+    QFrame, QHBoxLayout, QLabel, QPushButton, QSlider, QVBoxLayout
 )
 
 from config import (
@@ -95,6 +95,39 @@ class _Slider(QSlider):
             event.accept()
         else:
             super().mouseReleaseEvent(event)
+
+class _HoverGrowButton(QPushButton):
+    """Cresce o ícone ~12% no hover, com uma animação curta e barata."""
+
+    GROW_FACTOR = 1.12
+
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
+        self._base_icon_size: QSize | None = None
+        self._icon_animation = QPropertyAnimation(self, b"iconSize", self)
+        self._icon_animation.setDuration(100)
+        self._icon_animation.setEasingCurve(QEasingCurve.Type.OutQuad)
+
+    def setIconSize(self, size: QSize) -> None:
+        super().setIconSize(size)
+        if self._base_icon_size is None:
+            self._base_icon_size = size
+
+    def enterEvent(self, event) -> None:
+        super().enterEvent(event)
+        self._animate_to(self._base_icon_size * self.GROW_FACTOR if self.isEnabled() else self._base_icon_size)
+
+    def leaveEvent(self, event) -> None:
+        super().leaveEvent(event)
+        self._animate_to(self._base_icon_size)
+
+    def _animate_to(self, target: QSize | None) -> None:
+        if target is None:
+            return
+        self._icon_animation.stop()
+        self._icon_animation.setStartValue(self.iconSize())
+        self._icon_animation.setEndValue(target)
+        self._icon_animation.start()
 
 class PlayerBar(QFrame):
     play_clicked = Signal()

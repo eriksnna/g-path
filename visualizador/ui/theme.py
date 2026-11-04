@@ -103,7 +103,7 @@ QFrame#playbar {{ background: {SURFACE_1}; border: none; border-radius: {RADIUS_
 
 QFrame#statsPanel {{ background: {SURFACE_1}; border: none; border-radius: {RADIUS_LG}; }}
 QFrame#card {{ background: {SURFACE_2}; border: 1px solid {BORDER}; border-radius: {RADIUS_MD}; }}
-QLabel#cardTitle {{ color: {TEXT_SECONDARY}; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }}
+QLabel#cardTitle {{ color: {TEXT_SECONDARY}; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }}
 QLabel#cardValue {{ color: {TEXT_PRIMARY}; font-size: 17px; font-weight: 700; }}
 QLabel#sectionTitle {{ color: {TEXT_SECONDARY}; font-size: 11px; font-weight: 700; margin-top: 4px; }}
 
