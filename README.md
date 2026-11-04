@@ -1,14 +1,14 @@
-## G-Path
+# G-Path
 
 <p align="center">
   <img src="assets/logo.png" alt="Logo do G-Path" width="120">
 </p>
 
-### Sobre
+## Sobre
 
 Ferramenta de visualização e simulação 3D de programas G-code.
 
-### Instalação e uso
+## Instalação e uso
 
 `git clone https://github.com/eriksnna/g-path`
 
