@@ -1,7 +1,7 @@
 ## G-Path
 
 <p align="center">
-  <img src="assets/logo.png" alt="Logo do G-Path" width="96">
+  <img src="assets/logo.png" alt="Logo do G-Path" width="120">
 </p>
 
 ### Sobre
