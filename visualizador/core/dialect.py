@@ -58,3 +58,19 @@ def get_dialect(key: str) -> Dialect:
         raise ValueError(f"dialeto desconhecido: {key!r}") from err
 
 DIALECT_CHOICES = [(dialect.name, key) for key, dialect in DIALECTS.items()]
+
+_DIALECT_LABEL_KEYS = {
+    "generico": "dialect_generic",
+    "arco-m8-m9": "dialect_arc_m8_m9",
+    "fanuc": "dialect_fanuc",
+    "plasma-m3-m5": "dialect_plasma",
+    "waam-m10-m11": "dialect_waam",
+}
+
+
+def dialect_choices() -> list[tuple[str, str]]:
+    from core.i18n import tr  # import tardio: evita ciclo e garante tradução na hora certa
+    return [
+        (tr(_DIALECT_LABEL_KEYS.get(key, dialect.name)), key)
+        for key, dialect in DIALECTS.items()
+    ]

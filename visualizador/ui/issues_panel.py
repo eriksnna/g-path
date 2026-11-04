@@ -1,6 +1,8 @@
 """Painel de validação: lista os problemas e leva o usuário até a linha no caminho."""
 from __future__ import annotations
 
+from core.i18n import tr
+
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
@@ -24,7 +26,7 @@ class IssuesPanel(QFrame):
         self.setObjectName("issuesPanel")
         self.setMinimumWidth(PANEL_WIDTH)
 
-        title = QLabel("VALIDAÇÃO")
+        title = QLabel(tr("validation_title"))
         title.setObjectName("sectionTitle")
 
         self._summary = QLabel()
@@ -32,12 +34,14 @@ class IssuesPanel(QFrame):
 
         self._list = QListWidget()
         self._list.setObjectName("issues")
+        self._list.setWordWrap(True)
+        self._list.setResizeMode(QListWidget.ResizeMode.Adjust)
         self._list.itemClicked.connect(self._on_clicked)
 
-        self._empty = QLabel(EMPTY_TEXT)
+        self._empty = QLabel(tr("validation_empty"))
         self._empty.setObjectName("issueEmpty")
 
-        self._detail = QLabel(HINT_TEXT)
+        self._detail = QLabel(tr("validation_hint"))
         self._detail.setObjectName("issueDetail")
         self._detail.setWordWrap(True)
 
@@ -68,14 +72,16 @@ class IssuesPanel(QFrame):
 
         self._list.setVisible(has_issues)
         self._empty.setVisible(not has_issues)
-        self._detail.setVisible(has_issues)  # nova linha
+        self._detail.setVisible(has_issues)
         self._summary.setText(
-            f"{errors} erro(s)   ·   {warnings} aviso(s)" if has_issues else ""
+            tr("validation_summary").format(errors=errors, warnings=warnings) if has_issues else ""
         )
-        self._detail.setText(HINT_TEXT)
+        self._detail.setText(tr("validation_hint"))
 
     def show_source(self, line: int, text: str) -> None:
-        self._detail.setText(f"Linha {line}:  {text or '(vazia)'}")
+        self._detail.setText(
+            tr("validation_line_prefix").format(line=line, text=text or tr("validation_empty_line"))
+        )
 
     def _on_clicked(self, item: QListWidgetItem) -> None:
         self.issue_selected.emit(item.data(LINE_ROLE))

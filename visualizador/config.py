@@ -5,6 +5,7 @@ import os, sys
 
 CONFIG_DIR = Path(os.environ.get("APPDATA", str(Path.home() / ".config"))) / "GPath"
 PROFILES_FILE = CONFIG_DIR / "profiles.json"
+SETTINGS_FILE = CONFIG_DIR / "settings.json"
 
 APP_TITLE = "G-Path"
 WINDOW_SIZE = (1100, 800)
@@ -27,7 +28,7 @@ ARC_STEP_DEG = 5.0        # resolução dos arcos, em graus por segmento
 
 # Visual
 CUT_WIDTH = 2.0
-RAPID_WIDTH = 1.0
+RAPID_WIDTH = 1.5
 HEAD_SIZE = 12
 CAMERA_START_DISTANCE = 200.0
 CAMERA_MARGIN = 1.5

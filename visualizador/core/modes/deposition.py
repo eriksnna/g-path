@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from core.i18n import tr
 from core.lexer import ERROR, WARNING, Issue
 from core.modes.base import ModeCard, ProcessMode
 from core.parser import Move
@@ -62,12 +63,12 @@ class DepositionMode(ProcessMode):
         rate = mass_kg / (arc_time / 3600) if arc_time > 0 else 0.0
 
         return [
-            ModeCard("Material depositado", f"{mass_kg:.3f} kg",
-                     f"{volume / MM3_PER_CM3:.1f} cm³ · densidade {self.bead.density:g} g/cm³"),
-            ModeCard("Taxa de deposição", f"{rate:.2f} kg/h",
-                     f"em {format_duration(arc_time)} com arco ligado"),
-            ModeCard("Trajeto depositado", format_length(bead_length),
-                     f"{dots} pontos depositados"),
+            ModeCard(tr("card_deposited_material"), f"{mass_kg:.3f} kg",
+                     f"{volume / MM3_PER_CM3:.1f} cm³ · {tr('detail_density')} {self.bead.density:g} g/cm³"),
+            ModeCard(tr("card_deposition_rate"), f"{rate:.2f} kg/h",
+                     tr("detail_arc_time").format(time=format_duration(arc_time))),
+            ModeCard(tr("card_deposited_path"), format_length(bead_length),
+                     tr("detail_dots_deposited").format(count=dots)),
         ]
 
     def deposited_volume(self, bead_length: float, dots: int) -> float:

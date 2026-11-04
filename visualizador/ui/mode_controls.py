@@ -4,10 +4,11 @@ from __future__ import annotations
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QComboBox, QDoubleSpinBox, QHBoxLayout, QLabel, QWidget
 
+from core.i18n import tr
 from ui.theme import SPACE_SM
 
 from config import BEAD_HEIGHT_MM, BEAD_WIDTH_MM, DEFAULT_MODE, DEPOSIT_DENSITY_G_CM3
-from core.modes import MODE_CHOICES, create_mode
+from core.modes import create_mode, mode_choices
 from core.modes.base import ProcessMode
 from core.modes.deposition import BeadSpec, DepositionMode
 
@@ -21,7 +22,7 @@ class ModeControls(QWidget):
         super().__init__(parent)
 
         self._combo = QComboBox()
-        for label, key in MODE_CHOICES:
+        for label, key in mode_choices():
             self._combo.addItem(label, key)
         self._combo.setCurrentIndex(max(0, self._combo.findData(DEFAULT_MODE)))
 
@@ -29,9 +30,9 @@ class ModeControls(QWidget):
         self._height = self._make_spin(0.1, 20.0, BEAD_HEIGHT_MM, " mm")
         self._density = self._make_spin(0.1, 30.0, DEPOSIT_DENSITY_G_CM3, " g/cm³")
         self._bead_fields = [
-            (QLabel("Largura"), self._width),
-            (QLabel("Altura"), self._height),
-            (QLabel("Densidade"), self._density),
+            (QLabel(tr("label_width")), self._width),
+            (QLabel(tr("label_height")), self._height),
+            (QLabel(tr("label_density")), self._density),
         ]
 
         layout = QHBoxLayout(self)

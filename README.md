@@ -428,7 +428,7 @@ Novidades:
 - Remoção de código morto (não utilizado);
 - Correção de bugs
 
-### 30/10 — sexta-feira a 31/10 — domingo - Adição de licença MIT e outras melhorias (~12h)
+### 30/10 — sexta-feira a 31/10 — sábado - Adição de licença MIT e outras melhorias (~12h)
 
 1. **Licença**:
 
@@ -438,3 +438,15 @@ Novidades:
 
 - Adição de pasta de exemplos, com modelos de código G-Code de usinagem e WAAM.
 - Correção de bug de redimensionamento da janela.
+
+### 01/11 — domingo a 03/11 — terça-feira - Suporte à outras línguas (~23h)
+
+1. **Novidade:**
+
+- Agora o software suporta outras linguagens!
+  - Linguagens suportadas no momento: PT-BR e ENG-US
+
+2. **Misc:**
+
+- Correção de bugs na interface
+- Adição de animações simples

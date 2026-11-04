@@ -17,9 +17,3 @@ Este projeto depende das seguintes bibliotecas de terceiros:
 
 - Heroicons — MIT
   https://heroicons.com/
-
-Ferramenta usada apenas para gerar o executável (não é dependência do código-fonte):
-
-- PyInstaller — GPL, com exceção explícita que permite distribuir o
-  executável gerado sem ele próprio precisar ser GPL.
-  https://pyinstaller.org/en/stable/license.html

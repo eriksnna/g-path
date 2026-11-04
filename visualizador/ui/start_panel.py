@@ -9,8 +9,9 @@ from PySide6.QtWidgets import QFrame, QLabel, QPushButton, QVBoxLayout
 
 from ui.theme import ACCENT, SPACE_XL, SPACE_XXL, SURFACE_0, SURFACE_1
 
+from core.i18n import tr
+
 TITLE = "G-Path"
-SUBTITLE = "Ferramenta de visualização e simulação 3D de programas G-code."
 
 CONTENT_WIDTH = 360
 BUTTON_WIDTH = 280
@@ -92,17 +93,17 @@ class StartPanel(QFrame):
         title = QLabel(TITLE)
         title.setObjectName("startTitle")
         title.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-        subtitle = QLabel(SUBTITLE)
+        subtitle = QLabel(tr("start_subtitle"))
         subtitle.setObjectName("startSubtitle")
         subtitle.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         subtitle.setWordWrap(True)
 
-        open_button = QPushButton("Abrir arquivo G-code...")
+        open_button = QPushButton(tr("start_open_file"))
         open_button.setObjectName("startButton")
         open_button.setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT)
         open_button.clicked.connect(self.open_requested.emit)
 
-        blank_button = QPushButton("Começar do zero")
+        blank_button = QPushButton(tr("start_blank"))
         blank_button.setObjectName("startButtonSecondary")
         blank_button.setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT)
         blank_button.clicked.connect(self.blank_requested.emit)

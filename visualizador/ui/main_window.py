@@ -17,7 +17,8 @@ from ui.icons import APPLY, DISCARD, NEW_FILE, OPEN_FILE, QUIT, SAVE, SEARCH, SE
 import config
 from core.layers import depth_levels
 from core.lexer import Issue
-from core.modes import apply_mode
+from core.modes import apply_mode, mode_display_name
+from core.i18n import tr
 from core.parser import parse_gcode
 from core.playback import Playback
 from core.stats import compute_stats, format_duration
@@ -35,6 +36,14 @@ from ui.stats_panel import StatsPanel
 from ui.theme import DARK_QSS
 from ui.viewport import ToolpathView
 from ui.start_panel import StartPanel
+
+def _vsep() -> QFrame:
+    """Linha vertical fina pra separar grupos de controles na barra superior."""
+    line = QFrame()
+    line.setFrameShape(QFrame.Shape.VLine)
+    line.setFrameShadow(QFrame.Shadow.Plain)
+    line.setObjectName("headerSeparator")
+    return line
 
 class _ElidingLabel(QLabel):
     def __init__(self, text: str = "", parent=None) -> None:
@@ -77,14 +86,14 @@ class MainWindow(QMainWindow):
         self._profiles, _active_name = load_profiles()
         self._profile = next((p for p in self._profiles if p.name == _active_name), self._profiles[0])
 
-        self._file_label = _ElidingLabel("Nenhum arquivo carregado")
+        self._file_label = _ElidingLabel(tr("file_no_file"))
         self._file_label.setObjectName("fileLabel")
         self._profile_label = QLabel()
         self._profile_label.setObjectName("profileLabel")
         self._update_profile_label()
         self._mode_controls = ModeControls()
         self._mode_controls.set_mode(self._profile.mode_key)
-        self._editor_toggle = QPushButton("Editor")
+        self._editor_toggle = QPushButton(tr("editor_toggle"))
         self._editor_toggle.setObjectName("editorToggle")
         self._editor_toggle.setCheckable(True)
         self._layer_controls = LayerControls()
@@ -127,9 +136,11 @@ class MainWindow(QMainWindow):
         header.setSpacing(10)
         header.addWidget(self._file_label, 1)
         header.addWidget(self._profile_label)
+        header.addWidget(_vsep())
         header.addWidget(self._mode_controls)
-        header.addWidget(self._editor_toggle)
         header.addWidget(self._layer_controls)
+        header.addWidget(_vsep())
+        header.addWidget(self._editor_toggle)
 
         stats_scroll = QScrollArea()
         stats_scroll.setWidgetResizable(True)
@@ -143,6 +154,9 @@ class MainWindow(QMainWindow):
         side.setStretchFactor(0, 1)
         side.setStretchFactor(1, 1)
         side.setChildrenCollapsible(True)
+
+        side.setSizes([420, 220])
+        self._issues_panel.setMinimumHeight(160)
 
         self._viewport.setMinimumSize(280, 180)
         main_area = QSplitter(Qt.Orientation.Vertical)
@@ -182,15 +196,15 @@ class MainWindow(QMainWindow):
     def _build_menu_bar(self) -> None:
         menu_bar = self.menuBar()
 
-        file_menu = menu_bar.addMenu("&Arquivo")
+        file_menu = menu_bar.addMenu(tr("menu_file"))
 
-        new_action = QAction("Novo (em branco)", self)
+        new_action = QAction(tr("menu_new"), self)
         new_action.setIcon(icon(NEW_FILE))
         new_action.setShortcut(QKeySequence.StandardKey.New)
         new_action.triggered.connect(self._start_blank)
         file_menu.addAction(new_action)
 
-        open_action = QAction("Abrir G-code...", self)
+        open_action = QAction(tr("menu_open"), self)
         open_action.setIcon(icon(OPEN_FILE))
         open_action.setShortcut(QKeySequence.StandardKey.Open)
         open_action.triggered.connect(lambda: self.open_file())
@@ -198,50 +212,50 @@ class MainWindow(QMainWindow):
 
         file_menu.addSeparator()
 
-        save_action = QAction("Salvar", self)
+        save_action = QAction(tr("menu_save"), self)
         save_action.setIcon(icon(SAVE))
         save_action.triggered.connect(lambda: self._save_edited_text(self._editor.text()))
         file_menu.addAction(save_action)
 
-        save_as_action = QAction("Salvar como...", self)
+        save_as_action = QAction(tr("menu_save_as"), self)
         save_as_action.setIcon(icon(SAVE))
         save_as_action.triggered.connect(lambda: self._save_edited_text_as(self._editor.text()))
         file_menu.addAction(save_as_action)
 
         file_menu.addSeparator()
 
-        close_project_action = QAction("Fechar projeto / Redefinir", self)
+        close_project_action = QAction(tr("menu_close_project"), self)
         close_project_action.setIcon(icon(DISCARD))
         close_project_action.triggered.connect(self._reset_to_start)
         file_menu.addAction(close_project_action)
 
         file_menu.addSeparator()
 
-        quit_action = QAction("Sair", self)
+        quit_action = QAction(tr("menu_quit"), self)
         quit_action.setIcon(icon(QUIT))
         quit_action.setShortcut(QKeySequence.StandardKey.Quit)
         quit_action.triggered.connect(self.close)
         file_menu.addAction(quit_action)
 
-        edit_menu = menu_bar.addMenu("&Editar")
+        edit_menu = menu_bar.addMenu(tr("menu_edit"))
 
-        apply_action = QAction("Aplicar alterações", self)
+        apply_action = QAction(tr("menu_apply_changes"), self)
         apply_action.setIcon(icon(APPLY))
         apply_action.triggered.connect(lambda: self._apply_edited_text(self._editor.text()))
         edit_menu.addAction(apply_action)
 
-        comment_action = QAction("Comentar/descomentar linha(s)", self)
+        comment_action = QAction(tr("menu_toggle_comment"), self)
         comment_action.triggered.connect(self._editor.toggle_comment)
         edit_menu.addAction(comment_action)
 
-        find_action = QAction("Localizar... (Ctrl+F)", self)
+        find_action = QAction(tr("menu_find"), self)
         find_action.setIcon(icon(SEARCH))
         find_action.triggered.connect(self._show_editor_find)
         edit_menu.addAction(find_action)
 
-        settings_menu = menu_bar.addMenu("&Configurações")
+        settings_menu = menu_bar.addMenu(tr("menu_settings"))
 
-        settings_action = QAction("Ajustes...", self)
+        settings_action = QAction(tr("menu_settings_open"), self)
         settings_action.setIcon(icon(SETTINGS))
         settings_action.triggered.connect(self._open_settings)
         settings_menu.addAction(settings_action)
@@ -254,13 +268,14 @@ class MainWindow(QMainWindow):
         self._text = None
         self._saved_text = None
         self._settings.remove("window/last_file")
-        self._file_label.setText("Nenhum arquivo carregado")
+        self._file_label.setText(tr("file_no_file"))
         self._editor.set_text("")
         self._show_empty()
         self._header_widget.setVisible(False)
         self._player.setVisible(False)
         self.menuBar().setVisible(False)
         self._stack.setCurrentIndex(0)
+        self._fade_in_current_page()
 
     def _enter_workspace(self) -> None:
         """Sai da tela inicial: mostra cabeçalho, área de trabalho e barra de reprodução."""
@@ -268,6 +283,7 @@ class MainWindow(QMainWindow):
         self._player.setVisible(True)
         self.menuBar().setVisible(True)
         self._stack.setCurrentIndex(1)
+        self._fade_in_current_page()
 
     def _fade_in_current_page(self) -> None:
         page = self._stack.currentWidget()
@@ -327,7 +343,7 @@ class MainWindow(QMainWindow):
     # --- carregamento ---
 
     def open_file(self) -> None:
-        path, _ = QFileDialog.getOpenFileName(self, "Abrir G-code", "", GCODE_FILTER)
+        path, _ = QFileDialog.getOpenFileName(self, tr("dialog_open_title"), "", GCODE_FILTER)
         if path:
             self.load_file(Path(path))
 
@@ -343,7 +359,7 @@ class MainWindow(QMainWindow):
         self._reload()
 
     def _update_profile_label(self) -> None:
-        self._profile_label.setText(f"Perfil: {self._profile.name}")
+        self._profile_label.setText(tr("profile_label").format(name=self._profile.name))
 
     def _on_mode_changed(self) -> None:
         """O usuário trocou o modo (ou um parâmetro de cordão) na tela principal."""
@@ -360,11 +376,11 @@ class MainWindow(QMainWindow):
         self._settings.remove("window/last_file")
         self._text = ""
         self._saved_text = ""
-        self._file_label.setText("Novo programa (não salvo)")
+        self._file_label.setText(tr("file_new_unsaved"))
         self._editor.set_text("")
         self._editor_toggle.setChecked(True)
         self._enter_workspace()
-        self._show_empty(status="Programa novo. Escreva no editor e aplique (Ctrl+Enter).")
+        self._show_empty(status=tr("status_program_new"))
 
     def load_file(self, path: Path) -> None:
         if not self._confirm_discard_changes():
@@ -374,10 +390,10 @@ class MainWindow(QMainWindow):
             text = path.read_text(encoding="utf-8", errors="ignore")
             check_line_lengths(text)
         except UnsafeFileError as err:
-            self._player.set_status(f"Arquivo recusado: {err}")
+            self._player.set_status(tr("status_file_rejected").format(err=err))
             return
         except OSError as err:
-            self._player.set_status(f"Erro ao abrir arquivo: {err}")
+            self._player.set_status(tr("status_open_error").format(err=err))
             return
         self._path = path
         self._text = text
@@ -393,8 +409,8 @@ class MainWindow(QMainWindow):
         if not self._has_unsaved_changes():
             return True
         answer = QMessageBox.question(
-            self, "Descartar alterações?",
-            "Há alterações não salvas. Deseja continuar e descartá-las?",
+            self, tr("confirm_discard_title"),
+            tr("confirm_discard_text"),
             QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel,
             QMessageBox.StandardButton.Cancel,
         )
@@ -415,7 +431,7 @@ class MainWindow(QMainWindow):
 
     def _save_edited_text_as(self, text: str) -> None:
         """Sempre pergunta o caminho, mesmo que já exista um arquivo aberto."""
-        path_str, _ = QFileDialog.getSaveFileName(self, "Salvar G-code como", "", GCODE_FILTER)
+        path_str, _ = QFileDialog.getSaveFileName(self, tr("dialog_save_title"), "", GCODE_FILTER)
         if not path_str:
             return
         path = Path(path_str)
@@ -427,11 +443,11 @@ class MainWindow(QMainWindow):
         try:
             path.write_text(text, encoding="utf-8")
         except OSError as err:
-            QMessageBox.warning(self, "Erro ao salvar", f"Não foi possível salvar: {err}")
+            QMessageBox.warning(self, tr("save_error_title"), tr("save_error_text").format(err=err))
             return False
         self._apply_edited_text(text)
         self._saved_text = text
-        self._player.set_status(f"Salvo em {path}")
+        self._player.set_status(tr("status_saved_at").format(path=path))
         return True
     def _has_unsaved_changes(self) -> bool:
         if self._text is None:
@@ -476,11 +492,12 @@ class MainWindow(QMainWindow):
         self._viewport.show_toolpath(toolpath, levels)
         self._viewport.set_show_torch(mode.key == "deposicao")
         self._stats_panel.show_program(compute_stats(toolpath, result.commands))
-        self._stats_panel.show_mode(mode.name, mode.cards(toolpath))
+        self._stats_panel.show_mode(mode_display_name(mode.key), mode.cards(toolpath))
         self._player.set_enabled(True)
         self._refresh()
 
-    def _show_empty(self, status: str = "Nenhum movimento encontrado no arquivo.") -> None:
+    def _show_empty(self, status: str | None = None) -> None:
+        status = status if status is not None else tr("status_no_moves")
         self._toolpath = None
         self._viewport.clear()
         self._stats_panel.clear()
@@ -500,7 +517,7 @@ class MainWindow(QMainWindow):
             return
         t = self._toolpath.time_at_line(line)
         if t is None:
-            self._player.set_status(f"Nenhum movimento a partir da linha {line}.")
+            self._player.set_status(tr("status_no_moves_from_line").format(line=line))
             return
 
         self._playback.pause()
@@ -583,15 +600,15 @@ class MainWindow(QMainWindow):
 
     def _status_text(self, snapshot: Snapshot) -> str:
         pb = self._playback
-        text = (
-            f"movimento {snapshot.done}/{self._toolpath.count}   |   "
-            f"tempo {format_duration(pb.elapsed)} / {format_duration(pb.total_time)}   |   "
-            f"velocidade {pb.speed:.1f}x"
+        text = tr("status_line").format(
+            done=snapshot.done, total=self._toolpath.count,
+            elapsed=format_duration(pb.elapsed), total_time=format_duration(pb.total_time),
+            speed=f"{pb.speed:.1f}",
         )
         if snapshot.active:
-            text += "   |   processo ativo"
+            text += tr("status_active_suffix")
         if self._issues:
-            text += f"   |   {len(self._issues)} problema(s)"
+            text += tr("status_issues_suffix").format(count=len(self._issues))
         return text
     
     def closeEvent(self, event: QCloseEvent) -> None:

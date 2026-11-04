@@ -1,6 +1,7 @@
 """Controles de camadas: filtra por profundidade e liga a coloração por Z."""
 from __future__ import annotations
 
+from core.i18n import tr
 from typing import Sequence
 
 from PySide6.QtCore import Signal
@@ -8,7 +9,6 @@ from PySide6.QtWidgets import QCheckBox, QComboBox, QHBoxLayout, QLabel, QWidget
 
 from ui.theme import SPACE_SM
 
-ALL_LAYERS_TEXT = "Todas as camadas"
 COMBO_MIN_WIDTH = 140
 
 
@@ -23,13 +23,13 @@ class LayerControls(QWidget):
         self._combo.setMinimumWidth(COMBO_MIN_WIDTH)
         self._combo.currentIndexChanged.connect(self._on_index_changed)
 
-        self._depth_check = QCheckBox("Colorir por profundidade")
+        self._depth_check = QCheckBox(tr("checkbox_depth_color"))
         self._depth_check.toggled.connect(self.depth_coloring_toggled.emit)
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(SPACE_SM)
-        layout.addWidget(QLabel("Camada"))
+        layout.addWidget(QLabel(tr("label_layer")))
         layout.addWidget(self._combo)
         layout.addWidget(self._depth_check)
 
@@ -37,7 +37,7 @@ class LayerControls(QWidget):
         """Preenche o seletor com uma entrada por profundidade, sem disparar sinais."""
         self._combo.blockSignals(True)
         self._combo.clear()
-        self._combo.addItem(ALL_LAYERS_TEXT, None)
+        self._combo.addItem(tr("all_layers"), None)
         for index, z in enumerate(levels):
             self._combo.addItem(f"{index + 1}  ·  Z {z:g} mm", index)
         self._combo.setCurrentIndex(0)

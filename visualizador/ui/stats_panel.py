@@ -7,6 +7,8 @@ from PySide6.QtWidgets import (
 
 from PySide6.QtCore import QEasingCurve, QPropertyAnimation
 
+from core.i18n import tr
+
 from core.stats import ProgramStats, format_duration, format_length
 
 from ui.theme import SPACE_LG, SPACE_MD, SPACE_SM, SPACE_XL, SPACE_XXS
@@ -119,14 +121,14 @@ class StatsPanel(QFrame):
         self.setMinimumWidth(PANEL_MIN_WIDTH)
 
         self._program = {
-            "total_time": StatCard("Tempo total"),
-            "layers": StatCard("Camadas"),
-            "cut_time": StatCard("Tempo de corte"),
-            "rapid_time": StatCard("Tempo rápido"),
-            "cut_length": StatCard("Trajeto de corte"),
-            "rapid_length": StatCard("Trajeto rápido"),
-            "moves": StatCard("Comandos de movimento", wide=True),
-            "size": StatCard("Dimensões (mm)", wide=True),
+            "total_time": StatCard(tr("card_total_time")),
+            "layers": StatCard(tr("card_layers")),
+            "cut_time": StatCard(tr("card_cut_time")),
+            "rapid_time": StatCard(tr("card_rapid_time")),
+            "cut_length": StatCard(tr("card_cut_length")),
+            "rapid_length": StatCard(tr("card_rapid_length")),
+            "moves": StatCard(tr("card_moves"), wide=True),
+            "size": StatCard(tr("card_size"), wide=True),
         }
 
         self._progress_bar = QProgressBar()
@@ -134,11 +136,13 @@ class StatsPanel(QFrame):
         self._progress_bar.setTextVisible(False)
         self._progress_bar.setFixedHeight(8)
         self._progress = {
-            "percent": StatCard("Concluído"),
-            "current": StatCard("Movimento"),
-            "elapsed": StatCard("Decorrido"),
-            "remaining": StatCard("Restante"),
+            "percent": StatCard(tr("card_percent")),
+            "current": StatCard(tr("card_current")),
+            "elapsed": StatCard(tr("card_elapsed")),
+            "remaining": StatCard(tr("card_remaining")),
         }
+
+        self._mode_title = _section_title(tr("label_mode"))
 
         self._mode_title = _section_title("Modo")
         self._mode_box = QVBoxLayout()
@@ -151,13 +155,13 @@ class StatsPanel(QFrame):
         layout.setContentsMargins(SPACE_XL, SPACE_XL, SPACE_XL, SPACE_XL)
         layout.setSpacing(SPACE_MD)
 
-        layout.addWidget(_section_title("Resumo do programa"))
+        layout.addWidget(_section_title(tr("section_program_summary")))
         layout.addLayout(_card_grid(list(self._program.values())))
 
         layout.addWidget(self._mode_title)
         layout.addLayout(self._mode_box)
 
-        layout.addWidget(_section_title("Simulação"))
+        layout.addWidget(_section_title(tr("section_simulation")))
         layout.addWidget(self._progress_bar)
         layout.addLayout(_card_grid(list(self._progress.values())))
         layout.addStretch()
@@ -173,15 +177,25 @@ class StatsPanel(QFrame):
 
     def show_program(self, stats: ProgramStats) -> None:
         p = self._program
-        p["total_time"].set_value(format_duration(stats.total_time))
-        p["layers"].set_value(str(stats.layer_count))
-        p["cut_time"].set_value(format_duration(stats.cut_time))
-        p["rapid_time"].set_value(format_duration(stats.rapid_time))
-        p["cut_length"].set_value(format_length(stats.cut_length))
-        p["rapid_length"].set_value(format_length(stats.rapid_length))
+        p["total_time"].set_value(format_duration(stats.total_time), animate=True)
+        p["layers"].set_value(str(stats.layer_count), animate=True)
+        p["cut_time"].set_value(format_duration(stats.cut_time), animate=True)
+        p["rapid_time"].set_value(format_duration(stats.rapid_time), animate=True)
+        p["cut_length"].set_value(format_length(stats.cut_length), animate=True)
+        p["rapid_length"].set_value(format_length(stats.rapid_length), animate=True)
+
+        commands = stats.commands
+        breakdown = "  ·  ".join(f"{name} {n}" for name, n in commands.items() if n)
         p["moves"].set_value(
-            f"{stats.total_moves}",
-            f"{stats.cut_moves} cortes  ·  {stats.rapid_moves} rápidos",
+            tr("detail_commands").format(count=sum(commands.values())),
+            tr("detail_breakdown").format(breakdown=breakdown or tr("detail_none"), segments=stats.total_moves),
+            animate=True,
+        )
+        x, y, z = stats.size
+        p["size"].set_value(
+            f"{x:.1f} × {y:.1f} × {z:.1f}",
+            tr("detail_size_axes"),
+            animate=True,
         )
 
         commands = stats.commands
@@ -209,13 +223,13 @@ class StatsPanel(QFrame):
 
     def show_mode(self, title: str, cards: list[ModeCard]) -> None:
         _clear_layout(self._mode_box)
-        self._mode_title.setText(f"Modo: {title}".upper())
+        self._mode_title.setText(tr("section_mode_prefix").format(title=title).upper())
         self._mode_title.setVisible(True)
         if not cards:
             return
         stat_cards = []
         for card in cards:
             widget = StatCard(card.title)
-            widget.set_value(card.value, card.detail)
+            widget.set_value(card.value, card.detail, animate=True)
             stat_cards.append(widget)
         self._mode_box.addLayout(_card_grid(stat_cards))

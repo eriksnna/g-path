@@ -1,6 +1,10 @@
 """Ponto de entrada do G-Path"""
-import sys, traceback
+import sys, traceback, json
 
+from core.i18n import set_language, tr
+import config
+
+from PySide6.QtCore import QLocale
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 from ui.main_window import MainWindow
@@ -12,16 +16,27 @@ def _install_excepthook() -> None:
         print(detail, file=sys.stderr)
         box = QMessageBox(
             QMessageBox.Icon.Critical,
-            "Erro inesperado",
-            f"Ocorreu um erro e a operação não pôde continuar:\n\n{exc_value}",
+            tr("unexpected_error_title"),
+            tr("unexpected_error_text").format(err=exc_value),
         )
         box.setDetailedText(detail)
         box.exec()
 
     sys.excepthook = handle
 
+def _default_language() -> str:
+    """Primeiro uso, sem settings.json salvo: segue o idioma do sistema."""
+    return "pt_BR" if QLocale.system().name().startswith("pt") else "en"
+
+def _load_saved_language() -> str:
+    try:
+        data = json.loads(config.SETTINGS_FILE.read_text(encoding="utf-8"))
+        return data.get("language") or _default_language()
+    except (FileNotFoundError, json.JSONDecodeError):
+        return _default_language()
 
 def main() -> int:
+    set_language(_load_saved_language())
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
     _install_excepthook()

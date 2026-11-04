@@ -42,7 +42,7 @@ GRID_COLOR = (70, 75, 85, 255)
 
 DIM_CUT = (0.2, 0.5, 0.7, 0.35)
 BRIGHT_CUT = (0.2, 0.8, 1.0, 1.0)
-DIM_RAPID = (1.0, 0.35, 0.35, 0.2)
+DIM_RAPID = (1.0, 0.35, 0.35, 0.4)
 BRIGHT_RAPID = (1.0, 0.35, 0.35, 0.8)
 HEAD_COLOR = (1.0, 0.85, 0.2, 1.0)
 ARC_HEAD_COLOR = (1.0, 0.45, 0.1, 1.0)
@@ -103,6 +103,9 @@ QFrame#playbar {{ background: {SURFACE_1}; border: none; border-radius: {RADIUS_
 
 QFrame#statsPanel {{ background: {SURFACE_1}; border: none; border-radius: {RADIUS_LG}; }}
 QFrame#card {{ background: {SURFACE_2}; border: 1px solid {BORDER}; border-radius: {RADIUS_MD}; }}
+
+QFrame#headerSeparator {{ background: {BORDER}; max-width: 1px; min-width: 1px; }}
+
 QLabel#cardTitle {{ color: {TEXT_SECONDARY}; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }}
 QLabel#cardValue {{ color: {TEXT_PRIMARY}; font-size: 17px; font-weight: 700; }}
 QLabel#sectionTitle {{ color: {TEXT_SECONDARY}; font-size: 11px; font-weight: 700; margin-top: 4px; }}

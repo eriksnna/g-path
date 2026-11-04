@@ -3,11 +3,12 @@ from __future__ import annotations
 
 import numpy as np
 
+from core.i18n import tr
+
 from core.lexer import WARNING, Issue
 from core.modes.base import ModeCard, ProcessMode
 from core.parser import Move
 from core.toolpath import Toolpath
-
 
 class MachiningMode(ProcessMode):
     key = "usinagem"
@@ -31,4 +32,4 @@ class MachiningMode(ProcessMode):
             return []
         lengths = np.linalg.norm(toolpath.ends - toolpath.starts, axis=1)
         feed = float(lengths[cut].sum()) / cut_time * 60.0
-        return [ModeCard("Avanço médio", f"{feed:.0f} mm/min", "trajeto de corte ÷ tempo de corte")]
+        return [ModeCard(tr("card_avg_feed"), f"{feed:.0f} mm/min", tr("card_avg_feed_detail"))]

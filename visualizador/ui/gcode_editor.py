@@ -1,6 +1,8 @@
 """Editor de texto do programa G-code carregado. 'Aplicar' reinterpreta o texto editado."""
 from __future__ import annotations
 
+from core.i18n import tr
+
 from PySide6.QtCore import QRect, QSize, Qt, Signal
 from PySide6.QtGui import (
     QColor, QFont, QKeySequence, QPainter, QShortcut, QTextCharFormat, QTextCursor, QTextDocument,
@@ -21,20 +23,19 @@ FIND_SHORTCUT = "Ctrl+F"
 COMMENT_SHORTCUT = "Ctrl+/"
 SAVE_SHORTCUT = "Ctrl+S"
 SAVE_AS_SHORTCUT = "Ctrl+Shift+S"
-PLACEHOLDER = "Abra um arquivo G-code para editar aqui."
 GUTTER_PADDING = 12
 GUTTER_BACKGROUND = QColor(theme.EDITOR_GUTTER_BG)
 GUTTER_TEXT = QColor(theme.EDITOR_GUTTER_TEXT)
 CURRENT_LINE_BACKGROUND = QColor(theme.EDITOR_CURRENT_LINE_BG)
 RUNNING_LINE_BACKGROUND = QColor(theme.EDITOR_RUNNING_LINE_BG)
 
-
-SHORTCUTS_TEXT = (
-    f"{FIND_SHORTCUT}   Buscar texto no editor\n"
-    f"{APPLY_SHORTCUT}   Aplicar as alterações e reinterpretar o programa\n"
-    f"{COMMENT_SHORTCUT}   Comentar ou descomentar a linha atual (ou a seleção)\n"
-    f"{SAVE_SHORTCUT}   Salvar no arquivo aberto\n"
-    f"{SAVE_AS_SHORTCUT}   Salvar como... (escolher um novo arquivo)"
+def _shortcuts_text() -> str:
+    return (
+        f"{FIND_SHORTCUT}   {tr('editor_shortcut_find')}\n"
+        f"{APPLY_SHORTCUT}   {tr('editor_shortcut_apply')}\n"
+        f"{COMMENT_SHORTCUT}   {tr('editor_shortcut_comment')}\n"
+        f"{SAVE_SHORTCUT}   {tr('editor_shortcut_save')}\n"
+        f"{SAVE_AS_SHORTCUT}   {tr('editor_shortcut_save_as')}"
 )
 
 
@@ -190,7 +191,7 @@ class GCodeEditor(QFrame):
 
         self._text_edit = _CodeTextEdit()
         self._text_edit.setObjectName("codeEditor")
-        self._text_edit.setPlaceholderText(PLACEHOLDER)
+        self._text_edit.setPlaceholderText(tr("editor_placeholder"))
         font = QFont(EDITOR_FONT_FAMILY, EDITOR_FONT_SIZE)
         font.setStyleHint(QFont.StyleHint.Monospace)
         self._text_edit.setFont(font)
@@ -199,25 +200,25 @@ class GCodeEditor(QFrame):
         self._highlighter = GCodeHighlighter(self._text_edit.document())
 
         self._find_input = QLineEdit()
-        self._find_input.setPlaceholderText("Buscar no G-code...")
+        self._find_input.setPlaceholderText(tr("editor_search_placeholder"))
         self._find_input.returnPressed.connect(lambda: self._find(forward=True))
         self._find_status = QLabel("")
         self._find_status.setObjectName("findStatus")
 
-        find_prev = QPushButton("< Anterior")
+        find_prev = QPushButton(tr("editor_find_prev"))
         find_prev.clicked.connect(lambda: self._find(forward=False))
-        find_next = QPushButton("Próximo >")
+        find_next = QPushButton(tr("editor_find_next"))
         find_next.clicked.connect(lambda: self._find(forward=True))
         find_close = QPushButton()
         find_close.setIcon(icon(CLOSE))
         find_close.setFixedWidth(28)
-        find_close.setToolTip("Fechar busca")
+        find_close.setToolTip(tr("editor_find_close_tip"))
         find_close.clicked.connect(self._hide_find_bar)
 
         find_layout = QHBoxLayout()
         find_layout.setContentsMargins(0, 0, 0, 0)
         find_layout.setSpacing(theme.SPACE_XS)
-        find_layout.addWidget(QLabel("Buscar:"))
+        find_layout.addWidget(QLabel(tr("editor_find_label")))
         find_layout.addWidget(self._find_input, 1)
         find_layout.addWidget(find_prev)
         find_layout.addWidget(find_next)
@@ -232,15 +233,15 @@ class GCodeEditor(QFrame):
         self._status_label = QLabel("")
         self._status_label.setObjectName("editorStatus")
 
-        self._apply_button = QPushButton("Aplicar (Ctrl+Enter)")
-        self._apply_button.setObjectName("applyEdit")
+        self._apply_button = QPushButton(tr("editor_apply_button"))
+        self._apply_button = QPushButton(tr("editor_apply_button"))
         self._apply_button.clicked.connect(self._emit_apply)
 
-        self._save_button = QPushButton("Salvar")
+        self._save_button = QPushButton(tr("editor_save_button"))
         self._save_button.setObjectName("saveEdit")
         self._save_button.clicked.connect(self._emit_save)
 
-        self._save_as_button = QPushButton("Salvar como...")
+        self._save_as_button = QPushButton(tr("editor_save_as_button"))
         self._save_as_button.setObjectName("saveAsEdit")
         self._save_as_button.clicked.connect(self._emit_save_as)
 
@@ -248,7 +249,7 @@ class GCodeEditor(QFrame):
         self._help_button.setIcon(icon(HELP))
         self._help_button.setObjectName("editorHelp")
         self._help_button.setFixedWidth(28)
-        self._help_button.setToolTip("Atalhos do editor")
+        self._help_button.setToolTip(tr("editor_help_tip"))
         self._help_button.clicked.connect(self._show_shortcuts)
 
         QShortcut(QKeySequence(APPLY_SHORTCUT), self._text_edit).activated.connect(self._emit_apply)
@@ -265,7 +266,7 @@ class GCodeEditor(QFrame):
 
         toolbar = QHBoxLayout()
         toolbar.setSpacing(theme.SPACE_SM)
-        toolbar.addWidget(QLabel("EDITOR DE G-CODE"))
+        toolbar.addWidget(QLabel(tr("editor_title")))
         toolbar.addWidget(self._status_label)
         toolbar.addStretch()
         toolbar.addWidget(self._help_button)
@@ -335,7 +336,7 @@ class GCodeEditor(QFrame):
             )
             self._text_edit.setTextCursor(cursor)
             found = self._text_edit.find(text, flags)
-        self._find_status.setText("" if found else "Não encontrado")
+        self._find_status.setText("" if found else tr("editor_not_found"))
 
     def toggle_comment(self) -> None:
         """Comenta/descomenta a linha ou seleção atual no editor."""
@@ -351,7 +352,7 @@ class GCodeEditor(QFrame):
         self.save_as_requested.emit(self.text())
 
     def _on_modified(self, modified: bool) -> None:
-        self._status_label.setText("não aplicado" if modified else "")
+        self._status_label.setText(tr("editor_not_applied") if modified else "")
 
     def _show_shortcuts(self) -> None:
-        QMessageBox.information(self, "Atalhos do editor", SHORTCUTS_TEXT)
+        QMessageBox.information(self, tr("editor_shortcuts_title"), _shortcuts_text())

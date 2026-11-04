@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import math
+
+from core.i18n import tr
 from contextlib import contextmanager
 
 from PySide6.QtCore import QPointF, QRectF, QSize, Qt, Signal, QEasingCurve, QPropertyAnimation
@@ -150,14 +152,14 @@ class PlayerBar(QFrame):
         )
 
         self._play_button = self._make_button(
-            icon(PLAY), "Reproduzir / pausar", self.play_clicked.emit, PLAY_BUTTON_SIZE, name="play",
+            icon(PLAY), tr("tooltip_play_pause"), self.play_clicked.emit, PLAY_BUTTON_SIZE, name="play",
         )
         self._transport = [
-            self._make_button(icon(SKIP_BACK), "Ir para o início", self.start_clicked.emit, TRANSPORT_BUTTON_SIZE, name="transport"),
-            self._make_button(icon(REWIND), "Retroceder", lambda: self.step_clicked.emit(-1), TRANSPORT_BUTTON_SIZE, name="transport"),
+            self._make_button(icon(SKIP_BACK), tr("tooltip_go_start"), self.start_clicked.emit, TRANSPORT_BUTTON_SIZE, name="transport"),
+            self._make_button(icon(REWIND), tr("tooltip_rewind"), lambda: self.step_clicked.emit(-1), TRANSPORT_BUTTON_SIZE, name="transport"),
             self._play_button,
-            self._make_button(icon(FAST_FORWARD), "Avançar", lambda: self.step_clicked.emit(1), TRANSPORT_BUTTON_SIZE, name="transport"),
-            self._make_button(icon(SKIP_FORWARD), "Ir para o fim", self.end_clicked.emit, TRANSPORT_BUTTON_SIZE, name="transport"),
+            self._make_button(icon(FAST_FORWARD), tr("tooltip_forward"), lambda: self.step_clicked.emit(1), TRANSPORT_BUTTON_SIZE, name="transport"),
+            self._make_button(icon(SKIP_FORWARD), tr("tooltip_go_end"), self.end_clicked.emit, TRANSPORT_BUTTON_SIZE, name="transport"),
         ]
 
         self._speed_slider = _Slider(Qt.Orientation.Horizontal)
@@ -197,23 +199,12 @@ class PlayerBar(QFrame):
         for widget in self._transport:
             row.addWidget(widget)
         row.addStretch()
-        row.addWidget(QLabel("Velocidade"))
+        row.addWidget(QLabel(tr("label_speed")))
         row.addWidget(self._speed_slider)
         row.addWidget(self._speed_label)
         for _, button in self._presets:
             row.addWidget(button)
         return row
-
-    @staticmethod
-    def _make_button(button_icon, tip: str, callback, size, name: str | None = None) -> QPushButton:
-        button = QPushButton()
-        button.setIcon(button_icon)
-        button.setToolTip(tip)
-        button.setFixedSize(*size)
-        if name:
-            button.setObjectName(name)
-        button.clicked.connect(lambda _checked=False: callback())
-        return button
 
     def _make_preset(self, value: float) -> tuple[float, QPushButton]:
         button = QPushButton(f"{value:g}x")
@@ -251,7 +242,7 @@ class PlayerBar(QFrame):
 
     @staticmethod
     def _make_button(button_icon, tip: str, callback, size, name: str | None = None) -> QPushButton:
-        button = QPushButton()
+        button = _HoverGrowButton()
         button.setIcon(button_icon)
         button.setIconSize(QSize(round(size[0] * 0.5), round(size[1] * 0.5)))
         button.setToolTip(tip)
