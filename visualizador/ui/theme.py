@@ -9,11 +9,11 @@ BORDER_STRONG = "#3a3f4b"
 
 TEXT_PRIMARY = "#f2f3f5"
 TEXT_SECONDARY = "#9aa3b2"
-TEXT_MUTED = "#5a606d"
+TEXT_MUTED = "#767c8a"
 
-ACCENT = "#c9622a"
-ACCENT_HOVER = "#e0773a"
-ACCENT_PRESSED = "#a84f1f"
+ACCENT = "#b85a26"
+ACCENT_HOVER = "#cf6f36"
+ACCENT_PRESSED = "#97471b"
 
 SUCCESS = "#30d158"
 ERROR_COLOR = "#ff6b6b"
@@ -119,7 +119,9 @@ QCheckBox::indicator {{
     border: 1px solid {BORDER_STRONG}; background: {SURFACE_2};
 }}
 QCheckBox::indicator:hover {{ border: 1px solid {ACCENT}; }}
+QCheckBox::indicator:focus {{ border: 1px solid {ACCENT}; }}
 QCheckBox::indicator:checked {{ background: {ACCENT}; border: 1px solid {ACCENT}; }}
+
 
 QLineEdit {{
     background: {SURFACE_2}; color: {TEXT_PRIMARY};
