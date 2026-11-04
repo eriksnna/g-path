@@ -427,3 +427,14 @@ Novidades:
 
 - Remoção de código morto (não utilizado);
 - Correção de bugs
+
+### 30/10 — sexta-feira a 31/10 — domingo - Adição de licença MIT e outras melhorias (~12h)
+
+1. **Licença**:
+
+- Agora o software possui licença do MIT, que permite o uso irrestrito do código (mantendo a promessa open-source que queria desde o início).
+
+2. **Misc:**
+
+- Adição de pasta de exemplos, com modelos de código G-Code de usinagem e WAAM.
+- Correção de bug de redimensionamento da janela.
