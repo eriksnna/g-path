@@ -9,3 +9,7 @@ __pycache__/
 # configurações locais do editor
 .vscode/
 .idea/
+
+# pyinstaller
+build/
+dist/
