@@ -4,7 +4,7 @@ from __future__ import annotations
 import math
 from contextlib import contextmanager
 
-from PySide6.QtCore import QPointF, QRectF, Qt, Signal
+from PySide6.QtCore import QPointF, QRectF, QSize, Qt, Signal
 from PySide6.QtGui import QColor, QPainter
 from PySide6.QtWidgets import (
     QFrame, QHBoxLayout, QLabel, QPushButton, QSlider, QVBoxLayout,
@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
 from config import (
     SPEED_MAX, SPEED_MIN, SPEED_PRESETS, SPEED_SLIDER_SCALE, TIMELINE_STEPS,
 )
-from ui.theme import ACCENT, SURFACE_2, TEXT_MUTED
+from ui.theme import ACCENT, SPACE_MD, SPACE_SM, SPACE_XL, SURFACE_2, TEXT_MUTED
 from ui.icons import FAST_FORWARD, PAUSE, PLAY, REWIND, SKIP_BACK, SKIP_FORWARD, icon
 
 PLAY_BUTTON_SIZE = (48, 48)
@@ -151,15 +151,15 @@ class PlayerBar(QFrame):
 
     def _build_layout(self) -> None:
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(14, 10, 14, 10)
-        layout.setSpacing(8)
+        layout.setContentsMargins(SPACE_XL, SPACE_MD, SPACE_XL, SPACE_MD)
+        layout.setSpacing(SPACE_SM)
         layout.addWidget(self._timeline)
         layout.addLayout(self._build_controls_row())
         layout.addWidget(self._status)
 
     def _build_controls_row(self) -> QHBoxLayout:
         row = QHBoxLayout()
-        row.setSpacing(8)
+        row.setSpacing(SPACE_SM)
         row.addStretch()
         for widget in self._transport:
             row.addWidget(widget)
@@ -215,3 +215,15 @@ class PlayerBar(QFrame):
 
     def set_status(self, text: str) -> None:
         self._status.setText(text)
+
+    @staticmethod
+    def _make_button(button_icon, tip: str, callback, size, name: str | None = None) -> QPushButton:
+        button = QPushButton()
+        button.setIcon(button_icon)
+        button.setIconSize(QSize(round(size[0] * 0.5), round(size[1] * 0.5)))
+        button.setToolTip(tip)
+        button.setFixedSize(*size)
+        if name:
+            button.setObjectName(name)
+        button.clicked.connect(lambda _checked=False: callback())
+        return button

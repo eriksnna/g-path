@@ -7,6 +7,8 @@ from PySide6.QtWidgets import (
 
 from core.stats import ProgramStats, format_duration, format_length
 
+from ui.theme import SPACE_LG, SPACE_MD, SPACE_SM, SPACE_XL, SPACE_XXS
+
 from core.modes.base import ModeCard
 
 PANEL_MIN_WIDTH = 180
@@ -40,8 +42,8 @@ class StatCard(QFrame):
         self._detail.setVisible(False)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(12, 8, 12, 10)
-        layout.setSpacing(2)
+        layout.setContentsMargins(SPACE_LG, SPACE_SM, SPACE_LG, SPACE_MD)
+        layout.setSpacing(SPACE_XXS)
         layout.addWidget(self._title)
         layout.addWidget(self._value)
         layout.addWidget(self._detail)
@@ -80,7 +82,7 @@ def _clear_layout(layout) -> None:
 def _card_grid(cards: list[StatCard]) -> QGridLayout:
     """Organiza os cartões em duas colunas; cartões 'wide' ocupam a linha inteira."""
     grid = QGridLayout()
-    grid.setSpacing(8)
+    grid.setSpacing(SPACE_SM)
     row = col = 0
     for card in cards:
         span = 2 if card.wide else 1
@@ -130,8 +132,8 @@ class StatsPanel(QFrame):
 
     def _build_layout(self) -> None:
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(14, 14, 14, 14)
-        layout.setSpacing(10)
+        layout.setContentsMargins(SPACE_XL, SPACE_XL, SPACE_XL, SPACE_XL)
+        layout.setSpacing(SPACE_MD)
 
         layout.addWidget(_section_title("Resumo do programa"))
         layout.addLayout(_card_grid(list(self._program.values())))

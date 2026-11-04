@@ -14,6 +14,7 @@ TEXT_MUTED = "#767c8a"
 ACCENT = "#b85a26"
 ACCENT_HOVER = "#cf6f36"
 ACCENT_PRESSED = "#97471b"
+ON_ACCENT = "#ffffff"   # cor de texto/ícone sobre fundo ACCENT
 
 SUCCESS = "#30d158"
 ERROR_COLOR = "#ff6b6b"
@@ -23,6 +24,14 @@ ICON_COLOR = TEXT_PRIMARY
 RADIUS_SM = "6px"
 RADIUS_MD = "8px"
 RADIUS_LG = "12px"
+
+SPACE_XXS = 2
+SPACE_XS = 6
+SPACE_SM = 8
+SPACE_MD = 10
+SPACE_LG = 12
+SPACE_XL = 14
+SPACE_XXL = 16
 
 FONT_FAMILY = "'Segoe UI Variable Display', 'Segoe UI', sans-serif"
 
@@ -45,6 +54,14 @@ DEPTH_STOPS = (
     (0.3, 0.9, 0.7),
     (1.0, 0.85, 0.2),
 )
+
+# --- cores específicas do editor de código (gutter, linha atual, linha em execução) ---
+
+EDITOR_TEXT = "#d7dce3"
+EDITOR_GUTTER_BG = "#191b21"
+EDITOR_GUTTER_TEXT = "#555c6b"
+EDITOR_CURRENT_LINE_BG = "#23262f"
+EDITOR_RUNNING_LINE_BG = "#3a2f12"
 
 # --- folha de estilo ------------------------------------------------------
 
@@ -80,7 +97,7 @@ QPushButton#transport:pressed {{ background: {SURFACE_1}; }}
 
 QPushButton#preset {{ padding: 3px 10px; font-size: 12px; border-radius: {RADIUS_SM}; background: {SURFACE_2}; }}
 QPushButton#preset:hover {{ background: {SURFACE_3}; }}
-QPushButton#preset:checked {{ background: {ACCENT}; color: #ffffff; }}
+QPushButton#preset:checked {{ background: {ACCENT}; color: {ON_ACCENT}; }}
 
 QFrame#playbar {{ background: {SURFACE_1}; border: none; border-radius: {RADIUS_LG}; }}
 
@@ -99,7 +116,7 @@ QListWidget {{
 }}
 QListWidget::item {{ padding: 6px 10px; border-radius: 6px; }}
 QListWidget::item:hover {{ background: {SURFACE_3}; }}
-QListWidget::item:selected {{ background: {ACCENT}; color: #ffffff; }}
+QListWidget::item:selected {{ background: {ACCENT}; color: {ON_ACCENT}; }}
 
 QComboBox {{
     background: {SURFACE_2}; color: {TEXT_PRIMARY};
@@ -136,6 +153,7 @@ QDoubleSpinBox {{
     border: 1px solid {BORDER_STRONG}; border-radius: {RADIUS_MD}; padding: 4px 8px;
 }}
 QDoubleSpinBox:focus {{ border: 1px solid {ACCENT}; }}
+QDoubleSpinBox:disabled {{ color: {TEXT_MUTED}; }}
 QDoubleSpinBox::up-button, QDoubleSpinBox::down-button {{ background: transparent; border: none; width: 18px; }}
 QDoubleSpinBox::up-button:hover, QDoubleSpinBox::down-button:hover {{ background: {SURFACE_3}; }}
 
@@ -156,7 +174,7 @@ QLabel#issueDetail {{
 
 QFrame#editorPanel {{ background: {SURFACE_1}; border: none; border-radius: {RADIUS_LG}; }}
 QPlainTextEdit#codeEditor {{
-    background: {SURFACE_0}; color: #d7dce3;
+    background: {SURFACE_0}; color: {EDITOR_TEXT};
     border: none; border-radius: {RADIUS_MD};
     selection-background-color: {ACCENT};
 }}

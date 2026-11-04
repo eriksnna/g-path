@@ -6,6 +6,8 @@ from typing import Sequence
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QCheckBox, QComboBox, QHBoxLayout, QLabel, QWidget
 
+from ui.theme import SPACE_SM
+
 ALL_LAYERS_TEXT = "Todas as camadas"
 COMBO_MIN_WIDTH = 140
 
@@ -26,7 +28,7 @@ class LayerControls(QWidget):
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(8)
+        layout.setSpacing(SPACE_SM)
         layout.addWidget(QLabel("Camada"))
         layout.addWidget(self._combo)
         layout.addWidget(self._depth_check)

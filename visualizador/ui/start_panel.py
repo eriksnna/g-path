@@ -7,7 +7,7 @@ from PySide6.QtCore import QElapsedTimer, QTimer, Qt, Signal
 from PySide6.QtGui import QColor, QPainter, QRadialGradient
 from PySide6.QtWidgets import QFrame, QLabel, QPushButton, QVBoxLayout
 
-from ui.theme import ACCENT, SURFACE_0, SURFACE_1
+from ui.theme import ACCENT, SPACE_XL, SPACE_XXL, SURFACE_0, SURFACE_1
 
 TITLE = "G-Path"
 SUBTITLE = "Ferramenta de visualização e simulação 3D de programas G-code."
@@ -112,7 +112,7 @@ class StartPanel(QFrame):
         footer.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
         content_layout = QVBoxLayout()
-        content_layout.setSpacing(14)
+        content_layout.setSpacing(SPACE_XL)
         content_layout.addWidget(title)
         content_layout.addWidget(subtitle)
         content_layout.addSpacing(18)
@@ -126,7 +126,7 @@ class StartPanel(QFrame):
         content.setLayout(content_layout)
 
         outer = QVBoxLayout(self)
-        outer.setContentsMargins(0, 0, 0, 16)
+        outer.setContentsMargins(0, 0, 0, SPACE_XXL)
         outer.addStretch()
         outer.addWidget(content, 0, Qt.AlignmentFlag.AlignHCenter)
         outer.addStretch()

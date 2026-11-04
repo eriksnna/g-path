@@ -4,6 +4,8 @@ from __future__ import annotations
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QComboBox, QDoubleSpinBox, QHBoxLayout, QLabel, QWidget
 
+from ui.theme import SPACE_SM
+
 from config import BEAD_HEIGHT_MM, BEAD_WIDTH_MM, DEFAULT_MODE, DEPOSIT_DENSITY_G_CM3
 from core.modes import MODE_CHOICES, create_mode
 from core.modes.base import ProcessMode
@@ -34,7 +36,7 @@ class ModeControls(QWidget):
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(8)
+        layout.setSpacing(SPACE_SM)
         layout.addWidget(QLabel("Modo"))
         layout.addWidget(self._combo)
         for label, spin in self._bead_fields:

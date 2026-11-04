@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QTextEdit, QVBoxLayout, QWidget,
 )
 
+from ui import theme
 from ui.icons import CLOSE, HELP, icon
 from ui.gcode_highlighter import GCodeHighlighter
 
@@ -22,10 +23,10 @@ SAVE_SHORTCUT = "Ctrl+S"
 SAVE_AS_SHORTCUT = "Ctrl+Shift+S"
 PLACEHOLDER = "Abra um arquivo G-code para editar aqui."
 GUTTER_PADDING = 12
-GUTTER_BACKGROUND = QColor("#191b21")
-GUTTER_TEXT = QColor("#555c6b")
-CURRENT_LINE_BACKGROUND = QColor("#23262f")
-RUNNING_LINE_BACKGROUND = QColor("#3a2f12")
+GUTTER_BACKGROUND = QColor(theme.EDITOR_GUTTER_BG)
+GUTTER_TEXT = QColor(theme.EDITOR_GUTTER_TEXT)
+CURRENT_LINE_BACKGROUND = QColor(theme.EDITOR_CURRENT_LINE_BG)
+RUNNING_LINE_BACKGROUND = QColor(theme.EDITOR_RUNNING_LINE_BG)
 
 
 SHORTCUTS_TEXT = (
@@ -215,7 +216,7 @@ class GCodeEditor(QFrame):
 
         find_layout = QHBoxLayout()
         find_layout.setContentsMargins(0, 0, 0, 0)
-        find_layout.setSpacing(6)
+        find_layout.setSpacing(theme.SPACE_XS)
         find_layout.addWidget(QLabel("Buscar:"))
         find_layout.addWidget(self._find_input, 1)
         find_layout.addWidget(find_prev)
@@ -263,7 +264,7 @@ class GCodeEditor(QFrame):
         )
 
         toolbar = QHBoxLayout()
-        toolbar.setSpacing(8)
+        toolbar.setSpacing(theme.SPACE_SM)
         toolbar.addWidget(QLabel("EDITOR DE G-CODE"))
         toolbar.addWidget(self._status_label)
         toolbar.addStretch()
@@ -273,8 +274,8 @@ class GCodeEditor(QFrame):
         toolbar.addWidget(self._apply_button)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(10, 8, 10, 8)
-        layout.setSpacing(6)
+        layout.setContentsMargins(theme.SPACE_MD, theme.SPACE_SM, theme.SPACE_MD, theme.SPACE_SM)
+        layout.setSpacing(theme.SPACE_XS)
         layout.addLayout(toolbar)
         layout.addWidget(self._find_bar)
         layout.addWidget(self._text_edit, 1)
