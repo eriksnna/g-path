@@ -197,18 +197,6 @@ class StatsPanel(QFrame):
             tr("detail_size_axes"),
             animate=True,
         )
-
-        commands = stats.commands
-        breakdown = "  ·  ".join(f"{name} {n}" for name, n in commands.items() if n)
-        p["moves"].set_value(
-            f"{sum(commands.values())} comandos",
-            f"{breakdown or 'nenhum'}  ·  {stats.total_moves} segmentos",
-        )
-        x, y, z = stats.size
-        p["size"].set_value(
-            f"{x:.1f} × {y:.1f} × {z:.1f}",
-            "X × Y × Z",
-        )
         
     def show_progress(self, elapsed: float, total_time: float,
                       done: int, count: int) -> None:

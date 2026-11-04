@@ -4,14 +4,17 @@ from __future__ import annotations
 import math
 
 from PySide6.QtCore import QElapsedTimer, QTimer, Qt, Signal
-from PySide6.QtGui import QColor, QPainter, QRadialGradient
+from PySide6.QtGui import QColor, QPainter, QPixmap, QRadialGradient
 from PySide6.QtWidgets import QFrame, QLabel, QPushButton, QVBoxLayout
+
+import config
 
 from ui.theme import ACCENT, SPACE_XL, SPACE_XXL, SURFACE_0, SURFACE_1
 
 from core.i18n import tr
 
 TITLE = "G-Path"
+LOGO_SIZE = 72
 
 CONTENT_WIDTH = 360
 BUTTON_WIDTH = 280
@@ -91,6 +94,21 @@ class StartPanel(QFrame):
         self._background = _LiquidBackground(self)
 
         title = QLabel(TITLE)
+        logo = QLabel()
+        logo.setObjectName("startLogo")
+        logo.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        pixmap = QPixmap(str(config.ASSETS_DIR / "logo.png"))
+        logo.setPixmap(
+            pixmap.scaled(
+                LOGO_SIZE, LOGO_SIZE,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation,
+            )
+        )
+
+        title = QLabel(TITLE)
+        title.setObjectName("startTitle")
+        title.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         title.setObjectName("startTitle")
         title.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         subtitle = QLabel(tr("start_subtitle"))
@@ -114,6 +132,7 @@ class StartPanel(QFrame):
 
         content_layout = QVBoxLayout()
         content_layout.setSpacing(SPACE_XL)
+        content_layout.addWidget(logo)
         content_layout.addWidget(title)
         content_layout.addWidget(subtitle)
         content_layout.addSpacing(18)

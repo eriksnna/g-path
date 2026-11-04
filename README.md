@@ -1,5 +1,9 @@
 ## G-Path
 
+<p align="center">
+  <img src="assets/logo.png" alt="Logo do G-Path" width="96">
+</p>
+
 ### Sobre
 
 Ferramenta de visualização e simulação 3D de programas G-code.
