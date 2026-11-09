@@ -10,15 +10,15 @@ Ferramenta de visualização e simulação 3D de programas G-code.
 
 ## Instalação e uso
 
-`git clone https://github.com/eriksnna/g-path`
+1. Baixe o executável mais recente na aba [**Releases**](https://github.com/eriksnna/g-path/releases);
+2. Rode o `G-Path.exe` — não precisa instalar Python nem nenhuma dependência;
+3. Na tela inicial, escolha **abrir um arquivo G-code** existente ou **começar do zero** no editor.
 
-`cd g-path`
+> ⚠️ Na primeira execução, o Windows pode exibir um aviso do SmartScreen ("O Windows protegeu seu PC"), já que o executável ainda não tem assinatura digital. Clique em **"Mais informações" → "Executar assim mesmo"**.
 
-`pip install -r requirements.txt`
+Pra testar sem ter um G-code à mão, use os arquivos de exemplo na pasta `examples/` do repositório (um de usinagem, outro de deposição/WAAM).
 
-Execute o arquivo: ``python main.py``
-
-Em seguida, carregue um arquivo **G-Code** (.nc, .gcode, etc.) ou use a pasta de exemplo: ``exemples/``).
+<!-- TODO: gifs de uso aqui — abrir arquivo, reprodução da simulação, troca de modo/idioma -->
 
 Diário de Dev 🤠👇👇
 
@@ -454,3 +454,28 @@ Novidades:
 
 - Correção de bugs na interface
 - Adição de animações simples
+
+### 04/11 — quarta-feira a 06/11 — sexta-feira - Empacotamento em executável (~12h)
+
+1. **Identidade visual**
+
+- Novo ícone e logo do G-Path, aplicados na janela, na taskbar e na tela inicial;
+- Agrupamento visual e contraste ajustados na barra superior e no trajeto;
+
+2. **Correções de bugs**
+
+- Card de comandos de movimento com tradução inconsistente;
+- Texto cortado no painel de Validação;
+
+3. **Empacotamento (PyInstaller)**
+
+- Primeiro `.exe` gerado;
+- `config.py` preparado pra achar os assets dentro do build (`sys._MEIPASS`);
+- `.gitignore` atualizado (`build/`, `dist/`);
+
+### 09/11 — segunda-feira - Primeira Release!! 🥳 (~3h)
+
+1. **Processo de release**
+
+- Definição de versionamento (semver + beta);
+- Preparação do primeiro release de teste.
