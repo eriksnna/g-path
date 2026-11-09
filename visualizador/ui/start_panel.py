@@ -126,7 +126,7 @@ class StartPanel(QFrame):
         blank_button.setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT)
         blank_button.clicked.connect(self.blank_requested.emit)
 
-        footer = QLabel("erik senna ©2026")
+        footer = QLabel(f"erik senna ©2026  ·  v{config.APP_VERSION}")
         footer.setObjectName("startFooter")
         footer.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 

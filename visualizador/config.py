@@ -7,6 +7,8 @@ CONFIG_DIR = Path(os.environ.get("APPDATA", str(Path.home() / ".config"))) / "GP
 PROFILES_FILE = CONFIG_DIR / "profiles.json"
 SETTINGS_FILE = CONFIG_DIR / "settings.json"
 
+APP_VERSION = "0.1.0-beta.1"
+
 APP_TITLE = "G-Path"
 WINDOW_SIZE = (1100, 800)
 
