@@ -13,6 +13,8 @@ from dataclasses import dataclass, field
 from config import MAX_CALL_DEPTH, MAX_EXPANDED_LINES
 from core.lexer import ERROR, WARNING, GCodeError, Issue, clean_line, parse_words
 
+from core.i18n import tr
+
 SUB_LABEL_RE = re.compile(r"^O(\d+)$")
 ASSIGN_RE = re.compile(r"^#(\d+)\s*=\s*(.+)$")
 VARIABLE_RE = re.compile(r"#(\d+)")
@@ -62,7 +64,7 @@ def safe_eval(expr: str) -> float:
     try:
         tree = ast.parse(expr.strip(), mode="eval")
     except SyntaxError as err:
-        raise GCodeError(f"expressão inválida: {expr!r}") from err
+        raise GCodeError(tr("issue_expr_invalid").format(expr=repr(expr))) from err
     return _eval_node(tree.body, expr)
 
 
@@ -75,9 +77,9 @@ def _eval_node(node: ast.AST, expr: str) -> float:
         left = _eval_node(node.left, expr)
         right = _eval_node(node.right, expr)
         if isinstance(node.op, ast.Div) and right == 0:
-            raise GCodeError(f"divisão por zero em {expr!r}")
+            raise GCodeError(tr("issue_division_by_zero").format(expr=repr(expr)))
         return _BINARY_OPS[type(node.op)](left, right)
-    raise GCodeError(f"expressão não suportada: {expr!r}")
+    raise GCodeError(tr("issue_expr_unsupported").format(expr=repr(expr)))
 
 
 def _format(value: float) -> str:
@@ -131,7 +133,7 @@ class ProgramExpander:
                 number = int(label.group(1))
                 if number in self._subs:
                     self._report(lineno, WARNING,
-                                 f"sub-rotina O{number} definida mais de uma vez")
+                                 tr("issue_sub_redefined").format(number=number))
                 current = Subroutine(line=lineno)
                 self._subs[number] = current
                 continue
@@ -164,8 +166,7 @@ class ProgramExpander:
             codes = _m_codes(text)
             if codes & CONTROL_CODES:
                 if not _is_standalone(text):
-                    self._report(lineno, ERROR,
-                                 "M98, M99 e M30 devem estar sozinhos na linha; linha ignorada")
+                    self._report(lineno, ERROR, tr("issue_control_code_alone"))
                     continue
                 if codes & END_CODES:
                     self._stopped = True
@@ -184,20 +185,20 @@ class ProgramExpander:
         repeat = _word(words, "L", 1.0)
 
         if target is None:
-            self._report(lineno, ERROR, "M98 sem P (número da sub-rotina)")
+            self._report(lineno, ERROR, tr("issue_call_missing_p"))
             return
         if repeat < 1 or repeat != int(repeat):
-            self._report(lineno, ERROR, f"L inválido no M98: {repeat:g}")
+            self._report(lineno, ERROR, tr("issue_call_invalid_l").format(value=f"{repeat:g}"))
             return
 
         number = int(target)
         sub = self._subs.get(number)
         if sub is None:
-            self._report(lineno, ERROR, f"sub-rotina O{number} não encontrada")
+            self._report(lineno, ERROR, tr("issue_sub_not_found").format(number=number))
             return
         if depth >= MAX_CALL_DEPTH:
             self._report(lineno, ERROR,
-                         f"chamadas aninhadas acima de {MAX_CALL_DEPTH} níveis; possível recursão")
+                         tr("issue_call_too_deep").format(max_depth=MAX_CALL_DEPTH))
             return
 
         for _ in range(int(repeat)):
@@ -208,8 +209,7 @@ class ProgramExpander:
     def _emit(self, lineno: int, text: str) -> None:
         if len(self._out) >= MAX_EXPANDED_LINES:
             self._report(lineno, ERROR,
-                         f"programa expandido acima de {MAX_EXPANDED_LINES} linhas; "
-                         "expansão interrompida")
+                         tr("issue_expansion_too_long").format(max_lines=MAX_EXPANDED_LINES))
             self._stopped = True
             return
         self._out.append(SourceLine(lineno, text))
@@ -225,7 +225,7 @@ class ProgramExpander:
 
     def _lookup(self, number: int) -> float:
         if number not in self._variables:
-            raise GCodeError(f"variável #{number} não definida")
+            raise GCodeError(tr("issue_variable_undefined").format(number=number))
         return self._variables[number]
 
     def _evaluate(self, expr: str) -> float:

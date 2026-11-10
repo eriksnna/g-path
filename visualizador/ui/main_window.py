@@ -29,6 +29,7 @@ from ui.gcode_editor import GCodeEditor
 from ui.issues_panel import IssuesPanel
 from ui.layer_controls import LayerControls
 from ui.mode_controls import ModeControls
+from ui.camera_controls import CameraControls
 from core.profile_store import load_profiles, save_profiles
 from ui.settings_dialog import SettingsDialog
 from ui.player_bar import PlayerBar
@@ -75,6 +76,7 @@ class MainWindow(QMainWindow):
         self.resize(*WINDOW_SIZE)
         self.setWindowIcon(QIcon(str(ICON_PATH)))
         self.setStyleSheet(DARK_QSS)
+        self.setAcceptDrops(True) # arrastar e soltar
 
         self._path: Path | None = None
         self._text: str | None = None
@@ -97,6 +99,7 @@ class MainWindow(QMainWindow):
         self._editor_toggle.setObjectName("editorToggle")
         self._editor_toggle.setCheckable(True)
         self._layer_controls = LayerControls()
+        self._camera_controls = CameraControls()
         self._viewport = ToolpathView()
         self._editor = GCodeEditor()
         self._editor.setVisible(False)
@@ -141,6 +144,8 @@ class MainWindow(QMainWindow):
         header.addWidget(self._layer_controls)
         header.addWidget(_vsep())
         header.addWidget(self._editor_toggle)
+        header.addWidget(self._layer_controls)
+        header.addWidget(self._camera_controls)
 
         stats_scroll = QScrollArea()
         stats_scroll.setWidgetResizable(True)
@@ -209,6 +214,8 @@ class MainWindow(QMainWindow):
         open_action.setShortcut(QKeySequence.StandardKey.Open)
         open_action.triggered.connect(lambda: self.open_file())
         file_menu.addAction(open_action)
+        self._recent_menu = file_menu.addMenu(tr("menu_open_recent"))
+        self._recent_menu.aboutToShow.connect(self._refresh_recent_menu)
 
         file_menu.addSeparator()
 
@@ -315,6 +322,7 @@ class MainWindow(QMainWindow):
         self._editor.save_requested.connect(self._save_edited_text)
         self._editor.save_as_requested.connect(self._save_edited_text_as)
         self._editor.apply_requested.connect(self._apply_edited_text)
+        self._camera_controls.view_requested.connect(self._viewport.set_preset_view)
 
         p = self._player
         p.play_clicked.connect(self._toggle_play)
@@ -382,6 +390,30 @@ class MainWindow(QMainWindow):
         self._enter_workspace()
         self._show_empty(status=tr("status_program_new"))
 
+    def _recent_files(self) -> list[str]:
+        value = self._settings.value("window/recent_files", [])
+        if isinstance(value, str):  # QSettings devolve string quando sobra só 1 item salvo
+            value = [value]
+        return list(value or [])
+
+    def _add_recent_file(self, path: Path) -> None:
+        recent = [p for p in self._recent_files() if p != str(path)]
+        recent.insert(0, str(path))
+        self._settings.setValue("window/recent_files", recent[:config.MAX_RECENT_FILES])
+
+    def _refresh_recent_menu(self) -> None:
+        self._recent_menu.clear()
+        recent = [p for p in self._recent_files() if Path(p).exists()]
+        if not recent:
+            empty_action = QAction(tr("menu_recent_empty"), self)
+            empty_action.setEnabled(False)
+            self._recent_menu.addAction(empty_action)
+            return
+        for path_str in recent:
+            action = QAction(path_str, self)
+            action.triggered.connect(lambda checked=False, p=path_str: self.load_file(Path(p)))
+            self._recent_menu.addAction(action)
+
     def load_file(self, path: Path) -> None:
         if not self._confirm_discard_changes():
             return
@@ -400,6 +432,7 @@ class MainWindow(QMainWindow):
         self._saved_text = text
         self._file_label.setText(str(path))
         self._settings.setValue("window/last_file", str(path))
+        self._add_recent_file(path)
         self._editor.set_text(text)
         self._enter_workspace()
         self._reload()
@@ -502,6 +535,8 @@ class MainWindow(QMainWindow):
         self._viewport.clear()
         self._stats_panel.clear()
         self._layer_controls.set_levels([])
+        self._issues = []
+        self._issues_panel.show_issues(self._issues)
         self._player.set_enabled(False)
         self._player.set_status(status)
         self._editor.set_running_line(None)
@@ -617,6 +652,25 @@ class MainWindow(QMainWindow):
             return
         self._settings.setValue("window/geometry", self.saveGeometry())
         event.accept()
+
+    def dragEnterEvent(self, event) -> None:
+        if self._dropped_gcode_path(event.mimeData()) is not None:
+            event.acceptProposedAction()
+
+    def dropEvent(self, event) -> None:
+        path = self._dropped_gcode_path(event.mimeData())
+        if path is not None:
+            self.load_file(path)
+            event.acceptProposedAction()
+
+    @staticmethod
+    def _dropped_gcode_path(mime) -> Path | None:
+        if not mime.hasUrls():
+            return None
+        for url in mime.urls():
+            if url.isLocalFile() and Path(url.toLocalFile()).suffix.lower() in config.GCODE_EXTENSIONS:
+                return Path(url.toLocalFile())
+        return None
 
     def _show_editor_find(self) -> None:
         self._editor_toggle.setChecked(True)

@@ -21,8 +21,7 @@ class MachiningMode(ProcessMode):
         # um único aviso basta: se o spindle nunca liga, todos os cortes seriam repetidos
         for move in moves:
             if move.is_cut and not move.active:
-                return [Issue(move.line, WARNING,
-                              "corte sem processo ligado (M3/M8 não ativado no dialeto?)")]
+                return [Issue(move.line, WARNING, tr("issue_machining_no_process"))]
         return []
 
     def cards(self, toolpath: Toolpath) -> list[ModeCard]:

@@ -35,7 +35,7 @@ SPACE_XXL = 16
 
 FONT_FAMILY = "'Segoe UI Variable Display', 'Segoe UI', sans-serif"
 
-# --- cores usadas no viewport 3D (OpenGL, sem QSS) -----------------------
+# --- cores usadas no viewport 3D (full OpenGL, sem QSS) -----------------------
 
 BACKGROUND = SURFACE_0
 GRID_COLOR = (70, 75, 85, 255)

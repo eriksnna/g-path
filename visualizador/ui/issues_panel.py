@@ -9,13 +9,12 @@ from PySide6.QtWidgets import (
     QFrame, QLabel, QListWidget, QListWidgetItem, QVBoxLayout,
 )
 
-from core.parser import ERROR, Issue
+from core.parser import ERROR, WARNING, Issue
 from ui.theme import ERROR_COLOR, WARNING_COLOR
 
 PANEL_WIDTH = 300
 LINE_ROLE = Qt.ItemDataRole.UserRole
-HINT_TEXT = "Clique em um problema para ir até a linha."
-EMPTY_TEXT = "Nenhum problema encontrado."
+_SEVERITY_LABELS = {ERROR: "severity_error", WARNING: "severity_warning"}
 
 
 class IssuesPanel(QFrame):
@@ -63,7 +62,7 @@ class IssuesPanel(QFrame):
             item.setData(LINE_ROLE, issue.line)
             color = ERROR_COLOR if issue.severity == ERROR else WARNING_COLOR
             item.setForeground(QColor(color))
-            item.setToolTip(f"{issue.severity}: {issue.message}")
+            item.setToolTip(f"{tr(_SEVERITY_LABELS.get(issue.severity, issue.severity))}: {issue.message}")
             self._list.addItem(item)
 
         errors = sum(1 for issue in issues if issue.severity == ERROR)
