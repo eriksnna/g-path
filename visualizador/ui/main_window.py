@@ -209,6 +209,8 @@ class MainWindow(QMainWindow):
         open_action.setShortcut(QKeySequence.StandardKey.Open)
         open_action.triggered.connect(lambda: self.open_file())
         file_menu.addAction(open_action)
+        self._recent_menu = file_menu.addMenu(tr("menu_open_recent"))
+        self._recent_menu.aboutToShow.connect(self._refresh_recent_menu)
 
         file_menu.addSeparator()
 
@@ -382,6 +384,30 @@ class MainWindow(QMainWindow):
         self._enter_workspace()
         self._show_empty(status=tr("status_program_new"))
 
+    def _recent_files(self) -> list[str]:
+        value = self._settings.value("window/recent_files", [])
+        if isinstance(value, str):  # QSettings devolve string quando sobra só 1 item salvo
+            value = [value]
+        return list(value or [])
+
+    def _add_recent_file(self, path: Path) -> None:
+        recent = [p for p in self._recent_files() if p != str(path)]
+        recent.insert(0, str(path))
+        self._settings.setValue("window/recent_files", recent[:config.MAX_RECENT_FILES])
+
+    def _refresh_recent_menu(self) -> None:
+        self._recent_menu.clear()
+        recent = [p for p in self._recent_files() if Path(p).exists()]
+        if not recent:
+            empty_action = QAction(tr("menu_recent_empty"), self)
+            empty_action.setEnabled(False)
+            self._recent_menu.addAction(empty_action)
+            return
+        for path_str in recent:
+            action = QAction(path_str, self)
+            action.triggered.connect(lambda checked=False, p=path_str: self.load_file(Path(p)))
+            self._recent_menu.addAction(action)
+
     def load_file(self, path: Path) -> None:
         if not self._confirm_discard_changes():
             return
@@ -400,6 +426,7 @@ class MainWindow(QMainWindow):
         self._saved_text = text
         self._file_label.setText(str(path))
         self._settings.setValue("window/last_file", str(path))
+        self._add_recent_file(path)
         self._editor.set_text(text)
         self._enter_workspace()
         self._reload()

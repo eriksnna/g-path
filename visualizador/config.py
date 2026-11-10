@@ -79,3 +79,8 @@ MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024   # 20 MB; G-code real raramente passa di
 MAX_LINE_LENGTH = 10_000                 # caracteres; uma linha absurda indica arquivo corrompido/hostil
 
 WINDOW_STATE_FILE = CONFIG_DIR / "window_state.ini"
+
+# Abir arquivos recentes
+
+MAX_RECENT_FILES = 8
+GCODE_EXTENSIONS = (".nc", ".gcode", ".ngc", ".tap")
