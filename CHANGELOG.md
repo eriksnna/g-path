@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.0-beta] - 2026-11-09
+
+### Adicionado
+- Funcionalidade "Abrir recente"
+- Funcionalidade Arrastar e Soltar
+- Botões de vistas de câmeras diferentes
+- Suporte ao idioma Italiano
+
+### Corrigido
+- Label "Mode" aparecia harcoded em português ("Modo")
+
 ## [0.1.0-beta.1] - 2026-11-09
 ### Adicionado
 - Interface bilíngue (português/inglês), com seleção de idioma em Ajustes
