@@ -37,11 +37,7 @@ class DepositionMode(ProcessMode):
 
     def validate(self, moves: list[Move]) -> list[Issue]:
         if moves and not any(m.active for m in moves):
-            return [Issue(
-                moves[0].line, WARNING,
-                "nenhum depósito encontrado: nenhum movimento com processo ligado. "
-                "Verifique o dialeto (códigos de liga/desliga do arco)",
-            )]
+            return [Issue(moves[0].line, WARNING, tr("issue_deposition_no_deposit"))]
         issues = self._rapid_with_process_on(moves)
         layer_issue = self._layer_height_issue(moves)
         if layer_issue is not None:
@@ -81,8 +77,7 @@ class DepositionMode(ProcessMode):
     @staticmethod
     def _rapid_with_process_on(moves: list[Move]) -> list[Issue]:
         lines = sorted({m.line for m in moves if m.rapid and m.active})
-        return [Issue(line, ERROR, "deslocamento rápido (G0) com processo ligado")
-                for line in lines]
+        return [Issue(line, ERROR, tr("issue_deposition_rapid_on")) for line in lines]
 
     def _layer_height_issue(self, moves: list[Move]) -> Issue | None:
         work = [m for m in moves if m.is_cut]
@@ -94,6 +89,7 @@ class DepositionMode(ProcessMode):
             return None
         return Issue(
             work[0].line, WARNING,
-            f"passo entre camadas de {step:.2f} mm; "
-            f"cordão configurado com {self.bead.height:.2f} mm",
+            tr("issue_deposition_layer_height").format(
+                step=f"{step:.2f}", height=f"{self.bead.height:.2f}",
+            ),
         )

@@ -248,6 +248,104 @@ _STRINGS: dict[str, dict[str, str]] = {
     "dialect_plasma": {PT_BR: "Plasma (tocha em M3/M5)", EN: "Plasma (torch on M3/M5)", IT: "Plasma (torcia su M3/M5)"},
     "dialect_waam": {PT_BR: "WAAM (arco em M10/M11)", EN: "WAAM (arc on M10/M11)", IT: "WAAM (arco su M10/M11)"},
 
+    # --- mensagens de validação (parser/expander/modos) ----------------------
+    "severity_error": {PT_BR: "Erro", EN: "Error", IT: "Errore"},
+    "severity_warning": {PT_BR: "Aviso", EN: "Warning", IT: "Avviso"},
+
+    "issue_arc_r_unsupported": {
+        PT_BR: "arco com R não suportado; use I/J",
+        EN: "arc with R is not supported; use I/J",
+        IT: "arco con R non supportato; usa I/J",
+    },
+    "issue_feed_missing": {
+        PT_BR: "avanço F ausente; usando {feed} mm/min",
+        EN: "missing feed F; using {feed} mm/min",
+        IT: "avanzamento F assente; uso {feed} mm/min",
+    },
+    "issue_out_of_bounds": {
+        PT_BR: "fora da área de trabalho: {axis} = {value} (faixa {low} a {high} mm)",
+        EN: "outside the work area: {axis} = {value} (range {low} to {high} mm)",
+        IT: "fuori dall'area di lavoro: {axis} = {value} (intervallo {low} - {high} mm)",
+    },
+    "issue_sub_redefined": {
+        PT_BR: "sub-rotina O{number} definida mais de uma vez",
+        EN: "subroutine O{number} defined more than once",
+        IT: "sottoprogramma O{number} definito più di una volta",
+    },
+    "issue_control_code_alone": {
+        PT_BR: "M98, M99 e M30 devem estar sozinhos na linha; linha ignorada",
+        EN: "M98, M99 and M30 must be alone on the line; line ignored",
+        IT: "M98, M99 e M30 devono essere da soli sulla riga; riga ignorata",
+    },
+    "issue_call_missing_p": {
+        PT_BR: "M98 sem P (número da sub-rotina)",
+        EN: "M98 without P (subroutine number)",
+        IT: "M98 senza P (numero del sottoprogramma)",
+    },
+    "issue_call_invalid_l": {
+        PT_BR: "L inválido no M98: {value}",
+        EN: "invalid L in M98: {value}",
+        IT: "L non valido in M98: {value}",
+    },
+    "issue_sub_not_found": {
+        PT_BR: "sub-rotina O{number} não encontrada",
+        EN: "subroutine O{number} not found",
+        IT: "sottoprogramma O{number} non trovato",
+    },
+    "issue_call_too_deep": {
+        PT_BR: "chamadas aninhadas acima de {max_depth} níveis; possível recursão",
+        EN: "nested calls beyond {max_depth} levels; possible recursion",
+        IT: "chiamate annidate oltre {max_depth} livelli; possibile ricorsione",
+    },
+    "issue_expansion_too_long": {
+        PT_BR: "programa expandido acima de {max_lines} linhas; expansão interrompida",
+        EN: "expanded program beyond {max_lines} lines; expansion stopped",
+        IT: "programma espanso oltre {max_lines} righe; espansione interrotta",
+    },
+    "issue_expr_invalid": {
+        PT_BR: "expressão inválida: {expr}",
+        EN: "invalid expression: {expr}",
+        IT: "espressione non valida: {expr}",
+    },
+    "issue_division_by_zero": {
+        PT_BR: "divisão por zero em {expr}",
+        EN: "division by zero in {expr}",
+        IT: "divisione per zero in {expr}",
+    },
+    "issue_expr_unsupported": {
+        PT_BR: "expressão não suportada: {expr}",
+        EN: "unsupported expression: {expr}",
+        IT: "espressione non supportata: {expr}",
+    },
+    "issue_variable_undefined": {
+        PT_BR: "variável #{number} não definida",
+        EN: "variable #{number} not defined",
+        IT: "variabile #{number} non definita",
+    },
+    "issue_machining_no_process": {
+        PT_BR: "corte sem processo ligado (M3/M8 não ativado no dialeto?)",
+        EN: "cut with no process on (M3/M8 not enabled in the dialect?)",
+        IT: "taglio senza processo attivo (M3/M8 non attivato nel dialetto?)",
+    },
+    "issue_deposition_no_deposit": {
+        PT_BR: "nenhum depósito encontrado: nenhum movimento com processo ligado. "
+               "Verifique o dialeto (códigos de liga/desliga do arco)",
+        EN: "no deposition found: no move with the process on. "
+            "Check the dialect (arc on/off codes)",
+        IT: "nessuna deposizione trovata: nessun movimento con processo attivo. "
+            "Controlla il dialetto (codici di accensione/spegnimento dell'arco)",
+    },
+    "issue_deposition_rapid_on": {
+        PT_BR: "deslocamento rápido (G0) com processo ligado",
+        EN: "rapid move (G0) with the process on",
+        IT: "movimento rapido (G0) con processo attivo",
+    },
+    "issue_deposition_layer_height": {
+        PT_BR: "passo entre camadas de {step} mm; cordão configurado com {height} mm",
+        EN: "layer step of {step} mm; bead configured at {height} mm",
+        IT: "passo tra gli strati di {step} mm; cordone configurato a {height} mm",
+    },
+
     # --- vistas de câmera (se você já aplicou o item 3 do passo anterior) ----
     "camera_top": {PT_BR: "Topo", EN: "Top", IT: "Alto"},
     "camera_front": {PT_BR: "Frente", EN: "Front", IT: "Fronte"},

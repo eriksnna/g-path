@@ -12,6 +12,7 @@ from config import ARC_STEP_DEG, DEFAULT_DIALECT, DEFAULT_FEED, INCH_TO_MM
 from core.machine_profile import DEFAULT_LIMITS as MACHINE_LIMITS
 from core.dialect import Dialect, get_dialect
 from core.expander import expand_program
+from core.i18n import tr
 # re-exportados: quem importa de core.parser continua funcionando
 from core.lexer import ERROR, WARNING, GCodeError, Issue, clean_line, parse_words
 
@@ -238,7 +239,7 @@ class GCodeInterpreter:
 
     def _arc(self, end: Point, words: dict[str, float]) -> None:
         if "R" in words:
-            raise GCodeError("arco com R não suportado; use I/J")
+            raise GCodeError(tr("issue_arc_r_unsupported"))
 
         self._check_feed()
         start = self.position
@@ -264,7 +265,7 @@ class GCodeInterpreter:
         if self._feed_programmed or self._feed_warned:
             return
         self._feed_warned = True
-        self._report(WARNING, f"avanço F ausente; usando {self.feed:g} mm/min")
+        self._report(WARNING, tr("issue_feed_missing").format(feed=f"{self.feed:g}"))
 
     def _check_bounds(self, points: list[Point]) -> None:
         """Reporta no máximo um problema de área de trabalho por linha."""
@@ -277,8 +278,9 @@ class GCodeInterpreter:
                     self._bounds_reported_line = self._lineno
                     self._report(
                         ERROR,
-                        f"fora da área de trabalho: {axis} = {value:.2f} "
-                        f"(faixa {low:g} a {high:g} mm)",
+                        tr("issue_out_of_bounds").format(
+                            axis=axis, value=f"{value:.2f}", low=f"{low:g}", high=f"{high:g}",
+                        ),
                     )
                     return
 
