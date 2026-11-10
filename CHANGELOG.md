@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.1-beta] - 2026-11-10
+
+### Corrigido
+- Várias labels hardcoded em português
+
 ## [0.2.0-beta] - 2026-11-09
 
 ### Adicionado
