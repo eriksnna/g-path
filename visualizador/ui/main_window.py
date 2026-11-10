@@ -502,6 +502,8 @@ class MainWindow(QMainWindow):
         self._viewport.clear()
         self._stats_panel.clear()
         self._layer_controls.set_levels([])
+        self._issues = []
+        self._issues_panel.show_issues(self._issues)
         self._player.set_enabled(False)
         self._player.set_status(status)
         self._editor.set_running_line(None)

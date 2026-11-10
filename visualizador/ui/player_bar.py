@@ -99,7 +99,7 @@ class _Slider(QSlider):
             super().mouseReleaseEvent(event)
 
 class _HoverGrowButton(QPushButton):
-    """Cresce o ícone ~12% no hover, com uma animação curta e barata."""
+    """Cresce o ícone ~12% no hover, com uma animação curta e barata/leve."""
 
     GROW_FACTOR = 1.12
 

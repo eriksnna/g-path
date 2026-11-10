@@ -1,4 +1,4 @@
-"""Textos da interface em português e inglês. Pra adicionar um idioma novo,
+"""Textos da interface em português e inglês. CONTRIBUTING: Pra adicionar um idioma novo,
 copie um dos dicionários abaixo e traduza os valores — as CHAVES (lado
 esquerdo) nunca mudam, são o que o resto do código usa pra pedir o texto."""
 from __future__ import annotations

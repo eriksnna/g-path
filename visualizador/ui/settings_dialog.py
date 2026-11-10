@@ -223,9 +223,6 @@ class _ProfilesPage(QWidget):
         )
 
 class _AppearancePage(QWidget):
-    """Idioma da interface (reinicie o app para aplicar). Aqui também entrarão, no
-    futuro, a cor de destaque (accent-color) e o tema claro."""
-
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         layout = QVBoxLayout(self)
