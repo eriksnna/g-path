@@ -21,6 +21,12 @@ from ui.theme import (
 )
 
 GRID_SCALE = 10
+VIEW_PRESETS = { # vistas de câmeras em preset
+    "top": (90.0, -90.0),
+    "front": (0.0, -90.0),
+    "side": (0.0, 0.0),
+    "iso": (30.0, -60.0),
+}
 MIN_DIRECTION_LENGTH = 1e-6  # abaixo disso, o deslocamento XY é tratado como nulo
 
 
@@ -245,6 +251,11 @@ class ToolpathView(gl.GLViewWidget):
         size = float(np.linalg.norm(hi - lo))
         self.opts["center"] = pg.Vector(*center)
         self.setCameraPosition(distance=max(size * CAMERA_MARGIN, CAMERA_MIN_DISTANCE))
+
+    def set_preset_view(self, name: str) -> None:
+        """Gira a câmera para uma vista padrão, mantendo a distância (zoom) atual."""
+        elevation, azimuth = VIEW_PRESETS[name]
+        self.setCameraPosition(elevation=elevation, azimuth=azimuth)
 
     def wheelEvent(self, event) -> None:
         """Zoom com fator fixo por clique da roda, para manter sensibilidade em close-up."""

@@ -29,6 +29,7 @@ from ui.gcode_editor import GCodeEditor
 from ui.issues_panel import IssuesPanel
 from ui.layer_controls import LayerControls
 from ui.mode_controls import ModeControls
+from ui.camera_controls import CameraControls
 from core.profile_store import load_profiles, save_profiles
 from ui.settings_dialog import SettingsDialog
 from ui.player_bar import PlayerBar
@@ -98,6 +99,7 @@ class MainWindow(QMainWindow):
         self._editor_toggle.setObjectName("editorToggle")
         self._editor_toggle.setCheckable(True)
         self._layer_controls = LayerControls()
+        self._camera_controls = CameraControls()
         self._viewport = ToolpathView()
         self._editor = GCodeEditor()
         self._editor.setVisible(False)
@@ -142,6 +144,8 @@ class MainWindow(QMainWindow):
         header.addWidget(self._layer_controls)
         header.addWidget(_vsep())
         header.addWidget(self._editor_toggle)
+        header.addWidget(self._layer_controls)
+        header.addWidget(self._camera_controls)
 
         stats_scroll = QScrollArea()
         stats_scroll.setWidgetResizable(True)
@@ -318,6 +322,7 @@ class MainWindow(QMainWindow):
         self._editor.save_requested.connect(self._save_edited_text)
         self._editor.save_as_requested.connect(self._save_edited_text_as)
         self._editor.apply_requested.connect(self._apply_edited_text)
+        self._camera_controls.view_requested.connect(self._viewport.set_preset_view)
 
         p = self._player
         p.play_clicked.connect(self._toggle_play)
