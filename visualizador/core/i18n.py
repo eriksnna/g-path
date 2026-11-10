@@ -351,6 +351,13 @@ _STRINGS: dict[str, dict[str, str]] = {
     "camera_front": {PT_BR: "Frente", EN: "Front", IT: "Fronte"},
     "camera_side": {PT_BR: "Lado", EN: "Side", IT: "Lato"},
     "camera_iso": {PT_BR: "Isométrica", EN: "Isometric", IT: "Isometrica"},
+
+    "profile_default_name": {PT_BR: "Minha máquina", EN: "My machine", IT: "La mia macchina"},
+    "profile_unlimited_name": {
+        PT_BR: "Sem limite (ignorar área de trabalho)",
+        EN: "No limit (ignore work area)",
+        IT: "Nessun limite (ignora l'area di lavoro)",
+    },
 }
 
 _current = PT_BR

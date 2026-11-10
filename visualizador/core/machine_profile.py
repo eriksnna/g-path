@@ -36,10 +36,11 @@ class MachineProfile:
 
 def default_profiles() -> list[MachineProfile]:
     """Perfis iniciais oferecidos na interface. O usuário pode editar qualquer campo."""
+    from core.i18n import tr  # import tardio: evita ciclo e garante tradução na hora certa
     return [
-        MachineProfile("Minha máquina", dict(DEFAULT_LIMITS), DEFAULT_MODE, DEFAULT_DIALECT),
+        MachineProfile(tr("profile_default_name"), dict(DEFAULT_LIMITS), DEFAULT_MODE, DEFAULT_DIALECT),
         MachineProfile(
-            "Sem limite (ignorar área de trabalho)",
+            tr("profile_unlimited_name"),
             {"X": (-1e9, 1e9), "Y": (-1e9, 1e9), "Z": (-1e9, 1e9)},
             DEFAULT_MODE,
             DEFAULT_DIALECT,
