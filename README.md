@@ -473,9 +473,20 @@ Novidades:
 - `config.py` preparado pra achar os assets dentro do build (`sys._MEIPASS`);
 - `.gitignore` atualizado (`build/`, `dist/`);
 
-### 09/11 — segunda-feira - Primeira Release!! 🥳 (~3h)
+### 09/11 — segunda-feira - Primeira e Segunda Release!! 🥳 (~20h)
 
 1. **Processo de release**
 
 - Definição de versionamento (semver + beta);
 - Preparação do primeiro release de teste.
+
+2. **Segunda Release**
+
+**Novidades**:
+- Suporte ao idioma Italiano
+- Adição de abrir arquivos recentes
+- Adição de drag and drop
+- Adição de botões de vistas de câmeras diferentes
+
+**Correções:**
+- Ajuste de labels hardcodadas em PT-BR
