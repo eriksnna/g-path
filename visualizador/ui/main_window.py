@@ -75,6 +75,7 @@ class MainWindow(QMainWindow):
         self.resize(*WINDOW_SIZE)
         self.setWindowIcon(QIcon(str(ICON_PATH)))
         self.setStyleSheet(DARK_QSS)
+        self.setAcceptDrops(True) # arrastar e soltar
 
         self._path: Path | None = None
         self._text: str | None = None
@@ -646,6 +647,25 @@ class MainWindow(QMainWindow):
             return
         self._settings.setValue("window/geometry", self.saveGeometry())
         event.accept()
+
+    def dragEnterEvent(self, event) -> None:
+        if self._dropped_gcode_path(event.mimeData()) is not None:
+            event.acceptProposedAction()
+
+    def dropEvent(self, event) -> None:
+        path = self._dropped_gcode_path(event.mimeData())
+        if path is not None:
+            self.load_file(path)
+            event.acceptProposedAction()
+
+    @staticmethod
+    def _dropped_gcode_path(mime) -> Path | None:
+        if not mime.hasUrls():
+            return None
+        for url in mime.urls():
+            if url.isLocalFile() and Path(url.toLocalFile()).suffix.lower() in config.GCODE_EXTENSIONS:
+                return Path(url.toLocalFile())
+        return None
 
     def _show_editor_find(self) -> None:
         self._editor_toggle.setChecked(True)
