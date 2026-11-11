@@ -103,6 +103,7 @@ QPushButton#play {{
 }}
 QPushButton#play:hover {{ background: {ACCENT_HOVER}; }}
 QPushButton#play:pressed {{ background: {ACCENT_PRESSED}; }}
+QPushButton#play:disabled {{ background: {SURFACE_3}; }}
 
 QPushButton#transport {{ background: transparent; border-radius: 20px; padding: 0; }}
 QPushButton#transport:hover {{ background: {SURFACE_3}; }}

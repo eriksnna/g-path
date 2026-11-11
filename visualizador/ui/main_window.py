@@ -550,6 +550,7 @@ class MainWindow(QMainWindow):
         self._stats_panel.show_mode(mode_display_name(mode.key), mode.cards(toolpath))
         self._player.set_enabled(True)
         self._player.set_total(toolpath.total_time)
+        self._player.set_status("")
         self._refresh()
 
     def _show_empty(self, status: str | None = None, clear_issues: bool = True) -> None:
