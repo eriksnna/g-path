@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (
     QLayout, QGraphicsOpacityEffect,
 )
 
-from config import APP_TITLE, GCODE_FILTER, ICON_PATH, TICK_MS, WINDOW_SIZE
+from config import APP_TITLE, ICON_PATH, TICK_MS, WINDOW_SIZE
 from ui.icons import APPLY, DISCARD, NEW_FILE, OPEN_FILE, QUIT, SAVE, SEARCH, SETTINGS, icon
 
 import config
@@ -25,6 +25,7 @@ from core.stats import compute_stats, format_duration
 from core.toolpath import Snapshot, Toolpath
 from core.file_safety import UnsafeFileError, check_file_size, check_line_lengths
 from core.dialect import get_dialect
+from core.file_io import read_gcode_text
 from ui.gcode_editor import GCodeEditor
 from ui.issues_panel import IssuesPanel
 from ui.layer_controls import LayerControls
@@ -37,6 +38,10 @@ from ui.stats_panel import StatsPanel
 from ui.theme import DARK_QSS
 from ui.viewport import ToolpathView
 from ui.start_panel import StartPanel
+
+def _gcode_filter() -> str:
+    patterns = " ".join(f"*{ext}" for ext in config.GCODE_EXTENSIONS)
+    return f"G-code ({patterns});;{tr('file_filter_all')} (*)"
 
 def _vsep() -> QFrame:
     """Linha vertical fina pra separar grupos de controles na barra superior."""
@@ -77,6 +82,7 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon(str(ICON_PATH)))
         self.setStyleSheet(DARK_QSS)
         self.setAcceptDrops(True) # arrastar e soltar
+        self._encoding = "utf-8"
 
         self._path: Path | None = None
         self._text: str | None = None
@@ -351,7 +357,7 @@ class MainWindow(QMainWindow):
     # --- carregamento ---
 
     def open_file(self) -> None:
-        path, _ = QFileDialog.getOpenFileName(self, tr("dialog_open_title"), "", GCODE_FILTER)
+        path, _ = QFileDialog.getOpenFileName(self, tr("dialog_open_title"), "", _gcode_filter())
         if path:
             self.load_file(Path(path))
 
@@ -389,6 +395,7 @@ class MainWindow(QMainWindow):
         self._editor_toggle.setChecked(True)
         self._enter_workspace()
         self._show_empty(status=tr("status_program_new"))
+        self._encoding = "utf-8"
 
     def _recent_files(self) -> list[str]:
         value = self._settings.value("window/recent_files", [])
@@ -419,14 +426,15 @@ class MainWindow(QMainWindow):
             return
         try:
             check_file_size(path)
-            text = path.read_text(encoding="utf-8", errors="ignore")
+            text, encoding = read_gcode_text(path)
             check_line_lengths(text)
         except UnsafeFileError as err:
-            self._player.set_status(tr("status_file_rejected").format(err=err))
+            self._show_open_error(tr("status_file_rejected").format(err=err))
             return
         except OSError as err:
-            self._player.set_status(tr("status_open_error").format(err=err))
+            self._show_open_error(tr("status_open_error").format(err=err))
             return
+        self._encoding = encoding
         self._path = path
         self._text = text
         self._saved_text = text
@@ -464,7 +472,7 @@ class MainWindow(QMainWindow):
 
     def _save_edited_text_as(self, text: str) -> None:
         """Sempre pergunta o caminho, mesmo que já exista um arquivo aberto."""
-        path_str, _ = QFileDialog.getSaveFileName(self, tr("dialog_save_title"), "", GCODE_FILTER)
+        path_str, _ = QFileDialog.getSaveFileName(self, tr("dialog_save_title"), "", _gcode_filter())
         if not path_str:
             return
         path = Path(path_str)
