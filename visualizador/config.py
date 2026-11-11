@@ -19,8 +19,6 @@ else:
 ASSETS_DIR = BASE_DIR / "assets"
 ICON_PATH = ASSETS_DIR / "g-code.ico"
 
-GCODE_FILTER = "G-code (*.nc *.gcode *.ngc *.tap);;Todos os arquivos (*)"
-
 # Máquina e interpretação
 RAPID_FEED = 5000.0       # mm/min nos G0
 DEFAULT_FEED = 300.0      # mm/min usado antes de qualquer F no arquivo

@@ -140,13 +140,18 @@ class ProgramExpander:
                 continue
 
             label = SUB_LABEL_RE.match(line)
+
             if label:
                 number = int(label.group(1))
                 if number not in called:
-                    self._report(lineno, WARNING,
-                                 tr("issue_sub_redefined").format(number=number))
                     current = None
                     continue
+                if number in self._subs:
+                    self._report(lineno, WARNING,
+                                 tr("issue_sub_redefined").format(number=number))
+                current = Subroutine(line=lineno)
+                self._subs[number] = current
+                continue
 
             if current is None:
                 self._main.append((lineno, line))

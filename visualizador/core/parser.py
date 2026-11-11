@@ -266,6 +266,10 @@ class GCodeInterpreter:
     def _arc(self, end: Point, words: dict[str, float]) -> None:
         if "R" in words:
             raise GCodeError(tr("issue_arc_r_unsupported"))
+        if self.plane != G_PLANE_XY:
+            raise GCodeError(tr("issue_arc_plane_unsupported").format(plane=self.plane))
+        if "I" not in words and "J" not in words:
+            raise GCodeError(tr("issue_arc_missing_center"))
 
         self._check_feed()
         start = self.position

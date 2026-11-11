@@ -495,6 +495,7 @@ class MainWindow(QMainWindow):
                 self._encoding = "utf-8"
                 path.write_text(text, encoding=self._encoding)
         except OSError as err:
+            QMessageBox.warning(self, tr("save_error_title"), tr("save_error_text").format(err=err))
             return False
         self._apply_edited_text(text)
         self._saved_text = text
@@ -514,6 +515,9 @@ class MainWindow(QMainWindow):
 
     def _reload(self) -> None:
         """Reinterpreta o texto atual com o modo e o dialeto escolhidos."""
+        if self._text is None:
+            return
+        self._pause()
         if not moves:
             status = (tr("status_no_moves_see_issues").format(count=len(self._issues))
                       if self._issues else None)
