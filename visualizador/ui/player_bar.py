@@ -1,7 +1,9 @@
-"""Barra de reprodução. Exibe o estado e emite sinais; não decide nada sozinha."""
+"""barra de reprodução. exibe o estado e emite sinais; não decide nada sozinha."""
 from __future__ import annotations
 
 import math
+
+from html import escape
 
 from core.i18n import tr
 from contextlib import contextmanager
@@ -17,18 +19,22 @@ from config import (
     SPEED_MAX, SPEED_MIN, SPEED_PRESETS, SPEED_SLIDER_SCALE, TIMELINE_STEPS,
 )
 from core.stats import format_duration
-from ui.theme import ACCENT, SPACE_XXS, SPACE_MD, SPACE_SM, SPACE_XL, BORDER_STRONG, TEXT_MUTED, ON_ACCENT, SPACE_LG
+from core.timeline import TimelineMarks
+from ui.theme import ( 
+    ACCENT, ACCENT_TEXT, SPACE_XXS, SPACE_MD, SPACE_SM, SPACE_XL, BORDER_STRONG,
+    TEXT_MUTED, ON_ACCENT, SPACE_LG
+)
 from ui.icons import FAST_FORWARD, PAUSE, PLAY, REWIND, SKIP_BACK, SKIP_FORWARD, icon
 
 PLAY_BUTTON_SIZE = (40, 40)
 TRANSPORT_BUTTON_SIZE = (34, 34)
 SPEED_SLIDER_WIDTH = 180
 MESSAGE_TIMEOUT_MS = 4000
-
+LINE_CHIP_MAX_CHARS = 28
 
 @contextmanager
 def _signals_blocked(widget):
-    """Atualiza um widget por código sem disparar seus sinais."""
+    """atualiza um widget por código sem disparar seus sinais."""
     previous = widget.blockSignals(True)
     try:
         yield
@@ -36,35 +42,36 @@ def _signals_blocked(widget):
         widget.blockSignals(previous)
 
 class _Slider(QSlider):
-    """Slider com desenho próprio — o Fusion não respeita bem o QSS de groove no Windows."""
-
     TRACK_HEIGHT = 6
     HANDLE_RADIUS = 8
+
+    def _track_rect(self) -> QRectF:
+        return QRectF(
+            self.HANDLE_RADIUS, self.height() / 2 - self.TRACK_HEIGHT / 2,
+            self.width() - 2 * self.HANDLE_RADIUS, self.TRACK_HEIGHT,
+        )
 
     def _fraction(self) -> float:
         span = max(self.maximum() - self.minimum(), 1)
         return (self.value() - self.minimum()) / span
 
+    def _fraction_from_x(self, x: float) -> float:
+        track = self._track_rect()
+        return min(max((x - track.left()) / max(track.width(), 1), 0.0), 1.0)
+
     def _value_from_x(self, x: float) -> int:
-        left = self.HANDLE_RADIUS
-        right = self.width() - self.HANDLE_RADIUS
-        span = max(right - left, 1)
-        fraction = min(max((x - left) / span, 0.0), 1.0)
-        return round(self.minimum() + fraction * (self.maximum() - self.minimum()))
+        return round(self.minimum() + self._fraction_from_x(x) * (self.maximum() - self.minimum()))
 
     def paintEvent(self, event) -> None:
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.setPen(Qt.PenStyle.NoPen)
-
-        track = QRectF(
-            self.HANDLE_RADIUS, self.height() / 2 - self.TRACK_HEIGHT / 2,
-            self.width() - 2 * self.HANDLE_RADIUS, self.TRACK_HEIGHT,
-        )
+        track = self._track_rect()
         radius = self.TRACK_HEIGHT / 2
 
         painter.setBrush(QColor(BORDER_STRONG))
         painter.drawRoundedRect(track, radius, radius)
+        self._paint_under_handle(painter, track)
 
         fraction = self._fraction()
         handle_x = track.left() + fraction * track.width()
@@ -74,8 +81,11 @@ class _Slider(QSlider):
             painter.drawRoundedRect(filled, radius, radius)
 
         painter.setBrush(QColor("#ffffff" if self.isEnabled() else TEXT_MUTED))
-        painter.drawEllipse(QPointF(handle_x, self.height() / 2), self.HANDLE_RADIUS, self.HANDLE_RADIUS)
+        painter.drawEllipse(QPointF(handle_x, track.center().y()), self.HANDLE_RADIUS, self.HANDLE_RADIUS)
         painter.end()
+
+    def _paint_under_handle(self, painter: QPainter, track: QRectF) -> None:
+        """gancho para subclasses desenharem marcas entre o trilho e o cursor."""
 
     def mousePressEvent(self, event) -> None:
         if event.button() == Qt.MouseButton.LeftButton and self.isEnabled():
@@ -100,8 +110,6 @@ class _Slider(QSlider):
             super().mouseReleaseEvent(event)
 
 class _HoverGrowButton(QPushButton):
-    """Cresce o ícone ~12% no hover, com uma animação curta e barata/leve."""
-
     GROW_FACTOR = 1.12
 
     def __init__(self, parent=None) -> None:
@@ -157,9 +165,9 @@ class PlayerBar(QFrame):
         )
         self._transport = [
             self._make_button(icon(SKIP_BACK), tr("tooltip_go_start"), self.start_clicked.emit, TRANSPORT_BUTTON_SIZE, name="transport"),
-            self._make_button(icon(REWIND), tr("tooltip_rewind"), lambda: self.step_clicked.emit(-1), TRANSPORT_BUTTON_SIZE, name="transport"),
+            self._make_button(icon(REWIND), tr("tooltip_step_back"), lambda: self.step_clicked.emit(-1), TRANSPORT_BUTTON_SIZE, name="transport"),
             self._play_button,
-            self._make_button(icon(FAST_FORWARD), tr("tooltip_forward"), lambda: self.step_clicked.emit(1), TRANSPORT_BUTTON_SIZE, name="transport"),
+            self._make_button(icon(FAST_FORWARD), tr("tooltip_step_forward"), lambda: self.step_clicked.emit(1), TRANSPORT_BUTTON_SIZE, name="transport"),
             self._make_button(icon(SKIP_FORWARD), tr("tooltip_go_end"), self.end_clicked.emit, TRANSPORT_BUTTON_SIZE, name="transport"),
         ]
 
@@ -177,12 +185,15 @@ class PlayerBar(QFrame):
         self._speed_button = self._make_speed_button()
 
         self._message = QLabel()
+        self._line_chip = self._make_chip()
+        self._layer_chip = self._make_chip()
+        self._layer_total = 0
+        self._chips_allowed = True
+        self._message = QLabel()
         self._message.setObjectName("playerMessage")
-        # não deixa uma mensagem longa empurrar o transporte para fora do centro
-        self._message.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         self._message_timer = QTimer(self)
         self._message_timer.setSingleShot(True)
-        self._message_timer.timeout.connect(lambda: self._message.setText(""))
+        self._message_timer.timeout.connect(lambda: self.set_status(""))
 
         self._controls = [*self._transport, self._timeline, self._speed_button]
         self._build_layout()
@@ -203,7 +214,19 @@ class PlayerBar(QFrame):
 
         # colunas laterais com o mesmo stretch mantêm o transporte no centro real
         controls_row = QGridLayout()
-        controls_row.addWidget(self._message, 0, 0, Qt.AlignmentFlag.AlignVCenter)
+        info = QWidget()
+        # não deixa chips ou mensagem longa empurrarem o transporte para fora do centro
+        info.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
+        info_layout = QHBoxLayout(info)
+        info_layout.setContentsMargins(0, 0, 0, 0)
+        info_layout.setSpacing(SPACE_SM)
+        info_layout.addWidget(self._line_chip)
+        info_layout.addWidget(self._layer_chip)
+        info_layout.addWidget(self._message)
+        info_layout.addStretch()
+
+        controls_row = QGridLayout()
+        controls_row.addWidget(info, 0, 0)
         controls_row.addLayout(transport, 0, 1)
         controls_row.addWidget(self._speed_button, 0, 2,
                                Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
@@ -217,7 +240,6 @@ class PlayerBar(QFrame):
         layout.addLayout(controls_row)
 
     def _make_speed_button(self) -> QToolButton:
-        """Botão "1.0x ▾": presets no menu e o ajuste fino num slider dentro dele."""
         button = QToolButton()
         button.setObjectName("speedButton")
         button.setToolTip(tr("label_speed"))
@@ -243,6 +265,15 @@ class PlayerBar(QFrame):
         return button
 
     @staticmethod
+    def _make_chip() -> QLabel:
+        chip = QLabel()
+        chip.setObjectName("chip")
+        chip.setTextFormat(Qt.TextFormat.RichText)
+        chip.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Fixed)
+        chip.setVisible(False)
+        return chip
+
+    @staticmethod
     def _make_time_label(object_name: str) -> QLabel:
         label = QLabel("00:00")
         label.setObjectName(object_name)
@@ -259,9 +290,34 @@ class PlayerBar(QFrame):
         if not enabled:
             self._elapsed_label.setText("00:00")
             self._total_label.setText("00:00")
+            self._line_chip.setText("")
+            self._layer_total = 0
+            self._update_chips()
 
-    def set_total(self, seconds: float) -> None:
-        self._total_label.setText(format_duration(seconds))
+    def set_marks(self, marks: TimelineMarks) -> None:
+        self._total_label.setText(format_duration(marks.total))
+
+    def set_position(self, line: int, source: str, layer: int, layer_total: int, active: bool) -> None:
+        """linha do G-code em execução e camada atual. active = processo ligado."""
+        if len(source) > LINE_CHIP_MAX_CHARS:
+            source = source[:LINE_CHIP_MAX_CHARS - 1] + "…"
+        dot = ACCENT_TEXT if active else TEXT_MUTED
+        self._line_chip.setText(f'<span style="color:{dot}">●</span>&nbsp; L{line}&nbsp;&nbsp;{escape(source)}')
+        self._line_chip.setToolTip(tr("chip_process_on" if active else "chip_process_off"))
+        self._layer_total = layer_total
+        self._layer_chip.setText(tr("player_layer_chip").format(layer=layer, total=layer_total))
+        self._update_chips()
+
+    def set_chips_allowed(self, allowed: bool) -> None:
+        """Com o editor aberto a linha já aparece destacada lá; os chips seriam repetição."""
+        self._chips_allowed = allowed
+        self._update_chips()
+
+    def _update_chips(self) -> None:
+        """mensagem tem prioridade; sem ela, aparecem os chips de linha e camada."""
+        free = self._chips_allowed and not self._message.text()
+        self._line_chip.setVisible(free and bool(self._line_chip.text()))
+        self._layer_chip.setVisible(free and self._layer_total > 1)
 
     def set_playing(self, playing: bool) -> None:
         self._play_button.setIcon(icon(PAUSE if playing else PLAY, ON_ACCENT))
@@ -274,14 +330,15 @@ class PlayerBar(QFrame):
     def set_speed(self, value: float) -> None:
         with _signals_blocked(self._speed_slider):
             self._speed_slider.setValue(round(value * SPEED_SLIDER_SCALE))
-        self._speed_button.setText(f"{value:.1f}x")
+        self._speed_button.setText(f"{value:.1f}x  ▾")
         for preset, action in self._speed_actions:
             action.setChecked(math.isclose(preset, value))
 
     def set_status(self, text: str, timeout_ms: int = MESSAGE_TIMEOUT_MS) -> None:
-        """Mensagem à esquerda do transporte. timeout_ms=0 deixa a mensagem fixa."""
+        """mensagem à esquerda do transporte. timeout_ms=0 deixa a mensagem fixa."""
         self._message.setText(text)
         self._message.setToolTip(text)
+        self._update_chips()
         self._message_timer.stop()
         if text and timeout_ms > 0:
             self._message_timer.start(timeout_ms)

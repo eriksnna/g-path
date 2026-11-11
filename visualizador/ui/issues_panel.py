@@ -35,6 +35,8 @@ class IssuesPanel(QFrame):
         self._list.setObjectName("issues")
         self._list.setWordWrap(True)
         self._list.setResizeMode(QListWidget.ResizeMode.Adjust)
+        self._list.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self._list.setVerticalScrollMode(QListWidget.ScrollMode.ScrollPerPixel)
         self._list.itemClicked.connect(self._on_clicked)
 
         self._empty = QLabel(tr("validation_empty"))

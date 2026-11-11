@@ -1,4 +1,4 @@
-"""Viewport 3D: desenha o caminho, aplica cores por profundidade e o estado da simulação."""
+"""viewport 3D: desenha o caminho, aplica cores por profundidade e o estado da simulação."""
 from __future__ import annotations
 
 import math
@@ -7,6 +7,8 @@ from typing import Sequence
 import numpy as np
 import pyqtgraph as pg
 import pyqtgraph.opengl as gl
+
+from PySide6.QtCore import Qt
 
 from config import (
     CAMERA_MARGIN, CAMERA_MIN_DISTANCE, CAMERA_START_DISTANCE,
@@ -39,7 +41,7 @@ def depth_gradient(count: int) -> np.ndarray:
 
 
 def _make_torch() -> gl.GLMeshItem:
-    """Cone com a ponta (bico) em z=0 e o corpo subindo em +Z, sem transformação extra."""
+    """cone com a ponta (bico) em z=0 e o corpo subindo em +Z, sem transformação extra."""
     mesh = gl.MeshData.cylinder(rows=1, cols=16, radius=[0.0, TORCH_RADIUS], length=TORCH_HEIGHT)
     item = gl.GLMeshItem(meshdata=mesh, color=TORCH_COLOR, smooth=True, shader="shaded", drawEdges=False)
     item.setGLOptions("opaque")
@@ -47,13 +49,14 @@ def _make_torch() -> gl.GLMeshItem:
 
 
 def _tilt_direction(start: np.ndarray, end: np.ndarray) -> np.ndarray | None:
-    """Vetor unitário XY da direção de deslocamento, ou None se o movimento for vertical/nulo."""
+    """vetor unitário XY da direção de deslocamento, ou None se o movimento for vertical/nulo."""
     dxy = end[:2] - start[:2]
     length = float(np.linalg.norm(dxy))
     if length < MIN_DIRECTION_LENGTH:
         return None
     return dxy / length
 
+PLAYBACK_KEYS = {Qt.Key.Key_Space, Qt.Key.Key_Left, Qt.Key.Key_Right, Qt.Key.Key_Home, Qt.Key.Key_End}
 
 class ToolpathView(gl.GLViewWidget):
 
@@ -155,7 +158,7 @@ class ToolpathView(gl.GLViewWidget):
         self._redraw()
 
     def set_show_torch(self, enabled: bool) -> None:
-        """Liga ou desliga a tocha e o fio (usado no modo deposição)."""
+        """liga ou desliga a tocha e o fio (usado no modo deposição)."""
         self._show_torch = enabled
         if not enabled:
             self._torch_item.setVisible(False)
@@ -193,7 +196,7 @@ class ToolpathView(gl.GLViewWidget):
             self._update_torch(snapshot)
 
     def _update_torch(self, snapshot: Snapshot) -> None:
-        """Posiciona a tocha acima do ponto de trabalho, inclinada na direção do movimento."""
+        """posiciona a tocha acima do ponto de trabalho, inclinada na direção do movimento."""
         head = snapshot.head
         direction = _tilt_direction(snapshot.segment_start, snapshot.segment_end)
         if direction is not None:
@@ -227,7 +230,7 @@ class ToolpathView(gl.GLViewWidget):
             self.render(self._snapshot)
 
     def _build_colors(self) -> None:
-        """Cores de cada movimento, uma vez por carregamento ou troca de modo."""
+        """cores de cada movimento, uma vez por carregamento ou troca de modo."""
         if self._toolpath is None:
             return
         count = self._toolpath.count
@@ -252,13 +255,20 @@ class ToolpathView(gl.GLViewWidget):
         self.opts["center"] = pg.Vector(*center)
         self.setCameraPosition(distance=max(size * CAMERA_MARGIN, CAMERA_MIN_DISTANCE))
 
+    def keyPressEvent(self, event) -> None:
+        """deixa os atalhos de reprodução subirem para a janela principal."""
+        if event.key() in PLAYBACK_KEYS:
+            event.ignore()
+            return
+        super().keyPressEvent(event)
+
     def set_preset_view(self, name: str) -> None:
-        """Gira a câmera para uma vista padrão, mantendo a distância (zoom) atual."""
+        """gira a câmera para uma vista padrão, mantendo a distância (zoom) atual."""
         elevation, azimuth = VIEW_PRESETS[name]
         self.setCameraPosition(elevation=elevation, azimuth=azimuth)
 
     def wheelEvent(self, event) -> None:
-        """Zoom com fator fixo por clique da roda, para manter sensibilidade em close-up."""
+        """zoom com fator fixo por clique da roda, para manter sensibilidade em close-up."""
         delta = event.angleDelta().y()
         if delta == 0:
             return

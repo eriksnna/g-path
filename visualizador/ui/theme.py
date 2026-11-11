@@ -14,6 +14,8 @@ TEXT_MUTED = "#767c8a"
 ACCENT = "#b85a26"
 ACCENT_HOVER = "#cf6f36"
 ACCENT_PRESSED = "#97471b"
+ACCENT_SOFT = "#3b2c29"   # fundo de estado ativo/selecionado (laranja 18% sobre SURFACE_2)
+ACCENT_TEXT = "#e8894f"   # texto/ícone laranja sobre fundos escuros
 ON_ACCENT = "#ffffff"   # cor de texto/ícone sobre fundo ACCENT
 
 SUCCESS = "#30d158"
@@ -34,6 +36,15 @@ SPACE_XL = 14
 SPACE_XXL = 16
 
 FONT_FAMILY = "'Segoe UI Variable Display', 'Segoe UI', sans-serif"
+
+FONT_MONO = "Consolas, 'Cascadia Mono', monospace"
+FONT_CAPTION = "11px"
+FONT_SMALL = "12px"
+FONT_BODY = "13px"
+FONT_VALUE = "16px"
+FONT_TITLE = "24px"
+WEIGHT_REGULAR = "400"
+WEIGHT_STRONG = "600"
 
 # --- cores usadas no viewport 3D (full OpenGL, sem QSS) -----------------------
 
@@ -85,13 +96,13 @@ QMenu::separator {{ height: 1px; background: {BORDER}; margin: 4px 8px; }}
 QDialog {{ background: {SURFACE_0}; }}
 QDialog QLabel {{ color: {TEXT_PRIMARY}; }}
 
-QLabel {{ color: {TEXT_PRIMARY}; background: transparent; font-family: {FONT_FAMILY}; font-size: 13px; }}
+QLabel {{ color: {TEXT_PRIMARY}; background: transparent; font-family: {FONT_FAMILY}; font-size: {FONT_BODY}; }}
 QLabel#fileLabel {{ color: {TEXT_SECONDARY}; }}
-QLabel#profileLabel {{ color: {TEXT_SECONDARY}; font-weight: 600; }}
+QLabel#profileLabel {{ color: {TEXT_SECONDARY}; font-weight: {WEIGHT_STRONG}; }}
 
 QPushButton {{
     background: {SURFACE_2}; color: {TEXT_PRIMARY}; font-family: {FONT_FAMILY};
-    border: none; border-radius: {RADIUS_MD}; padding: 7px 14px; font-weight: 500;
+    border: none; border-radius: {RADIUS_MD}; padding: 7px 14px; font-weight: {WEIGHT_REGULAR};
 }}
 QPushButton:hover {{ background: {SURFACE_3}; }}
 QPushButton:pressed {{ background: {SURFACE_1}; }}
@@ -99,7 +110,7 @@ QPushButton:disabled {{ color: {TEXT_MUTED}; }}
 QPushButton:focus {{ border: 1px solid {ACCENT}; }}
 
 QPushButton#play {{
-    background: {ACCENT}; border-radius: 20px; padding: 0; font-size: 16px;
+    background: {ACCENT}; border-radius: 20px; padding: 0; font-size: {FONT_VALUE};
 }}
 QPushButton#play:hover {{ background: {ACCENT_HOVER}; }}
 QPushButton#play:pressed {{ background: {ACCENT_PRESSED}; }}
@@ -109,41 +120,48 @@ QPushButton#transport {{ background: transparent; border-radius: 17px; padding: 
 QPushButton#transport:hover {{ background: {SURFACE_3}; }}
 QPushButton#transport:pressed {{ background: {SURFACE_1}; }}
 
-QPushButton#preset {{ padding: 3px 10px; font-size: 12px; border-radius: {RADIUS_SM}; background: {SURFACE_2}; }}
+QPushButton#preset {{ padding: 3px 10px; font-size: {FONT_SMALL}; border-radius: {RADIUS_SM}; background: {SURFACE_2}; }}
 QPushButton#preset:hover {{ background: {SURFACE_3}; }}
 QPushButton#preset:checked {{ background: {ACCENT}; color: {ON_ACCENT}; }}
 
 QFrame#playbar {{ background: {SURFACE_1}; border: none; border-radius: {RADIUS_LG}; }}
 
-QLabel#timeLabel {{ color: {TEXT_PRIMARY}; font-family: Consolas, monospace; font-size: 12px; min-width: 44px; }}
-QLabel#timeLabelMuted {{ color: {TEXT_SECONDARY}; font-family: Consolas, monospace; font-size: 12px; min-width: 44px; }}
-QLabel#playerMessage {{ color: {TEXT_SECONDARY}; font-size: 12px; }}
+QLabel#timeLabel {{ color: {TEXT_PRIMARY}; font-family: {FONT_MONO}; font-size: {FONT_SMALL}; min-width: 44px; }}
+QLabel#timeLabelMuted {{ color: {TEXT_SECONDARY}; font-family: {FONT_MONO}; font-size: {FONT_SMALL}; min-width: 44px; }}
+QLabel#playerMessage {{ color: {TEXT_SECONDARY}; font-size: {FONT_SMALL}; }}
+QLabel#chip {{
+    color: {TEXT_SECONDARY}; background: {SURFACE_2}; border: 1px solid {BORDER};
+    border-radius: {RADIUS_SM}; padding: 2px 8px; font-family: {FONT_MONO}; font-size: {FONT_SMALL};
+}}
 QToolButton#speedButton {{
     background: {SURFACE_2}; color: {TEXT_PRIMARY}; border: none; border-radius: {RADIUS_MD};
-    padding: 5px 22px 5px 10px; font-family: Consolas, monospace; font-size: 12px;
+    padding: 5px 22px 5px 10px; font-family: {FONT_MONO}; font-size: {FONT_SMALL};
 }}
 QToolButton#speedButton:hover {{ background: {SURFACE_3}; }}
 QToolButton#speedButton:disabled {{ color: {TEXT_MUTED}; }}
+QToolButton#speedButton::menu-indicator {{ image: none; }}
 
 QFrame#statsPanel {{ background: {SURFACE_1}; border: none; border-radius: {RADIUS_LG}; }}
 QFrame#card {{ background: {SURFACE_2}; border: 1px solid {BORDER}; border-radius: {RADIUS_MD}; }}
 
 QFrame#headerSeparator {{ background: {BORDER}; max-width: 1px; min-width: 1px; }}
 
-QLabel#cardTitle {{ color: {TEXT_SECONDARY}; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }}
-QLabel#cardValue {{ color: {TEXT_PRIMARY}; font-size: 17px; font-weight: 700; }}
-QLabel#sectionTitle {{ color: {TEXT_SECONDARY}; font-size: 11px; font-weight: 700; margin-top: 4px; }}
+QLabel#cardTitle {{ color: {TEXT_SECONDARY}; font-size: {FONT_CAPTION}; font-weight: {WEIGHT_STRONG}; letter-spacing: 0.5px; }}
+QLabel#cardValue {{ color: {TEXT_PRIMARY}; font-size: {FONT_VALUE}; font-weight: {WEIGHT_STRONG}; }}
+QLabel#sectionTitle {{ color: {TEXT_SECONDARY}; font-size: {FONT_CAPTION}; font-weight: {WEIGHT_STRONG}; margin-top: 4px; }}
 
 QProgressBar {{ background: {SURFACE_2}; border: none; border-radius: 4px; }}
 QProgressBar::chunk {{ background: {ACCENT}; border-radius: 4px; }}
 
 QListWidget {{
     background: {SURFACE_2}; color: {TEXT_PRIMARY};
-    border: none; border-radius: {RADIUS_MD}; font-size: 12px;
+    border: none; border-radius: {RADIUS_MD}; font-size: {FONT_SMALL};
 }}
 QListWidget::item {{ padding: 6px 10px; border-radius: 6px; }}
 QListWidget::item:hover {{ background: {SURFACE_3}; }}
-QListWidget::item:selected {{ background: {ACCENT}; color: {ON_ACCENT}; }}
+QListWidget::item:selected {{ background: {ACCENT_SOFT}; color: {ACCENT_TEXT}; }}
+
+QListWidget#issues::item {{ margin-right: 6px; }}
 
 QComboBox {{
     background: {SURFACE_2}; color: {TEXT_PRIMARY};
@@ -185,17 +203,17 @@ QDoubleSpinBox::up-button, QDoubleSpinBox::down-button {{ background: transparen
 QDoubleSpinBox::up-button:hover, QDoubleSpinBox::down-button:hover {{ background: {SURFACE_3}; }}
 
 QGroupBox {{
-    color: {TEXT_SECONDARY}; font-size: 11px; font-weight: 700;
+    color: {TEXT_SECONDARY}; font-size: {FONT_CAPTION}; font-weight: {WEIGHT_STRONG};
     border: 1px solid {BORDER}; border-radius: {RADIUS_LG};
     margin-top: 12px; padding-top: 16px;
 }}
 QGroupBox::title {{ subcontrol-origin: margin; left: 12px; padding: 0 6px; color: {TEXT_SECONDARY}; }}
 
 QFrame#issuesPanel {{ background: {SURFACE_1}; border: none; border-radius: {RADIUS_LG}; }}
-QLabel#issueSummary {{ color: {TEXT_SECONDARY}; font-size: 12px; }}
-QLabel#issueEmpty {{ color: {SUCCESS}; font-size: 12px; }}
+QLabel#issueSummary {{ color: {TEXT_SECONDARY}; font-size: {FONT_SMALL}; }}
+QLabel#issueEmpty {{ color: {SUCCESS}; font-size: {FONT_SMALL}; }}
 QLabel#issueDetail {{
-    color: {TEXT_SECONDARY}; font-family: Consolas, monospace; font-size: 11px;
+    color: {TEXT_SECONDARY}; font-family: {FONT_MONO}; font-size: {FONT_CAPTION};
     background: {SURFACE_2}; border-radius: {RADIUS_SM}; padding: 6px;
 }}
 
@@ -205,27 +223,27 @@ QPlainTextEdit#codeEditor {{
     border: none; border-radius: {RADIUS_MD};
     selection-background-color: {ACCENT};
 }}
-QLabel#editorStatus {{ color: {WARNING_COLOR}; font-size: 11px; font-weight: 700; }}
+QLabel#editorStatus {{ color: {WARNING_COLOR}; font-size: {FONT_CAPTION}; font-weight: {WEIGHT_STRONG}; }}
 QPushButton#applyEdit {{ background: {ACCENT}; }}
 QPushButton#applyEdit:hover {{ background: {ACCENT_HOVER}; }}
-QPushButton#editorToggle:checked {{ background: {ACCENT}; }}
+QPushButton#editorToggle:checked {{ background: {ACCENT_SOFT}; color: {ACCENT_TEXT}; }}
 QPushButton#saveEdit {{ background: {SURFACE_2}; }}
 QPushButton#saveAsEdit {{ background: {SURFACE_2}; }}
-QPushButton#editorHelp {{ background: {SURFACE_2}; border-radius: 14px; font-weight: 700; }}
+QPushButton#editorHelp {{ background: {SURFACE_2}; border-radius: 14px; font-weight: {WEIGHT_STRONG}; }}
 QWidget#findBar {{ background: {SURFACE_2}; border-radius: {RADIUS_MD}; }}
-QLabel#findStatus {{ color: {WARNING_COLOR}; font-size: 11px; }}
+QLabel#findStatus {{ color: {WARNING_COLOR}; font-size: {FONT_CAPTION}; }}
 
 QFrame#startPanel {{ background: {SURFACE_0}; }}
-QLabel#startTitle {{ color: {TEXT_PRIMARY}; font-size: 24px; font-weight: 700; }}
-QLabel#startSubtitle {{ color: {TEXT_SECONDARY}; font-size: 13px; }}
-QLabel#startFooter {{ color: {TEXT_MUTED}; font-size: 11px; }}
+QLabel#startTitle {{ color: {TEXT_PRIMARY}; font-size: {FONT_TITLE}; font-weight: {WEIGHT_STRONG}; }}
+QLabel#startSubtitle {{ color: {TEXT_SECONDARY}; font-size: {FONT_BODY}; }}
+QLabel#startFooter {{ color: {TEXT_MUTED}; font-size: {FONT_CAPTION}; }}
 
 QPushButton#startButton {{
-    background: {ACCENT}; padding: 8px 20px; font-size: 13px; font-weight: 600;
+    background: {ACCENT}; padding: 8px 20px; font-size: {FONT_BODY}; font-weight: {WEIGHT_STRONG};
     border-radius: {RADIUS_MD};
 }}
 QPushButton#startButton:hover {{ background: {ACCENT_HOVER}; }}
-QPushButton#startButtonSecondary {{ padding: 8px 20px; font-size: 13px; border-radius: {RADIUS_MD}; }}
+QPushButton#startButtonSecondary {{ padding: 8px 20px; font-size: {FONT_BODY}; border-radius: {RADIUS_MD}; }}
 
 QScrollBar:vertical {{
     background: transparent; width: 10px; margin: 0;

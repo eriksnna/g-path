@@ -105,7 +105,20 @@ _STRINGS: dict[str, dict[str, str]] = {
     "tooltip_rewind": {PT_BR: "Retroceder", EN: "Rewind", IT: "Indietro"},
     "tooltip_forward": {PT_BR: "Avançar", EN: "Forward", IT: "Avanti"},
     "tooltip_go_end": {PT_BR: "Ir para o fim", EN: "Go to end", IT: "Vai alla fine"},
+    "tooltip_step_back": {
+        PT_BR: "Movimento anterior (Shift: camada anterior)",
+        EN: "Previous move (Shift: previous layer)",
+        IT: "Movimento precedente (Shift: strato precedente)",
+    },
+    "tooltip_step_forward": {
+        PT_BR: "Próximo movimento (Shift: próxima camada)",
+        EN: "Next move (Shift: next layer)",
+        IT: "Movimento successivo (Shift: strato successivo)",
+    },
+    "player_layer_chip": {PT_BR: "Camada {layer}/{total}", EN: "Layer {layer}/{total}", IT: "Strato {layer}/{total}"},
     "label_speed": {PT_BR: "Velocidade", EN: "Speed", IT: "Velocità"},
+    "chip_process_on": {PT_BR: "Processo ligado", EN: "Process on", IT: "Processo attivo"},
+    "chip_process_off": {PT_BR: "Processo desligado", EN: "Process off", IT: "Processo spento"},
 
     # --- painel de estatísticas ----------------------------------------------
     "section_program_summary": {PT_BR: "Resumo do programa", EN: "Program summary", IT: "Riepilogo del programma"},

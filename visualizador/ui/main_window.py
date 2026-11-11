@@ -8,7 +8,7 @@ from PySide6.QtGui import QIcon, QCloseEvent, QAction, QKeySequence
 from PySide6.QtWidgets import (
     QFileDialog, QFrame, QHBoxLayout, QLabel, QMainWindow, QPushButton,
     QScrollArea, QSplitter, QVBoxLayout, QWidget, QMessageBox, QStackedWidget,
-    QLayout, QGraphicsOpacityEffect,
+    QLayout, QGraphicsOpacityEffect, QApplication,
 )
 
 from config import APP_TITLE, ICON_PATH, TICK_MS, WINDOW_SIZE
@@ -16,7 +16,8 @@ from ui.icons import APPLY, DISCARD, NEW_FILE, OPEN_FILE, QUIT, SAVE, SEARCH, SE
 
 import config
 from core.layers import depth_levels
-from core.lexer import Issue
+from core.lexer import Issue, clean_line
+from core.timeline import TimelineMarks, build_marks, step_layer, step_move
 from core.modes import apply_mode, mode_display_name
 from core.i18n import tr
 from core.parser import parse_gcode
@@ -88,6 +89,7 @@ class MainWindow(QMainWindow):
         self._text: str | None = None
         self._saved_text: str | None = None  # último texto gravado em disco (ou None se nunca salvo)
         self._toolpath: Toolpath | None = None
+        self._marks = TimelineMarks()
         self._issues: list[Issue] = []
         self._source_lines: list[str] = []
         self._playback = Playback()
@@ -102,6 +104,7 @@ class MainWindow(QMainWindow):
         self._mode_controls = ModeControls()
         self._mode_controls.set_mode(self._profile.mode_key)
         self._editor_toggle = QPushButton(tr("editor_toggle"))
+        self._editor_toggle.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self._editor_toggle.setObjectName("editorToggle")
         self._editor_toggle.setCheckable(True)
         self._layer_controls = LayerControls()
@@ -130,6 +133,7 @@ class MainWindow(QMainWindow):
         self._player.set_enabled(False)
         self._layer_controls.set_levels([])
         self._restore_window_state()
+        self._viewport.setFocus()
 
     # --- montagem ---
 
@@ -549,7 +553,9 @@ class MainWindow(QMainWindow):
         self._stats_panel.show_program(compute_stats(toolpath, result.commands))
         self._stats_panel.show_mode(mode_display_name(mode.key), mode.cards(toolpath))
         self._player.set_enabled(True)
-        self._player.set_total(toolpath.total_time)
+        self._marks = build_marks(toolpath, levels, self._issues)
+        self._player.set_enabled(True)
+        self._player.set_marks(self._marks)
         self._player.set_status("")
         self._refresh()
 
@@ -606,7 +612,17 @@ class MainWindow(QMainWindow):
         self._refresh()
 
     def _step(self, direction: int) -> None:
-        self._playback.step(direction)
+        """Pula um movimento; com Shift, uma camada inteira."""
+        if self._toolpath is None:
+            return
+        t = self._playback.elapsed
+        by_layer = QApplication.keyboardModifiers() & Qt.KeyboardModifier.ShiftModifier
+        if by_layer and self._marks.layer_starts.size:
+            target = step_layer(self._marks, t, direction)
+        else:
+            target = step_move(self._toolpath, t, direction)
+        self._playback.pause()
+        self._playback.seek(target)
         self._refresh()
 
     def _scrub_to(self, fraction: float) -> None:
@@ -634,6 +650,7 @@ class MainWindow(QMainWindow):
         self._viewport.render(snapshot)
         self._player.set_progress(pb.progress, pb.elapsed)
         self._player.set_playing(pb.playing)
+        self._update_position_chips(snapshot)
         self._stats_panel.show_progress(
             pb.elapsed, pb.total_time, snapshot.done, self._toolpath.count,
         )
@@ -650,6 +667,16 @@ class MainWindow(QMainWindow):
         index = min(max(snapshot.done, 0), self._toolpath.count - 1)
         self._editor.set_running_line(int(self._toolpath.lines[index]))
 
+    def _update_position_chips(self, snapshot: Snapshot) -> None:
+        index = min(snapshot.done, self._toolpath.count - 1)
+        line = int(self._toolpath.lines[index])
+        raw = self._source_lines[line - 1] if 1 <= line <= len(self._source_lines) else ""
+        self._player.set_position(
+            line, clean_line(raw) or raw.strip(),
+            self._marks.layer_at(self._playback.elapsed), len(self._marks.layer_starts),
+            snapshot.active,
+        )
+
     def _sync_timer(self) -> None:
         if self._playback.playing and not self._timer.isActive():
             self._frame_clock.start()
@@ -664,9 +691,21 @@ class MainWindow(QMainWindow):
         self._settings.setValue("window/geometry", self.saveGeometry())
         event.accept()
 
-    def dragEnterEvent(self, event) -> None:
-        if self._dropped_gcode_path(event.mimeData()) is not None:
-            event.acceptProposedAction()
+    def keyPressEvent(self, event) -> None:
+        """atalhos de reprodução. só chegam aqui quando o editor não está com o foco."""
+        actions = {
+            Qt.Key.Key_Space: self._toggle_play,
+            Qt.Key.Key_Left: lambda: self._step(-1),
+            Qt.Key.Key_Right: lambda: self._step(1),
+            Qt.Key.Key_Home: self._go_to_start,
+            Qt.Key.Key_End: self._go_to_end,
+        }
+        action = actions.get(event.key())
+        if action is None or self._toolpath is None:
+            super().keyPressEvent(event)
+            return
+        action()
+        event.accept()
 
     def dropEvent(self, event) -> None:
         path = self._dropped_gcode_path(event.mimeData())
@@ -689,5 +728,6 @@ class MainWindow(QMainWindow):
 
     def _on_editor_toggled(self, visible: bool) -> None:
         self._editor.setVisible(visible)
+        self._player.set_chips_allowed(not visible)
         if visible and self._toolpath is not None:
             self._update_running_line(self._toolpath.snapshot(self._playback.elapsed))
