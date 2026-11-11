@@ -99,13 +99,13 @@ QPushButton:disabled {{ color: {TEXT_MUTED}; }}
 QPushButton:focus {{ border: 1px solid {ACCENT}; }}
 
 QPushButton#play {{
-    background: {ACCENT}; border-radius: 24px; padding: 0; font-size: 16px;
+    background: {ACCENT}; border-radius: 20px; padding: 0; font-size: 16px;
 }}
 QPushButton#play:hover {{ background: {ACCENT_HOVER}; }}
 QPushButton#play:pressed {{ background: {ACCENT_PRESSED}; }}
 QPushButton#play:disabled {{ background: {SURFACE_3}; }}
 
-QPushButton#transport {{ background: transparent; border-radius: 20px; padding: 0; }}
+QPushButton#transport {{ background: transparent; border-radius: 17px; padding: 0; }}
 QPushButton#transport:hover {{ background: {SURFACE_3}; }}
 QPushButton#transport:pressed {{ background: {SURFACE_1}; }}
 

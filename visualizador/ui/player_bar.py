@@ -17,11 +17,11 @@ from config import (
     SPEED_MAX, SPEED_MIN, SPEED_PRESETS, SPEED_SLIDER_SCALE, TIMELINE_STEPS,
 )
 from core.stats import format_duration
-from ui.theme import ACCENT, SPACE_MD, SPACE_SM, SPACE_XL, BORDER_STRONG, TEXT_MUTED, ON_ACCENT, SPACE_LG
+from ui.theme import ACCENT, SPACE_XXS, SPACE_MD, SPACE_SM, SPACE_XL, BORDER_STRONG, TEXT_MUTED, ON_ACCENT, SPACE_LG
 from ui.icons import FAST_FORWARD, PAUSE, PLAY, REWIND, SKIP_BACK, SKIP_FORWARD, icon
 
-PLAY_BUTTON_SIZE = (48, 48)
-TRANSPORT_BUTTON_SIZE = (40, 40)
+PLAY_BUTTON_SIZE = (40, 40)
+TRANSPORT_BUTTON_SIZE = (34, 34)
 SPEED_SLIDER_WIDTH = 180
 MESSAGE_TIMEOUT_MS = 4000
 
@@ -197,7 +197,7 @@ class PlayerBar(QFrame):
         timeline_row.addWidget(self._total_label)
 
         transport = QHBoxLayout()
-        transport.setSpacing(SPACE_SM)
+        transport.setSpacing(SPACE_XXS)
         for widget in self._transport:
             transport.addWidget(widget)
 
