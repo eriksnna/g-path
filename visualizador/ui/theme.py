@@ -68,6 +68,20 @@ EDITOR_RUNNING_LINE_BG = "#3a2f12"
 DARK_QSS = f"""
 QMainWindow {{ background: {SURFACE_0}; }}
 QWidget#central {{ background: {SURFACE_0}; }}
+QMenuBar {{ background: {SURFACE_0}; color: {TEXT_PRIMARY}; padding: 2px 4px; }}
+QMenuBar::item {{ background: transparent; padding: 4px 10px; border-radius: {RADIUS_SM}; }}
+QMenuBar::item:selected {{ background: {SURFACE_3}; }}
+QMenuBar::item:pressed {{ background: {SURFACE_2}; }}
+
+QMenu {{
+    background: {SURFACE_2}; color: {TEXT_PRIMARY};
+    border: 1px solid {BORDER_STRONG}; border-radius: {RADIUS_MD}; padding: 4px;
+}}
+QMenu::item {{ padding: 6px 28px 6px 10px; border-radius: {RADIUS_SM}; }}
+QMenu::item:selected {{ background: {SURFACE_3}; }}
+QMenu::item:disabled {{ color: {TEXT_MUTED}; }}
+QMenu::icon {{ padding-left: 6px; }}
+QMenu::separator {{ height: 1px; background: {BORDER}; margin: 4px 8px; }}
 QDialog {{ background: {SURFACE_0}; }}
 QDialog QLabel {{ color: {TEXT_PRIMARY}; }}
 

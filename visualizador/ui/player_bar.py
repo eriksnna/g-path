@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
 from config import (
     SPEED_MAX, SPEED_MIN, SPEED_PRESETS, SPEED_SLIDER_SCALE, TIMELINE_STEPS,
 )
-from ui.theme import ACCENT, SPACE_MD, SPACE_SM, SPACE_XL, SURFACE_2, TEXT_MUTED, ON_ACCENT
+from ui.theme import ACCENT, SPACE_MD, SPACE_SM, SPACE_XL, BORDER_STRONG, TEXT_MUTED, ON_ACCENT
 from ui.icons import FAST_FORWARD, PAUSE, PLAY, REWIND, SKIP_BACK, SKIP_FORWARD, icon
 
 PLAY_BUTTON_SIZE = (48, 48)
@@ -62,7 +62,7 @@ class _Slider(QSlider):
         )
         radius = self.TRACK_HEIGHT / 2
 
-        painter.setBrush(QColor(SURFACE_2))
+        painter.setBrush(QColor(BORDER_STRONG))
         painter.drawRoundedRect(track, radius, radius)
 
         fraction = self._fraction()
