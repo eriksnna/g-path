@@ -518,11 +518,6 @@ class MainWindow(QMainWindow):
         if self._text is None:
             return
         self._pause()
-        if not moves:
-            status = (tr("status_no_moves_see_issues").format(count=len(self._issues))
-                      if self._issues else None)
-            self._show_empty(status=status, clear_issues=False)
-            return
 
         mode = self._mode_controls.current_mode()
         dialect = get_dialect(self._profile.dialect_key)
@@ -539,7 +534,9 @@ class MainWindow(QMainWindow):
         self._layer_controls.setVisible(mode.key != "deposicao")
 
         if not moves:
-            self._show_empty()
+            status = (tr("status_no_moves_see_issues").format(count=len(self._issues))
+                      if self._issues else None)
+            self._show_empty(status=status, clear_issues=False)
             return
 
         toolpath = Toolpath(moves, rapid_feed=self._profile.rapid_feed, min_feed=self._profile.min_feed)
