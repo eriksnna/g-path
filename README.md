@@ -20,6 +20,10 @@ Pra testar sem ter um G-code à mão, use os arquivos de exemplo na pasta `examp
 
 <!-- TODO: gifs de uso aqui — abrir arquivo, reprodução da simulação, troca de modo/idioma -->
 
+## Créditos
+
+Ícones: [Phosphor Icons](https://phosphoricons.com) — MIT License, © Phosphor Icons.
+
 Diário de Dev 🤠👇👇
 
 <details>
@@ -473,12 +477,14 @@ Novidades:
 - `config.py` preparado pra achar os assets dentro do build (`sys._MEIPASS`);
 - `.gitignore` atualizado (`build/`, `dist/`);
 
-### 09/11 — segunda-feira - Primeira e Segunda Release!! 🥳 (~20h)
+### 07/11 — sábado - Primeira Release!! 🥳 (~6h)
 
 1. **Processo de release**
 
 - Definição de versionamento (semver + beta);
 - Preparação do primeiro release de teste.
+
+### 08/11 — domingo a 9/11 — segunda-feira - Segunda Release e correção de bugs (~4h)
 
 2. **Segunda Release**
 

@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
 from config import (
     SPEED_MAX, SPEED_MIN, SPEED_PRESETS, SPEED_SLIDER_SCALE, TIMELINE_STEPS,
 )
-from ui.theme import ACCENT, SPACE_MD, SPACE_SM, SPACE_XL, SURFACE_2, TEXT_MUTED
+from ui.theme import ACCENT, SPACE_MD, SPACE_SM, SPACE_XL, SURFACE_2, TEXT_MUTED, ON_ACCENT
 from ui.icons import FAST_FORWARD, PAUSE, PLAY, REWIND, SKIP_BACK, SKIP_FORWARD, icon
 
 PLAY_BUTTON_SIZE = (48, 48)
@@ -152,7 +152,7 @@ class PlayerBar(QFrame):
         )
 
         self._play_button = self._make_button(
-            icon(PLAY), tr("tooltip_play_pause"), self.play_clicked.emit, PLAY_BUTTON_SIZE, name="play",
+            icon(PLAY, ON_ACCENT), tr("tooltip_play_pause"), self.play_clicked.emit, PLAY_BUTTON_SIZE, name="play",
         )
         self._transport = [
             self._make_button(icon(SKIP_BACK), tr("tooltip_go_start"), self.start_clicked.emit, TRANSPORT_BUTTON_SIZE, name="transport"),
@@ -224,7 +224,7 @@ class PlayerBar(QFrame):
             widget.setEnabled(enabled)
 
     def set_playing(self, playing: bool) -> None:
-        self._play_button.setIcon(icon(PAUSE if playing else PLAY))
+        self._play_button.setIcon(icon(PAUSE if playing else PLAY, ON_ACCENT))
 
     def set_progress(self, fraction: float) -> None:
         with _signals_blocked(self._timeline):
