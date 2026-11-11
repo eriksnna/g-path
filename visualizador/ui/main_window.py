@@ -549,6 +549,7 @@ class MainWindow(QMainWindow):
         self._stats_panel.show_program(compute_stats(toolpath, result.commands))
         self._stats_panel.show_mode(mode_display_name(mode.key), mode.cards(toolpath))
         self._player.set_enabled(True)
+        self._player.set_total(toolpath.total_time)
         self._refresh()
 
     def _show_empty(self, status: str | None = None, clear_issues: bool = True) -> None:
@@ -561,7 +562,7 @@ class MainWindow(QMainWindow):
             self._issues = []
             self._issues_panel.show_issues(self._issues)
         self._player.set_enabled(False)
-        self._player.set_status(status)
+        self._player.set_status(status, timeout_ms=0)
         self._editor.set_running_line(None)
 
     # --- validação ---
@@ -630,9 +631,8 @@ class MainWindow(QMainWindow):
         pb = self._playback
         snapshot = self._toolpath.snapshot(pb.elapsed)
         self._viewport.render(snapshot)
-        self._player.set_progress(pb.progress)
+        self._player.set_progress(pb.progress, pb.elapsed)
         self._player.set_playing(pb.playing)
-        self._player.set_status(self._status_text(snapshot))
         self._stats_panel.show_progress(
             pb.elapsed, pb.total_time, snapshot.done, self._toolpath.count,
         )
@@ -655,19 +655,6 @@ class MainWindow(QMainWindow):
             self._timer.start()
         elif not self._playback.playing and self._timer.isActive():
             self._timer.stop()
-
-    def _status_text(self, snapshot: Snapshot) -> str:
-        pb = self._playback
-        text = tr("status_line").format(
-            done=snapshot.done, total=self._toolpath.count,
-            elapsed=format_duration(pb.elapsed), total_time=format_duration(pb.total_time),
-            speed=f"{pb.speed:.1f}",
-        )
-        if snapshot.active:
-            text += tr("status_active_suffix")
-        if self._issues:
-            text += tr("status_issues_suffix").format(count=len(self._issues))
-        return text
     
     def closeEvent(self, event: QCloseEvent) -> None:
         if self._has_unsaved_changes() and not self._confirm_discard_changes():

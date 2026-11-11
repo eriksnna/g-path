@@ -6,23 +6,24 @@ import math
 from core.i18n import tr
 from contextlib import contextmanager
 
-from PySide6.QtCore import QPointF, QRectF, QSize, Qt, Signal, QEasingCurve, QPropertyAnimation
-from PySide6.QtGui import QColor, QPainter
+from PySide6.QtCore import QPointF, QRectF, QSize, Qt, Signal, QEasingCurve, QPropertyAnimation, QTimer
+from PySide6.QtGui import QAction, QColor, QPainter
 from PySide6.QtWidgets import (
-    QFrame, QHBoxLayout, QLabel, QPushButton, QSlider, QVBoxLayout
+    QFrame, QGridLayout, QHBoxLayout, QLabel, QMenu, QPushButton, QSizePolicy, QSlider,
+    QToolButton, QVBoxLayout, QWidget, QWidgetAction,
 )
 
 from config import (
     SPEED_MAX, SPEED_MIN, SPEED_PRESETS, SPEED_SLIDER_SCALE, TIMELINE_STEPS,
 )
-from ui.theme import ACCENT, SPACE_MD, SPACE_SM, SPACE_XL, BORDER_STRONG, TEXT_MUTED, ON_ACCENT
+from core.stats import format_duration
+from ui.theme import ACCENT, SPACE_MD, SPACE_SM, SPACE_XL, BORDER_STRONG, TEXT_MUTED, ON_ACCENT, SPACE_LG
 from ui.icons import FAST_FORWARD, PAUSE, PLAY, REWIND, SKIP_BACK, SKIP_FORWARD, icon
 
 PLAY_BUTTON_SIZE = (48, 48)
 TRANSPORT_BUTTON_SIZE = (40, 40)
-PRESET_BUTTON_SIZE = (46, 26)
-SPEED_SLIDER_WIDTH = 160
-SPEED_LABEL_WIDTH = 44
+SPEED_SLIDER_WIDTH = 180
+MESSAGE_TIMEOUT_MS = 4000
 
 
 @contextmanager
@@ -162,57 +163,90 @@ class PlayerBar(QFrame):
             self._make_button(icon(SKIP_FORWARD), tr("tooltip_go_end"), self.end_clicked.emit, TRANSPORT_BUTTON_SIZE, name="transport"),
         ]
 
+        self._elapsed_label = self._make_time_label("timeLabel")
+        self._elapsed_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        self._total_label = self._make_time_label("timeLabelMuted")
+
         self._speed_slider = _Slider(Qt.Orientation.Horizontal)
         self._speed_slider.setRange(
             round(SPEED_MIN * SPEED_SLIDER_SCALE), round(SPEED_MAX * SPEED_SLIDER_SCALE),
         )
         self._speed_slider.setFixedWidth(SPEED_SLIDER_WIDTH)
         self._speed_slider.valueChanged.connect(self._on_speed_slider)
+        self._speed_actions: list[tuple[float, QAction]] = []
+        self._speed_button = self._make_speed_button()
 
-        self._speed_label = QLabel()
-        self._speed_label.setFixedWidth(SPEED_LABEL_WIDTH)
-        self._presets = [self._make_preset(value) for value in SPEED_PRESETS]
+        self._message = QLabel()
+        self._message.setObjectName("playerMessage")
+        # não deixa uma mensagem longa empurrar o transporte para fora do centro
+        self._message.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
+        self._message_timer = QTimer(self)
+        self._message_timer.setSingleShot(True)
+        self._message_timer.timeout.connect(lambda: self._message.setText(""))
 
-        self._status = QLabel()
-        self._status.setObjectName("status")
-
-        self._controls = [
-            *self._transport, self._timeline, self._speed_slider,
-            *(button for _, button in self._presets),
-        ]
+        self._controls = [*self._transport, self._timeline, self._speed_button]
         self._build_layout()
 
     # --- montagem ---
 
     def _build_layout(self) -> None:
+        timeline_row = QHBoxLayout()
+        timeline_row.setSpacing(SPACE_LG)
+        timeline_row.addWidget(self._elapsed_label)
+        timeline_row.addWidget(self._timeline, 1)
+        timeline_row.addWidget(self._total_label)
+
+        transport = QHBoxLayout()
+        transport.setSpacing(SPACE_SM)
+        for widget in self._transport:
+            transport.addWidget(widget)
+
+        # colunas laterais com o mesmo stretch mantêm o transporte no centro real
+        controls_row = QGridLayout()
+        controls_row.addWidget(self._message, 0, 0, Qt.AlignmentFlag.AlignVCenter)
+        controls_row.addLayout(transport, 0, 1)
+        controls_row.addWidget(self._speed_button, 0, 2,
+                               Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        controls_row.setColumnStretch(0, 1)
+        controls_row.setColumnStretch(2, 1)
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(SPACE_XL, SPACE_MD, SPACE_XL, SPACE_MD)
         layout.setSpacing(SPACE_SM)
-        layout.addWidget(self._timeline)
-        layout.addLayout(self._build_controls_row())
-        layout.addWidget(self._status)
+        layout.addLayout(timeline_row)
+        layout.addLayout(controls_row)
 
-    def _build_controls_row(self) -> QHBoxLayout:
-        row = QHBoxLayout()
-        row.setSpacing(SPACE_SM)
-        row.addStretch()
-        for widget in self._transport:
-            row.addWidget(widget)
-        row.addStretch()
-        row.addWidget(QLabel(tr("label_speed")))
-        row.addWidget(self._speed_slider)
-        row.addWidget(self._speed_label)
-        for _, button in self._presets:
-            row.addWidget(button)
-        return row
+    def _make_speed_button(self) -> QToolButton:
+        """Botão "1.0x ▾": presets no menu e o ajuste fino num slider dentro dele."""
+        button = QToolButton()
+        button.setObjectName("speedButton")
+        button.setToolTip(tr("label_speed"))
+        button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
 
-    def _make_preset(self, value: float) -> tuple[float, QPushButton]:
-        button = QPushButton(f"{value:g}x")
-        button.setObjectName("preset")
-        button.setCheckable(True)
-        button.setFixedSize(*PRESET_BUTTON_SIZE)
-        button.clicked.connect(lambda _checked=False, v=value: self.speed_changed.emit(v))
-        return value, button
+        menu = QMenu(button)
+        for value in SPEED_PRESETS:
+            action = menu.addAction(f"{value:g}x")
+            action.setCheckable(True)
+            action.triggered.connect(lambda _checked=False, v=value: self.speed_changed.emit(v))
+            self._speed_actions.append((value, action))
+        menu.addSeparator()
+
+        holder = QWidget()
+        holder_layout = QHBoxLayout(holder)
+        holder_layout.setContentsMargins(SPACE_MD, SPACE_SM, SPACE_MD, SPACE_SM)
+        holder_layout.addWidget(self._speed_slider)
+        slider_action = QWidgetAction(menu)
+        slider_action.setDefaultWidget(holder)
+        menu.addAction(slider_action)
+
+        button.setMenu(menu)
+        return button
+
+    @staticmethod
+    def _make_time_label(object_name: str) -> QLabel:
+        label = QLabel("00:00")
+        label.setObjectName(object_name)
+        return label
 
     def _on_speed_slider(self, units: int) -> None:
         self.speed_changed.emit(units / SPEED_SLIDER_SCALE)
@@ -222,23 +256,35 @@ class PlayerBar(QFrame):
     def set_enabled(self, enabled: bool) -> None:
         for widget in self._controls:
             widget.setEnabled(enabled)
+        if not enabled:
+            self._elapsed_label.setText("00:00")
+            self._total_label.setText("00:00")
+
+    def set_total(self, seconds: float) -> None:
+        self._total_label.setText(format_duration(seconds))
 
     def set_playing(self, playing: bool) -> None:
         self._play_button.setIcon(icon(PAUSE if playing else PLAY, ON_ACCENT))
 
-    def set_progress(self, fraction: float) -> None:
+    def set_progress(self, fraction: float, elapsed: float) -> None:
         with _signals_blocked(self._timeline):
             self._timeline.setValue(round(fraction * TIMELINE_STEPS))
+        self._elapsed_label.setText(format_duration(elapsed))
 
     def set_speed(self, value: float) -> None:
         with _signals_blocked(self._speed_slider):
             self._speed_slider.setValue(round(value * SPEED_SLIDER_SCALE))
-        self._speed_label.setText(f"{value:.1f}x")
-        for preset, button in self._presets:
-            button.setChecked(math.isclose(preset, value))
+        self._speed_button.setText(f"{value:.1f}x")
+        for preset, action in self._speed_actions:
+            action.setChecked(math.isclose(preset, value))
 
-    def set_status(self, text: str) -> None:
-        self._status.setText(text)
+    def set_status(self, text: str, timeout_ms: int = MESSAGE_TIMEOUT_MS) -> None:
+        """Mensagem à esquerda do transporte. timeout_ms=0 deixa a mensagem fixa."""
+        self._message.setText(text)
+        self._message.setToolTip(text)
+        self._message_timer.stop()
+        if text and timeout_ms > 0:
+            self._message_timer.start(timeout_ms)
 
     @staticmethod
     def _make_button(button_icon, tip: str, callback, size, name: str | None = None) -> QPushButton:

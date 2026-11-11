@@ -88,7 +88,6 @@ QDialog QLabel {{ color: {TEXT_PRIMARY}; }}
 QLabel {{ color: {TEXT_PRIMARY}; background: transparent; font-family: {FONT_FAMILY}; font-size: 13px; }}
 QLabel#fileLabel {{ color: {TEXT_SECONDARY}; }}
 QLabel#profileLabel {{ color: {TEXT_SECONDARY}; font-weight: 600; }}
-QLabel#status {{ color: {TEXT_SECONDARY}; font-family: Consolas, monospace; font-size: 12px; }}
 
 QPushButton {{
     background: {SURFACE_2}; color: {TEXT_PRIMARY}; font-family: {FONT_FAMILY};
@@ -114,6 +113,16 @@ QPushButton#preset:hover {{ background: {SURFACE_3}; }}
 QPushButton#preset:checked {{ background: {ACCENT}; color: {ON_ACCENT}; }}
 
 QFrame#playbar {{ background: {SURFACE_1}; border: none; border-radius: {RADIUS_LG}; }}
+
+QLabel#timeLabel {{ color: {TEXT_PRIMARY}; font-family: Consolas, monospace; font-size: 12px; min-width: 44px; }}
+QLabel#timeLabelMuted {{ color: {TEXT_SECONDARY}; font-family: Consolas, monospace; font-size: 12px; min-width: 44px; }}
+QLabel#playerMessage {{ color: {TEXT_SECONDARY}; font-size: 12px; }}
+QToolButton#speedButton {{
+    background: {SURFACE_2}; color: {TEXT_PRIMARY}; border: none; border-radius: {RADIUS_MD};
+    padding: 5px 22px 5px 10px; font-family: Consolas, monospace; font-size: 12px;
+}}
+QToolButton#speedButton:hover {{ background: {SURFACE_3}; }}
+QToolButton#speedButton:disabled {{ color: {TEXT_MUTED}; }}
 
 QFrame#statsPanel {{ background: {SURFACE_1}; border: none; border-radius: {RADIUS_LG}; }}
 QFrame#card {{ background: {SURFACE_2}; border: 1px solid {BORDER}; border-radius: {RADIUS_MD}; }}

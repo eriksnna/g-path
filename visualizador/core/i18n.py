@@ -84,14 +84,6 @@ _STRINGS: dict[str, dict[str, str]] = {
         EN: "No moves from line {line} onward.",
         IT: "Nessun movimento a partire dalla riga {line}.",
     },
-    "status_line": {
-        PT_BR: "movimento {done}/{total}   |   tempo {elapsed} / {total_time}   |   velocidade {speed}x",
-        EN: "move {done}/{total}   |   time {elapsed} / {total_time}   |   speed {speed}x",
-        IT: "movimento {done}/{total}   |   tempo {elapsed} / {total_time}   |   velocità {speed}x",
-    },
-    "status_active_suffix": {PT_BR: "   |   processo ativo", EN: "   |   process active", IT: "   |   processo attivo"},
-    "status_issues_suffix": {PT_BR: "   |   {count} problema(s)", EN: "   |   {count} issue(s)", IT: "   |   {count} problema/i"},
-
     "confirm_discard_title": {PT_BR: "Descartar alterações?", EN: "Discard changes?", IT: "Scartare le modifiche?"},
     "confirm_discard_text": {
         PT_BR: "Há alterações não salvas. Deseja continuar e descartá-las?",
