@@ -59,6 +59,23 @@ _STRINGS: dict[str, dict[str, str]] = {
         EN: "No moves found in the file.",
         IT: "Nessun movimento trovato nel file.",
     },
+    "status_no_moves_see_issues": {
+        PT_BR: "Nenhum movimento gerado: veja os {count} problema(s) no painel de validação",
+        EN: "No moves generated: see the {count} issue(s) in the validation panel",
+        IT: "Nessun movimento generato: vedi i {count} problemi nel pannello di convalida",
+    },
+    "open_error_title": {PT_BR: "Não foi possível abrir", EN: "Could not open", IT: "Impossibile aprire"},
+    "file_filter_all": {PT_BR: "Todos os arquivos", EN: "All files", IT: "Tutti i file"},
+    "file_too_large": {
+        PT_BR: "arquivo tem {size} MB, acima do limite de {limit} MB",
+        EN: "file is {size} MB, above the {limit} MB limit",
+        IT: "il file è di {size} MB, oltre il limite di {limit} MB",
+    },
+    "file_line_too_long": {
+        PT_BR: "linha {line} tem {length} caracteres, acima do limite de {limit}; o arquivo pode estar corrompido",
+        EN: "line {line} has {length} characters, above the {limit} limit; the file may be corrupted",
+        IT: "la riga {line} ha {length} caratteri, oltre il limite di {limit}; il file potrebbe essere danneggiato",
+    },
     "status_file_rejected": {PT_BR: "Arquivo recusado: {err}", EN: "File rejected: {err}", IT: "File rifiutato: {err}"},
     "status_open_error": {PT_BR: "Erro ao abrir arquivo: {err}", EN: "Error opening file: {err}", IT: "Errore nell'apertura del file: {err}"},
     "status_saved_at": {PT_BR: "Salvo em {path}", EN: "Saved to {path}", IT: "Salvato in {path}"},
@@ -251,6 +268,27 @@ _STRINGS: dict[str, dict[str, str]] = {
     # --- mensagens de validação (parser/expander/modos) ----------------------
     "severity_error": {PT_BR: "Erro", EN: "Error", IT: "Errore"},
     "severity_warning": {PT_BR: "Aviso", EN: "Warning", IT: "Avviso"},
+
+    "issue_g_not_simulated": {
+        PT_BR: "G{code} não é simulado; coordenadas da linha ignoradas",
+        EN: "G{code} is not simulated; coordinates on this line ignored",
+        IT: "G{code} non è simulato; coordinate della riga ignorate",
+    },
+    "issue_g_unknown": {
+        PT_BR: "G{code} não reconhecido; ignorado",
+        EN: "G{code} not recognized; ignored",
+        IT: "G{code} non riconosciuto; ignorato",
+    },
+    "issue_arc_plane_unsupported": {
+        PT_BR: "arco no plano G{plane} não suportado; só G17 (XY)",
+        EN: "arc in plane G{plane} is not supported; only G17 (XY)",
+        IT: "arco nel piano G{plane} non supportato; solo G17 (XY)",
+    },
+    "issue_arc_missing_center": {
+        PT_BR: "arco sem centro: informe I e/ou J",
+        EN: "arc without center: provide I and/or J",
+        IT: "arco senza centro: indica I e/o J",
+    },
 
     "issue_arc_r_unsupported": {
         PT_BR: "arco com R não suportado; use I/J",

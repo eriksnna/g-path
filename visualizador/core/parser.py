@@ -27,6 +27,10 @@ G_DWELL = 4
 G_UNITS = {20: INCH_TO_MM, 21: 1.0}
 G_ABSOLUTE = 90
 G_INCREMENTAL = 91
+G_PLANE_XY = 17
+G_SET_POSITION = 92
+G_NOT_SIMULATED = {10, 28, 30, 53}  # usam X/Y/Z, mas não como destino de corte
+G_IGNORED = {17, 18, 19, 40, 41, 42, 43, 49, 54, 55, 56, 57, 58, 59, 61, 64, 80, 94}
 MOTION_ARCS = (G_CW_ARC, G_CCW_ARC)
 AXES = "XYZ"
 BOUNDS_TOLERANCE = 1e-6
@@ -129,6 +133,9 @@ class GCodeInterpreter:
         self.moves: list[Move] = []
         self.issues: list[Issue] = []
         self.commands = {"G0": 0, "G1": 0, "G2": 0, "G3": 0, "G4": 0}
+        self.plane = G_PLANE_XY
+        self.offset = [0.0, 0.0, 0.0]  # deslocamento do G92, por eixo
+        self._unknown_warned: set[int] = set()
 
         self._lineno = 0
         self._feed_programmed = False
@@ -166,6 +173,14 @@ class GCodeInterpreter:
         if G_DWELL in g_codes:
             self._dwell(params.get("P", 0.0))
 
+        if G_SET_POSITION in g_codes:
+            self._set_position(params)
+            return
+        skipped = [code for code in g_codes if code in G_NOT_SIMULATED]
+        if skipped:
+            self._report(WARNING, tr("issue_g_not_simulated").format(code=skipped[0]))
+            return
+
         if any(axis in params for axis in AXES):
             self._move(params)
 
@@ -178,7 +193,12 @@ class GCodeInterpreter:
             self.absolute = True
         elif code == G_INCREMENTAL:
             self.absolute = False
-        # G04 é tratado em _execute, pois depende do parâmetro P
+        elif code in (17, 18, 19):
+            self.plane = code
+        elif code not in (G_DWELL, G_SET_POSITION, *G_NOT_SIMULATED, *G_IGNORED) \
+                and code not in self._unknown_warned:
+            self._unknown_warned.add(code)
+            self._report(WARNING, tr("issue_g_unknown").format(code=code))
 
     def _apply_m_code(self, code: int) -> None:
         """M-codes de processo são definidos pelo dialeto; os demais são ignorados."""
@@ -197,14 +217,20 @@ class GCodeInterpreter:
         self.position = end
 
     def _target(self, words: dict[str, float]) -> Point:
-        def resolve(axis: str, current: float) -> float:
+        def resolve(i: int, axis: str) -> float:
+            current = self.position[i]
             if axis not in words:
                 return current
             value = words[axis] * self.unit_scale
-            return value if self.absolute else current + value
+            return value + self.offset[i] if self.absolute else current + value
 
-        x, y, z = self.position
-        return (resolve("X", x), resolve("Y", y), resolve("Z", z))
+        return (resolve(0, "X"), resolve(1, "Y"), resolve(2, "Z"))
+
+    def _set_position(self, words: dict[str, float]) -> None:
+        """G92: a posição atual passa a valer o que a linha diz, sem mover a ferramenta."""
+        for i, axis in enumerate(AXES):
+            if axis in words:
+                self.offset[i] = self.position[i] - words[axis] * self.unit_scale
 
     # --- movimentos e esperas ---
 
@@ -249,6 +275,11 @@ class GCodeInterpreter:
         )
         points = arc_points(start, end, center, clockwise=self.motion == G_CW_ARC, step_deg=self.arc_step_deg)
         self._check_bounds(points)
+
+        if self.plane != G_PLANE_XY:
+            raise GCodeError(tr("issue_arc_plane_unsupported").format(plane=self.plane))
+        if "I" not in words and "J" not in words:
+            raise GCodeError(tr("issue_arc_missing_center"))
 
         previous = start
         for point in points:
