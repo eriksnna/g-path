@@ -150,7 +150,6 @@ class MainWindow(QMainWindow):
         header.addWidget(self._layer_controls)
         header.addWidget(_vsep())
         header.addWidget(self._editor_toggle)
-        header.addWidget(self._layer_controls)
         header.addWidget(self._camera_controls)
 
         stats_scroll = QScrollArea()
@@ -229,11 +228,13 @@ class MainWindow(QMainWindow):
         save_action.setIcon(icon(SAVE))
         save_action.triggered.connect(lambda: self._save_edited_text(self._editor.text()))
         file_menu.addAction(save_action)
+        save_action.setShortcut(QKeySequence.StandardKey.Save)
 
         save_as_action = QAction(tr("menu_save_as"), self)
         save_as_action.setIcon(icon(SAVE))
         save_as_action.triggered.connect(lambda: self._save_edited_text_as(self._editor.text()))
         file_menu.addAction(save_as_action)
+        save_as_action.setShortcut(QKeySequence.StandardKey.SaveAs)
 
         file_menu.addSeparator()
 
@@ -445,6 +446,11 @@ class MainWindow(QMainWindow):
         self._enter_workspace()
         self._reload()
 
+    def _show_open_error(self, message: str) -> None:
+        """Na tela inicial a barra de status está oculta, então o erro vai num diálogo."""
+        self._player.set_status(message)
+        QMessageBox.warning(self, tr("open_error_title"), message)
+
     def _confirm_discard_changes(self) -> bool:
         """Pergunta antes de descartar edições não salvas. True se pode prosseguir."""
         if not self._has_unsaved_changes():
@@ -482,14 +488,19 @@ class MainWindow(QMainWindow):
 
     def _write_to_path(self, path: Path, text: str) -> bool:
         try:
-            path.write_text(text, encoding="utf-8")
+            try:
+                path.write_text(text, encoding=self._encoding)
+            except UnicodeEncodeError:
+                # texto novo tem caractere que a codificação antiga não comporta
+                self._encoding = "utf-8"
+                path.write_text(text, encoding=self._encoding)
         except OSError as err:
-            QMessageBox.warning(self, tr("save_error_title"), tr("save_error_text").format(err=err))
             return False
         self._apply_edited_text(text)
         self._saved_text = text
         self._player.set_status(tr("status_saved_at").format(path=path))
         return True
+
     def _has_unsaved_changes(self) -> bool:
         if self._text is None:
             return False
@@ -503,9 +514,11 @@ class MainWindow(QMainWindow):
 
     def _reload(self) -> None:
         """Reinterpreta o texto atual com o modo e o dialeto escolhidos."""
-        if self._text is None:
+        if not moves:
+            status = (tr("status_no_moves_see_issues").format(count=len(self._issues))
+                      if self._issues else None)
+            self._show_empty(status=status, clear_issues=False)
             return
-        self._pause()
 
         mode = self._mode_controls.current_mode()
         dialect = get_dialect(self._profile.dialect_key)
@@ -537,14 +550,15 @@ class MainWindow(QMainWindow):
         self._player.set_enabled(True)
         self._refresh()
 
-    def _show_empty(self, status: str | None = None) -> None:
+    def _show_empty(self, status: str | None = None, clear_issues: bool = True) -> None:
         status = status if status is not None else tr("status_no_moves")
         self._toolpath = None
         self._viewport.clear()
         self._stats_panel.clear()
         self._layer_controls.set_levels([])
-        self._issues = []
-        self._issues_panel.show_issues(self._issues)
+        if clear_issues:
+            self._issues = []
+            self._issues_panel.show_issues(self._issues)
         self._player.set_enabled(False)
         self._player.set_status(status)
         self._editor.set_running_line(None)

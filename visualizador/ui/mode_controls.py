@@ -38,7 +38,7 @@ class ModeControls(QWidget):
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(SPACE_SM)
-        layout.addWidget(QLabel("label_mode"))
+        layout.addWidget(QLabel(tr("label_mode")))
         layout.addWidget(self._combo)
         for label, spin in self._bead_fields:
             layout.addWidget(label)

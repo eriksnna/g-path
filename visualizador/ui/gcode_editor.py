@@ -256,8 +256,6 @@ class GCodeEditor(QFrame):
         QShortcut(QKeySequence(COMMENT_SHORTCUT), self._text_edit).activated.connect(
             self._text_edit.toggle_comment
         )
-        QShortcut(QKeySequence(SAVE_SHORTCUT), self._text_edit).activated.connect(self._emit_save)
-        QShortcut(QKeySequence(SAVE_AS_SHORTCUT), self._text_edit).activated.connect(self._emit_save_as)
         QShortcut(QKeySequence(FIND_SHORTCUT), self._text_edit).activated.connect(self._show_find_bar)
         QShortcut(QKeySequence("Escape"), self._find_input).activated.connect(self._hide_find_bar)
         QShortcut(QKeySequence("Shift+Return"), self._find_input).activated.connect(

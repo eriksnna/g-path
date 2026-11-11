@@ -144,7 +144,6 @@ class StatsPanel(QFrame):
 
         self._mode_title = _section_title(tr("label_mode"))
 
-        self._mode_title = _section_title("Modo")
         self._mode_box = QVBoxLayout()
 
         self._build_layout()

@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from core.i18n import tr
+
 from config import MAX_FILE_SIZE_BYTES, MAX_LINE_LENGTH
 
 
@@ -18,16 +20,14 @@ class UnsafeFileError(ValueError):
 def check_file_size(path: Path) -> None:
     size = path.stat().st_size
     if size > MAX_FILE_SIZE_BYTES:
-        raise UnsafeFileError(
-            f"Arquivo tem {size / 1_048_576:.1f} MB, acima do limite de "
-            f"{MAX_FILE_SIZE_BYTES / 1_048_576:.0f} MB."
-        )
+        raise UnsafeFileError(tr("file_too_large").format(
+            size=f"{size / 1_048_576:.1f}", limit=f"{MAX_FILE_SIZE_BYTES / 1_048_576:.0f}",
+        ))
 
 
 def check_line_lengths(text: str) -> None:
     for lineno, line in enumerate(text.splitlines(), start=1):
         if len(line) > MAX_LINE_LENGTH:
-            raise UnsafeFileError(
-                f"Linha {lineno} tem {len(line)} caracteres, acima do limite de "
-                f"{MAX_LINE_LENGTH}. O arquivo pode estar corrompido."
+            raise UnsafeFileError(tr("file_line_too_long").format(
+                line=lineno, length=len(line), limit=MAX_LINE_LENGTH)
             )
