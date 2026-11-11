@@ -91,6 +91,16 @@ def _format(value: float) -> str:
 def _m_codes(text: str) -> set[int]:
     return {int(value) for letter, value in parse_words(text) if letter == "M"}
 
+def _called_numbers(text: str) -> set[int]:
+    """Números chamados por M98 P<n> em qualquer ponto do arquivo."""
+    called = set()
+    for raw in text.splitlines():
+        words = parse_words(clean_line(raw))
+        if any(letter == "M" and value == CALL_CODE for letter, value in words):
+            target = _word(words, "P")
+            if target is not None:
+                called.add(int(target))
+    return called
 
 def _is_standalone(text: str) -> bool:
     """Linha de controle deve conter apenas M, P e L."""
@@ -122,6 +132,7 @@ class ProgramExpander:
 
     def _split(self, text: str) -> None:
         """Sub-rotinas podem ficar depois do M30, então todas são coletadas antes de executar."""
+        called = _called_numbers(text)
         current: Subroutine | None = None
         for lineno, raw in enumerate(text.splitlines(), start=1):
             line = clean_line(raw)
@@ -131,12 +142,11 @@ class ProgramExpander:
             label = SUB_LABEL_RE.match(line)
             if label:
                 number = int(label.group(1))
-                if number in self._subs:
+                if number not in called:
                     self._report(lineno, WARNING,
                                  tr("issue_sub_redefined").format(number=number))
-                current = Subroutine(line=lineno)
-                self._subs[number] = current
-                continue
+                    current = None
+                    continue
 
             if current is None:
                 self._main.append((lineno, line))
