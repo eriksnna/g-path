@@ -11,8 +11,8 @@ from contextlib import contextmanager
 from PySide6.QtCore import QPointF, QRectF, QSize, Qt, Signal, QEasingCurve, QPropertyAnimation, QTimer
 from PySide6.QtGui import QAction, QColor, QPainter
 from PySide6.QtWidgets import (
-    QFrame, QGridLayout, QHBoxLayout, QLabel, QMenu, QPushButton, QSizePolicy, QSlider,
-    QToolButton, QVBoxLayout, QWidget, QWidgetAction,
+    QFrame, QLabel, QMenu, QPushButton, QSizePolicy, QSlider,
+    QToolButton, QHBoxLayout, QWidget, QWidgetAction,
 )
 
 from config import (
@@ -30,6 +30,7 @@ PLAY_BUTTON_SIZE = (40, 40)
 TRANSPORT_BUTTON_SIZE = (34, 34)
 SPEED_SLIDER_WIDTH = 180
 MESSAGE_TIMEOUT_MS = 4000
+MESSAGE_MAX_WIDTH = 260  # mensagens maiores são abreviadas no meio
 LINE_CHIP_MAX_CHARS = 28
 
 @contextmanager
@@ -212,32 +213,30 @@ class PlayerBar(QFrame):
         for widget in self._transport:
             transport.addWidget(widget)
 
-        # colunas laterais com o mesmo stretch mantêm o transporte no centro real
-        controls_row = QGridLayout()
-        info = QWidget()
-        # não deixa chips ou mensagem longa empurrarem o transporte para fora do centro
-        info.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
-        info_layout = QHBoxLayout(info)
-        info_layout.setContentsMargins(0, 0, 0, 0)
+    def _build_layout(self) -> None:
+        self._info = QWidget()
+        info_layout = QHBoxLayout(self._info)
+        info_layout.setContentsMargins(SPACE_SM, 0, 0, 0)
         info_layout.setSpacing(SPACE_SM)
         info_layout.addWidget(self._line_chip)
         info_layout.addWidget(self._layer_chip)
         info_layout.addWidget(self._message)
-        info_layout.addStretch()
 
-        controls_row = QGridLayout()
-        controls_row.addWidget(info, 0, 0)
-        controls_row.addLayout(transport, 0, 1)
-        controls_row.addWidget(self._speed_button, 0, 2,
-                               Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-        controls_row.setColumnStretch(0, 1)
-        controls_row.setColumnStretch(2, 1)
-
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(SPACE_XL, SPACE_MD, SPACE_XL, SPACE_MD)
-        layout.setSpacing(SPACE_SM)
-        layout.addLayout(timeline_row)
-        layout.addLayout(controls_row)
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(SPACE_LG, SPACE_SM, SPACE_XL, SPACE_SM)
+        layout.setSpacing(SPACE_XXS)
+        for widget in self._transport:
+            layout.addWidget(widget)
+        layout.addWidget(self._info)
+        layout.addSpacing(SPACE_LG)
+        layout.addWidget(self._elapsed_label)
+        layout.addSpacing(SPACE_MD)
+        layout.addWidget(self._timeline, 1)
+        layout.addSpacing(SPACE_MD)
+        layout.addWidget(self._total_label)
+        layout.addSpacing(SPACE_LG)
+        layout.addWidget(self._speed_button)
+        self._update_chips()
 
     def _make_speed_button(self) -> QToolButton:
         button = QToolButton()
@@ -315,9 +314,15 @@ class PlayerBar(QFrame):
 
     def _update_chips(self) -> None:
         """mensagem tem prioridade; sem ela, aparecem os chips de linha e camada."""
-        free = self._chips_allowed and not self._message.text()
-        self._line_chip.setVisible(free and bool(self._line_chip.text()))
-        self._layer_chip.setVisible(free and self._layer_total > 1)
+        has_message = bool(self._message.text())
+        free = self._chips_allowed and not has_message
+        show_line = free and bool(self._line_chip.text())
+        show_layer = free and self._layer_total > 1
+        self._line_chip.setVisible(show_line)
+        self._layer_chip.setVisible(show_layer)
+        self._message.setVisible(has_message)
+        # sem nada para mostrar, a área some e a timeline ocupa o espaço
+        self._info.setVisible(has_message or show_line or show_layer)
 
     def set_playing(self, playing: bool) -> None:
         self._play_button.setIcon(icon(PAUSE if playing else PLAY, ON_ACCENT))
@@ -336,7 +341,8 @@ class PlayerBar(QFrame):
 
     def set_status(self, text: str, timeout_ms: int = MESSAGE_TIMEOUT_MS) -> None:
         """mensagem à esquerda do transporte. timeout_ms=0 deixa a mensagem fixa."""
-        self._message.setText(text)
+        metrics = self._message.fontMetrics()
+        self._message.setText(metrics.elidedText(text, Qt.TextElideMode.ElideMiddle, MESSAGE_MAX_WIDTH))
         self._message.setToolTip(text)
         self._update_chips()
         self._message_timer.stop()

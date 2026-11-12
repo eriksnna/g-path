@@ -135,7 +135,7 @@ QLabel#chip {{
 }}
 QToolButton#speedButton {{
     background: {SURFACE_2}; color: {TEXT_PRIMARY}; border: none; border-radius: {RADIUS_MD};
-    padding: 5px 22px 5px 10px; font-family: {FONT_MONO}; font-size: {FONT_SMALL};
+    padding: 5px 10px; font-family: {FONT_MONO}; font-size: {FONT_SMALL};
 }}
 QToolButton#speedButton:hover {{ background: {SURFACE_3}; }}
 QToolButton#speedButton:disabled {{ color: {TEXT_MUTED}; }}
