@@ -10,6 +10,7 @@ from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QVBoxLay
 import config
 from core.i18n import tr
 from ui.icons import SETTINGS, icon
+from ui.start_background import StartBackground
 from ui.theme import SPACE_LG, SPACE_MD, SPACE_SM, SPACE_XL, SPACE_XXL, SPACE_XXS, TEXT_SECONDARY
 
 TITLE = "G-Path"
@@ -60,6 +61,8 @@ class StartPanel(QFrame):
         super().__init__(parent)
         self.setObjectName("startPanel")
 
+        self._background = StartBackground(self)
+
         logo = QLabel()
         logo.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         logo.setPixmap(QPixmap(str(config.ASSETS_DIR / "logo.png")).scaled(
@@ -69,10 +72,11 @@ class StartPanel(QFrame):
         title = QLabel(TITLE)
         title.setObjectName("startTitle")
         title.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-        subtitle = QLabel(tr("start_subtitle"))
-        subtitle.setObjectName("startSubtitle")
-        subtitle.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-        subtitle.setWordWrap(True)
+        self._subtitle = QLabel(tr("start_subtitle"))
+        self._subtitle.setObjectName("startSubtitle")
+        self._subtitle.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        self._subtitle.setWordWrap(True)
+        self._subtitle.setFixedWidth(CONTENT_WIDTH)
 
         open_button = QPushButton(tr("start_open_file"))
         open_button.setObjectName("startButton")
@@ -102,7 +106,7 @@ class StartPanel(QFrame):
         content_layout.setSpacing(SPACE_SM)
         content_layout.addWidget(logo)
         content_layout.addWidget(title)
-        content_layout.addWidget(subtitle)
+        content_layout.addWidget(self._subtitle)
         content_layout.addSpacing(SPACE_XXL)
         content_layout.addLayout(buttons)
         content_layout.addWidget(drop_hint)
@@ -135,6 +139,17 @@ class StartPanel(QFrame):
         outer.addWidget(content, 0, Qt.AlignmentFlag.AlignHCenter)
         outer.addStretch()
         outer.addWidget(footer)
+        self._background.lower()
+
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        # texto com quebra de linha: sem a altura real, o layout reserva só uma linha
+        # e as últimas linhas da lista de recentes saem cortadas
+        self._subtitle.setFixedHeight(self._subtitle.heightForWidth(CONTENT_WIDTH))
+
+    def resizeEvent(self, event) -> None:
+        super().resizeEvent(event)
+        self._background.setGeometry(self.rect())
 
     def set_recent(self, paths: list[str]) -> None:
         """mostra até MAX_RECENT_SHOWN arquivos recentes; sem nenhum, a seção some."""

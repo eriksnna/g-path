@@ -257,7 +257,6 @@ QPushButton#startButton {{
 QPushButton#startButton:hover {{ background: {ACCENT_HOVER}; }}
 QPushButton#startButtonSecondary {{ padding: 8px 20px; font-size: {FONT_BODY}; border-radius: {RADIUS_MD}; }}
 
-QFrame#startPanel {{ background: {SURFACE_0}; }}
 QLabel#startHint {{ color: {TEXT_MUTED}; font-size: {FONT_SMALL}; }}
 QPushButton#recentRow {{ background: transparent; border: none; border-radius: {RADIUS_SM}; padding: 0; }}
 QPushButton#recentRow:hover {{ background: {SURFACE_2}; }}
