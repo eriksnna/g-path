@@ -15,5 +15,5 @@ Este projeto depende das seguintes bibliotecas de terceiros:
 - PyOpenGL — BSD-style
   https://pyopengl.sourceforge.net/
 
-- Heroicons — MIT
-  https://heroicons.com/
+- Phosphor Icons — MIT
+  https://phosphoricons.com/

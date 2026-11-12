@@ -154,6 +154,18 @@ QToolButton#speedButton:disabled {{ color: {TEXT_MUTED}; }}
 QToolButton#speedButton::menu-indicator {{ image: none; }}
 
 QFrame#statsPanel {{ background: {SURFACE_1}; border: none; border-radius: {RADIUS_LG}; }}
+
+QFrame#settingsCard {{ background: {SURFACE_1}; border: none; border-radius: {RADIUS_MD}; }}
+QLabel#fieldCaption {{ color: {TEXT_MUTED}; font-size: {FONT_SMALL}; }}
+QLabel#aboutTitle {{ font-size: {FONT_VALUE}; font-weight: {WEIGHT_STRONG}; }}
+QLabel#kbd {{
+    color: {TEXT_PRIMARY}; background: {SURFACE_2}; border: 1px solid {BORDER};
+    border-radius: {RADIUS_SM}; padding: 2px 8px; font-family: {FONT_MONO}; font-size: {FONT_SMALL};
+}}
+QPushButton#linkDanger {{ background: transparent; color: {ERROR_COLOR}; padding: 4px 0; font-size: {FONT_SMALL}; }}
+QPushButton#linkDanger:hover {{ text-decoration: underline; }}
+QListWidget#settingsNav {{ background: transparent; border: none; }}
+
 QFrame#card {{ background: {SURFACE_2}; border: 1px solid {BORDER}; border-radius: {RADIUS_MD}; }}
 
 QFrame#headerSeparator {{ background: {BORDER}; max-width: 1px; min-width: 1px; }}

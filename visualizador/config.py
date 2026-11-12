@@ -10,6 +10,9 @@ SETTINGS_FILE = CONFIG_DIR / "settings.json"
 APP_VERSION = "0.2.1-beta"
 
 APP_TITLE = "G-Path"
+AUTHOR_NAME = "Erik Senna"
+GITHUB_URL = "https://github.com/eriksnna/g-path"
+LINKEDIN_URL = "https://www.linkedin.com/in/eriksnna/"
 WINDOW_SIZE = (1100, 800)
 
 if getattr(sys, "frozen", False):
@@ -78,7 +81,7 @@ MAX_LINE_LENGTH = 10_000                 # caracteres; uma linha absurda indica 
 
 WINDOW_STATE_FILE = CONFIG_DIR / "window_state.ini"
 
-# abir arquivos recentes
+# abrir arquivos recentes
 
 MAX_RECENT_FILES = 8
 GCODE_EXTENSIONS = (".nc", ".gcode", ".ngc", ".tap")
