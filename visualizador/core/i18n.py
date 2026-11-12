@@ -116,6 +116,17 @@ _STRINGS: dict[str, dict[str, str]] = {
         IT: "Movimento successivo (Shift: strato successivo)",
     },
     "player_layer_chip": {PT_BR: "Camada {layer}/{total}", EN: "Layer {layer}/{total}", IT: "Strato {layer}/{total}"},
+        "profile_dialect_tooltip": {
+        PT_BR: "Dialeto do perfil: o processo liga e desliga em {codes}",
+        EN: "Profile dialect: the process turns on and off with {codes}",
+        IT: "Dialetto del profilo: il processo si attiva e disattiva con {codes}",
+    },
+    "dialect_suggestion": {
+        PT_BR: "Este programa usa {codes} para ligar e desligar o processo, mas o dialeto atual é {current}.",
+        EN: "This program uses {codes} to turn the process on and off, but the current dialect is {current}.",
+        IT: "Questo programma usa {codes} per attivare e disattivare il processo, ma il dialetto attuale è {current}.",
+    },
+    "dialect_suggestion_action": {PT_BR: "Usar {name}", EN: "Use {name}", IT: "Usa {name}"},
     "dro_process_on": {PT_BR: "ligado", EN: "on", IT: "attivo"},
     "dro_process_off": {PT_BR: "desligado", EN: "off", IT: "spento"},
     "label_speed": {PT_BR: "Velocidade", EN: "Speed", IT: "Velocità"},

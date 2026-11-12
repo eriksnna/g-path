@@ -22,10 +22,10 @@ from core.modes import apply_mode, mode_display_name
 from core.i18n import tr
 from core.parser import parse_gcode
 from core.playback import Playback
-from core.stats import compute_stats, format_duration
+from core.stats import compute_stats
 from core.toolpath import Snapshot, Toolpath
 from core.file_safety import UnsafeFileError, check_file_size, check_line_lengths
-from core.dialect import get_dialect
+from core.dialect import dialect_label, get_dialect, process_codes_label, suggest_dialect
 from core.file_io import read_gcode_text
 from ui.gcode_editor import GCodeEditor
 from ui.issues_panel import IssuesPanel
@@ -352,6 +352,7 @@ class MainWindow(QMainWindow):
 
         self._issues_panel.issue_selected.connect(self._go_to_issue)
         self._issues_panel.issue_selected.connect(self._editor.goto_line)
+        self._issues_panel.dialect_requested.connect(self._use_dialect)
 
         self._start_panel.open_requested.connect(lambda: self.open_file())
         self._start_panel.blank_requested.connect(self._start_blank)
@@ -369,7 +370,7 @@ class MainWindow(QMainWindow):
             self.load_file(Path(path))
 
     def _open_settings(self) -> None:
-        """abre a tela de Ajustes (perfis: modo, dialeto e limites)."""
+        """abre a tela de ajustes (perfis: modo, dialeto e limites)."""
         dialog = SettingsDialog(self, profiles=self._profiles, active_profile=self._profile)
         dialog.exec()
         self._profiles = dialog.profiles()
@@ -380,7 +381,29 @@ class MainWindow(QMainWindow):
         self._reload()
 
     def _update_profile_label(self) -> None:
-        self._profile_label.setText(tr("profile_label").format(name=self._profile.name))
+        name = tr("profile_label").format(name=self._profile.name)
+        self._profile_label.setText(f"{name}  ·  {dialect_label(self._profile.dialect_key)}")
+        self._profile_label.setToolTip(tr("profile_dialect_tooltip").format(
+            codes=process_codes_label(self._profile.dialect_key)))
+
+    def _update_dialect_suggestion(self) -> None:
+        key = suggest_dialect(self._text or "", self._profile.dialect_key)
+        if key is None:
+            self._issues_panel.show_dialect_suggestion(None)
+            return
+        self._issues_panel.show_dialect_suggestion(
+            key,
+            tr("dialect_suggestion").format(
+                codes=process_codes_label(key), current=dialect_label(self._profile.dialect_key)),
+            tr("dialect_suggestion_action").format(name=dialect_label(key)),
+        )
+
+    def _use_dialect(self, key: str) -> None:
+        """troca o dialeto do perfil ativo pelo sugerido e reinterpreta o programa."""
+        self._profile.dialect_key = key
+        save_profiles(self._profiles, self._profile.name)
+        self._update_profile_label()
+        self._reload()
 
     def _on_mode_changed(self) -> None:
         """o usuário trocou o modo (ou um parâmetro de cordão) na tela principal."""
@@ -537,6 +560,7 @@ class MainWindow(QMainWindow):
         self._source_lines = self._text.splitlines()
         self._issues = sorted([*result.issues, *mode.validate(moves)], key=lambda i: i.line)
         self._issues_panel.show_issues(self._issues)
+        self._update_dialect_suggestion()
         self._layer_controls.setVisible(mode.key != "deposicao")
 
         if not moves:
@@ -571,6 +595,7 @@ class MainWindow(QMainWindow):
         if clear_issues:
             self._issues = []
             self._issues_panel.show_issues(self._issues)
+            self._issues_panel.show_dialect_suggestion(None)
         self._player.set_enabled(False)
         self._player.set_status(status, timeout_ms=0)
         self._editor.set_running_line(None)

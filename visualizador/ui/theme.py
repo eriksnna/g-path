@@ -130,6 +130,11 @@ QLabel#timeLabel {{ color: {TEXT_PRIMARY}; font-family: {FONT_MONO}; font-size: 
 QLabel#timeLabelMuted {{ color: {TEXT_SECONDARY}; font-family: {FONT_MONO}; font-size: {FONT_SMALL}; min-width: 44px; }}
 QLabel#playerMessage {{ color: {TEXT_SECONDARY}; font-size: {FONT_SMALL}; }}
 
+QFrame#suggestion {{ background: {ACCENT_SOFT}; border: none; border-radius: {RADIUS_MD}; }}
+QLabel#suggestionText {{ color: {TEXT_PRIMARY}; font-size: {FONT_SMALL}; }}
+QPushButton#suggestionButton {{ background: {ACCENT}; color: {ON_ACCENT}; padding: 4px 12px; font-size: {FONT_SMALL}; }}
+QPushButton#suggestionButton:hover {{ background: {ACCENT_HOVER}; }}
+
 QFrame#dro {{ background: {SURFACE_1}; border: 1px solid {BORDER}; border-radius: {RADIUS_MD}; }}
 QLabel#droName {{ color: {TEXT_SECONDARY}; font-family: {FONT_MONO}; font-size: {FONT_SMALL}; }}
 QLabel#droValue {{ color: {TEXT_PRIMARY}; font-family: {FONT_MONO}; font-size: {FONT_SMALL}; min-width: 64px; }}
