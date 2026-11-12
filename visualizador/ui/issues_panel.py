@@ -6,11 +6,11 @@ from core.i18n import tr
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
-    QFrame, QLabel, QListWidget, QListWidgetItem, QVBoxLayout, QPushButton
+    QFrame, QLabel, QListWidget, QListWidgetItem, QVBoxLayout,
 )
 
 from core.parser import ERROR, WARNING, Issue
-from ui.theme import ERROR_COLOR, WARNING_COLOR, SPACE_MD, SPACE_SM
+from ui.theme import ERROR_COLOR, WARNING_COLOR
 
 PANEL_WIDTH = 300
 LINE_ROLE = Qt.ItemDataRole.UserRole
@@ -19,8 +19,6 @@ _SEVERITY_LABELS = {ERROR: "severity_error", WARNING: "severity_warning"}
 
 class IssuesPanel(QFrame):
     issue_selected = Signal(int)  # número da linha
-
-    dialect_requested = Signal(str)  # chave do dialeto sugerido
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
@@ -32,23 +30,6 @@ class IssuesPanel(QFrame):
 
         self._summary = QLabel()
         self._summary.setObjectName("issueSummary")
-
-        self._suggested_dialect: str | None = None
-        self._suggestion_text = QLabel()
-        self._suggestion_text.setObjectName("suggestionText")
-        self._suggestion_text.setWordWrap(True)
-        self._suggestion_button = QPushButton()
-        self._suggestion_button.setObjectName("suggestionButton")
-        self._suggestion_button.clicked.connect(
-            lambda: self.dialect_requested.emit(self._suggested_dialect))
-        self._suggestion = QFrame()
-        self._suggestion.setObjectName("suggestion")
-        suggestion_layout = QVBoxLayout(self._suggestion)
-        suggestion_layout.setContentsMargins(SPACE_MD, SPACE_SM, SPACE_MD, SPACE_SM)
-        suggestion_layout.setSpacing(SPACE_SM)
-        suggestion_layout.addWidget(self._suggestion_text)
-        suggestion_layout.addWidget(self._suggestion_button, 0, Qt.AlignmentFlag.AlignLeft)
-        self._suggestion.hide()
 
         self._list = QListWidget()
         self._list.setObjectName("issues")
@@ -70,7 +51,6 @@ class IssuesPanel(QFrame):
         layout.setSpacing(8)
         layout.addWidget(title)
         layout.addWidget(self._summary)
-        layout.addWidget(self._suggestion)
         layout.addWidget(self._list, 1)
         layout.addWidget(self._empty)
         layout.addWidget(self._detail)
@@ -98,13 +78,6 @@ class IssuesPanel(QFrame):
             tr("validation_summary").format(errors=errors, warnings=warnings) if has_issues else ""
         )
         self._detail.setText(tr("validation_hint"))
-
-    def show_dialect_suggestion(self, key: str | None, text: str = "", action: str = "") -> None:
-        """aviso com botão para trocar de dialeto; key=None esconde."""
-        self._suggested_dialect = key
-        self._suggestion_text.setText(text)
-        self._suggestion_button.setText(action)
-        self._suggestion.setVisible(key is not None)
 
     def show_source(self, line: int, text: str) -> None:
         self._detail.setText(

@@ -39,6 +39,7 @@ from ui.stats_panel import StatsPanel
 from ui.theme import DARK_QSS
 from ui.viewport import ToolpathView
 from ui.dro import DroOverlay
+from ui.suggestion_banner import SuggestionBanner
 from ui.start_panel import StartPanel
 
 def _gcode_filter() -> str:
@@ -112,6 +113,8 @@ class MainWindow(QMainWindow):
         self._camera_controls = CameraControls()
         self._viewport = ToolpathView()
         self._dro = DroOverlay(self._viewport)
+        self._banner = SuggestionBanner()
+        self._dismissed_dialect: str | None = None
         self._editor = GCodeEditor()
         self._editor.setVisible(False)
         self._stats_panel = StatsPanel()
@@ -199,6 +202,7 @@ class MainWindow(QMainWindow):
         workspace_layout.setContentsMargins(12, 12, 12, 12)
         workspace_layout.setSpacing(10)
         workspace_layout.addWidget(self._header_widget)
+        workspace_layout.addWidget(self._banner)
         workspace_layout.addWidget(body, 1)
         workspace_layout.addWidget(self._player)
 
@@ -352,7 +356,8 @@ class MainWindow(QMainWindow):
 
         self._issues_panel.issue_selected.connect(self._go_to_issue)
         self._issues_panel.issue_selected.connect(self._editor.goto_line)
-        self._issues_panel.dialect_requested.connect(self._use_dialect)
+        self._banner.accepted.connect(self._use_dialect)
+        self._banner.dismissed.connect(self._dismiss_dialect)
 
         self._start_panel.open_requested.connect(lambda: self.open_file())
         self._start_panel.blank_requested.connect(self._start_blank)
@@ -388,15 +393,19 @@ class MainWindow(QMainWindow):
 
     def _update_dialect_suggestion(self) -> None:
         key = suggest_dialect(self._text or "", self._profile.dialect_key)
-        if key is None:
-            self._issues_panel.show_dialect_suggestion(None)
+        if key is None or key == self._dismissed_dialect:
+            self._banner.hide()
             return
-        self._issues_panel.show_dialect_suggestion(
+        self._banner.show_suggestion(
             key,
             tr("dialect_suggestion").format(
                 codes=process_codes_label(key), current=dialect_label(self._profile.dialect_key)),
             tr("dialect_suggestion_action").format(name=dialect_label(key)),
         )
+
+    def _dismiss_dialect(self, key: str) -> None:
+        """não sugere de novo o mesmo dialeto até outro arquivo ser aberto."""
+        self._dismissed_dialect = key
 
     def _use_dialect(self, key: str) -> None:
         """troca o dialeto do perfil ativo pelo sugerido e reinterpreta o programa."""
@@ -466,6 +475,7 @@ class MainWindow(QMainWindow):
             return
         self._encoding = encoding
         self._path = path
+        self._dismissed_dialect = None
         self._text = text
         self._saved_text = text
         self._file_label.setText(str(path))
@@ -595,7 +605,7 @@ class MainWindow(QMainWindow):
         if clear_issues:
             self._issues = []
             self._issues_panel.show_issues(self._issues)
-            self._issues_panel.show_dialect_suggestion(None)
+            self._banner.hide()
         self._player.set_enabled(False)
         self._player.set_status(status, timeout_ms=0)
         self._editor.set_running_line(None)

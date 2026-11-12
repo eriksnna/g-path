@@ -134,6 +134,8 @@ QFrame#suggestion {{ background: {ACCENT_SOFT}; border: none; border-radius: {RA
 QLabel#suggestionText {{ color: {TEXT_PRIMARY}; font-size: {FONT_SMALL}; }}
 QPushButton#suggestionButton {{ background: {ACCENT}; color: {ON_ACCENT}; padding: 4px 12px; font-size: {FONT_SMALL}; }}
 QPushButton#suggestionButton:hover {{ background: {ACCENT_HOVER}; }}
+QPushButton#suggestionClose {{ background: transparent; border: none; border-radius: {RADIUS_SM}; padding: 0; }}
+QPushButton#suggestionClose:hover {{ background: {SURFACE_3}; }}
 
 QFrame#dro {{ background: {SURFACE_1}; border: 1px solid {BORDER}; border-radius: {RADIUS_MD}; }}
 QLabel#droName {{ color: {TEXT_SECONDARY}; font-family: {FONT_MONO}; font-size: {FONT_SMALL}; }}
