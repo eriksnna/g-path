@@ -135,9 +135,9 @@ class StartPanel(QFrame):
         outer = QVBoxLayout(self)
         outer.setContentsMargins(SPACE_XL, SPACE_XL, SPACE_XL, SPACE_XXL)
         outer.addLayout(top)
-        outer.addStretch()
+        outer.addStretch(1)
         outer.addWidget(content, 0, Qt.AlignmentFlag.AlignHCenter)
-        outer.addStretch()
+        outer.addStretch(2)  # conteúdo no terço de cima; a cena animada fica livre embaixo
         outer.addWidget(footer)
         self._background.lower()
 
