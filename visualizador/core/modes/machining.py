@@ -1,4 +1,4 @@
-"""Modo de usinagem: trabalho é o corte com a ferramenta, com processo (spindle) ligado."""
+"""modo de usinagem: trabalho é o corte com a ferramenta, com processo (spindle) ligado."""
 from __future__ import annotations
 
 import numpy as np

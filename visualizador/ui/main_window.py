@@ -1,4 +1,4 @@
-"""Janela principal: liga a interface ao modo de processo, ao modelo e à reprodução."""
+"""janela principal: liga a interface ao modo de processo, ao modelo e à reprodução."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -45,7 +45,7 @@ def _gcode_filter() -> str:
     return f"G-code ({patterns});;{tr('file_filter_all')} (*)"
 
 def _vsep() -> QFrame:
-    """Linha vertical fina pra separar grupos de controles na barra superior."""
+    """linha vertical fina pra separar grupos de controles na barra superior."""
     line = QFrame()
     line.setFrameShape(QFrame.Shape.VLine)
     line.setFrameShadow(QFrame.Shadow.Plain)
@@ -279,7 +279,7 @@ class MainWindow(QMainWindow):
         settings_menu.addAction(settings_action)
 
     def _reset_to_start(self) -> None:
-        """Fecha o projeto atual e volta à tela inicial, esquecendo o último arquivo lembrado."""
+        """fecha o projeto atual e volta à tela inicial, esquecendo o último arquivo lembrado."""
         if not self._confirm_discard_changes():
             return
         self._path = None
@@ -296,7 +296,7 @@ class MainWindow(QMainWindow):
         self._fade_in_current_page()
 
     def _enter_workspace(self) -> None:
-        """Sai da tela inicial: mostra cabeçalho, área de trabalho e barra de reprodução."""
+        """sai da tela inicial: mostra cabeçalho, área de trabalho e barra de reprodução."""
         self._header_widget.setVisible(True)
         self._player.setVisible(True)
         self.menuBar().setVisible(True)
@@ -317,7 +317,7 @@ class MainWindow(QMainWindow):
         self._page_fade = animation  # mantém viva até terminar
 
     def _restore_window_state(self) -> None:
-        """Restaura a geometria da janela e reabre o último arquivo, se ele ainda existir."""
+        """restaura a geometria da janela e reabre o último arquivo, se ele ainda existir."""
         geometry = self._settings.value("window/geometry")
         if geometry is not None:
             self.restoreGeometry(geometry)
@@ -367,7 +367,7 @@ class MainWindow(QMainWindow):
             self.load_file(Path(path))
 
     def _open_settings(self) -> None:
-        """Abre a tela de Ajustes (perfis: modo, dialeto e limites)."""
+        """abre a tela de Ajustes (perfis: modo, dialeto e limites)."""
         dialog = SettingsDialog(self, profiles=self._profiles, active_profile=self._profile)
         dialog.exec()
         self._profiles = dialog.profiles()
@@ -381,14 +381,14 @@ class MainWindow(QMainWindow):
         self._profile_label.setText(tr("profile_label").format(name=self._profile.name))
 
     def _on_mode_changed(self) -> None:
-        """O usuário trocou o modo (ou um parâmetro de cordão) na tela principal."""
+        """o usuário trocou o modo (ou um parâmetro de cordão) na tela principal."""
         mode = self._mode_controls.current_mode()
         self._profile.mode_key = mode.key
         save_profiles(self._profiles, self._profile.name)
         self._reload()
 
     def _start_blank(self) -> None:
-        """Começa um programa vazio direto no editor, sem arquivo de origem."""
+        """começa um programa vazio direto no editor, sem arquivo de origem."""
         if not self._confirm_discard_changes():
             return
         self._path = None
@@ -451,12 +451,12 @@ class MainWindow(QMainWindow):
         self._reload()
 
     def _show_open_error(self, message: str) -> None:
-        """Na tela inicial a barra de status está oculta, então o erro vai num diálogo."""
+        """na tela inicial a barra de status está oculta, então o erro vai num diálogo."""
         self._player.set_status(message)
         QMessageBox.warning(self, tr("open_error_title"), message)
 
     def _confirm_discard_changes(self) -> bool:
-        """Pergunta antes de descartar edições não salvas. True se pode prosseguir."""
+        """pergunta antes de descartar edições não salvas. True se pode prosseguir."""
         if not self._has_unsaved_changes():
             return True
         answer = QMessageBox.question(
@@ -468,20 +468,20 @@ class MainWindow(QMainWindow):
         return answer == QMessageBox.StandardButton.Discard
 
     def _apply_edited_text(self, text: str) -> None:
-        """O usuário editou o G-code no painel e pediu para reinterpretar."""
+        """o usuário editou o G-code no painel e pediu para reinterpretar."""
         self._text = text
         self._editor.mark_applied()
         self._reload()
 
     def _save_edited_text(self, text: str) -> None:
-        """Salva no arquivo aberto; sem arquivo de origem, pede um caminho novo."""
+        """salva no arquivo aberto; sem arquivo de origem, pede um caminho novo."""
         if self._path is None:
             self._save_edited_text_as(text)
             return
         self._write_to_path(self._path, text)
 
     def _save_edited_text_as(self, text: str) -> None:
-        """Sempre pergunta o caminho, mesmo que já exista um arquivo aberto."""
+        """sempre pergunta o caminho, mesmo que já exista um arquivo aberto."""
         path_str, _ = QFileDialog.getSaveFileName(self, tr("dialog_save_title"), "", _gcode_filter())
         if not path_str:
             return
@@ -518,7 +518,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(f"{mark}{APP_TITLE}")
 
     def _reload(self) -> None:
-        """Reinterpreta o texto atual com o modo e o dialeto escolhidos."""
+        """reinterpreta o texto atual com o modo e o dialeto escolhidos."""
         if self._text is None:
             return
         self._pause()
@@ -612,7 +612,7 @@ class MainWindow(QMainWindow):
         self._refresh()
 
     def _step(self, direction: int) -> None:
-        """Pula um movimento; com Shift, uma camada inteira."""
+        """pula um movimento; com Shift, uma camada inteira."""
         if self._toolpath is None:
             return
         t = self._playback.elapsed
@@ -658,7 +658,7 @@ class MainWindow(QMainWindow):
         self._sync_timer()
 
     def _update_running_line(self, snapshot: Snapshot) -> None:
-        """Destaca no editor a linha de origem do movimento atualmente em execução."""
+        """destaca no editor a linha de origem do movimento atualmente em execução."""
         if not self._editor.isVisible():
             return
         if self._toolpath is None or self._toolpath.count == 0:

@@ -1,7 +1,6 @@
-"""Expansão de sub-rotinas (O, M98, M99), repetições (L) e variáveis (#n).
+"""expansão de sub-rotinas (O, M98, M99), repetições (L) e variáveis (#n).
 
-Produz a sequência de linhas na ordem em que a máquina as executaria. Não depende
-de Qt nem de numpy.
+produz a sequência de linhas na ordem em que a máquina as executaria.
 """
 from __future__ import annotations
 
@@ -37,7 +36,6 @@ _UNARY_OPS = {ast.USub: operator.neg, ast.UAdd: operator.pos}
 
 @dataclass(frozen=True)
 class SourceLine:
-    """Uma linha executada. 'line' é onde o comando está escrito no arquivo."""
     line: int
     text: str
 
@@ -55,12 +53,10 @@ class Expansion:
 
 
 def expand_program(text: str) -> Expansion:
-    """Transforma o texto do programa na sequência de linhas executadas."""
     return ProgramExpander(text).run()
 
 
 def safe_eval(expr: str) -> float:
-    """Avalia uma expressão aritmética simples (+ - * / e parênteses). Sem nomes nem chamadas."""
     try:
         tree = ast.parse(expr.strip(), mode="eval")
     except SyntaxError as err:
@@ -83,7 +79,6 @@ def _eval_node(node: ast.AST, expr: str) -> float:
 
 
 def _format(value: float) -> str:
-    """Número em notação decimal simples, para caber nas palavras do G-code."""
     text = f"{value:.6f}".rstrip("0").rstrip(".")
     return "0" if text in ("", "-0") else text
 
@@ -92,7 +87,6 @@ def _m_codes(text: str) -> set[int]:
     return {int(value) for letter, value in parse_words(text) if letter == "M"}
 
 def _called_numbers(text: str) -> set[int]:
-    """Números chamados por M98 P<n> em qualquer ponto do arquivo."""
     called = set()
     for raw in text.splitlines():
         words = parse_words(clean_line(raw))
@@ -103,7 +97,7 @@ def _called_numbers(text: str) -> set[int]:
     return called
 
 def _is_standalone(text: str) -> bool:
-    """Linha de controle deve conter apenas M, P e L."""
+    """linha de controle deve conter apenas M, P e L."""
     return all(letter in "MPL" for letter, _ in parse_words(text))
 
 
@@ -131,7 +125,7 @@ class ProgramExpander:
     # --- primeira passada: separa programa principal e sub-rotinas ---
 
     def _split(self, text: str) -> None:
-        """Sub-rotinas podem ficar depois do M30, então todas são coletadas antes de executar."""
+        """sub-rotinas podem ficar depois do M30, então todas são coletadas antes de executar."""
         called = _called_numbers(text)
         current: Subroutine | None = None
         for lineno, raw in enumerate(text.splitlines(), start=1):

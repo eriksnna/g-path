@@ -1,4 +1,4 @@
-"""Modo de deposição (WAAM): trabalho é o material depositado com o processo ligado."""
+"""modo de deposição (WAAM): trabalho é o material depositado com o processo ligado."""
 from __future__ import annotations
 
 import math
@@ -68,7 +68,7 @@ class DepositionMode(ProcessMode):
         ]
 
     def deposited_volume(self, bead_length: float, dots: int) -> float:
-        """Volume em mm³. Cordão: comprimento × largura × altura. Ponto: cilindro de diâmetro = largura."""
+        """volume em mm³. Cordão: comprimento × largura × altura. Ponto: cilindro de diâmetro = largura."""
         w, h = self.bead.width, self.bead.height
         return bead_length * w * h + dots * math.pi / 4 * w * w * h
 

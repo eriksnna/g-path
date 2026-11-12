@@ -1,6 +1,6 @@
-"""Interpretação de movimentos G-code. Não depende de Qt nem de numpy.
+"""interpretação de movimentos G-code.
 
-Sub-rotinas e variáveis já foram expandidas por core.expander. Os códigos de
+sub-rotinas e variáveis já foram expandidas por core.expander. os códigos de
 processo (M-codes) são traduzidos pelo dialeto escolhido, não fixados aqui.
 """
 from __future__ import annotations
@@ -44,7 +44,7 @@ __all__ = [
 
 @dataclass(frozen=True)
 class Move:
-    """Um trecho de movimento. Arcos viram vários Move; G04 vira um Move de espera."""
+    """um trecho de movimento. arcos viram vários Move; G04 vira um Move de espera."""
     start: Point
     end: Point
     is_cut: bool
@@ -70,7 +70,7 @@ def parse_gcode(text: str, default_feed: float = DEFAULT_FEED,
                 limits: Limits = MACHINE_LIMITS,
                 dialect: Dialect | None = None,
                 arc_step_deg: float = ARC_STEP_DEG) -> ParseResult:
-    """Expande o programa e interpreta a sequência resultante."""
+    """expande o programa e interpreta a sequência resultante."""
     dialect = dialect or get_dialect(DEFAULT_DIALECT)
     expansion = expand_program(text)
 
@@ -88,7 +88,7 @@ def parse_gcode(text: str, default_feed: float = DEFAULT_FEED,
 
 def arc_points(start: Point, end: Point, center: tuple[float, float],
                clockwise: bool, step_deg: float = ARC_STEP_DEG) -> list[Point]:
-    """Pontos intermediários de um arco no plano XY. Z varia linearmente (hélice)."""
+    """pontos intermediários de um arco no plano XY. Z varia linearmente (hélice)."""
     cx, cy = center
     radius = math.hypot(start[0] - cx, start[1] - cy)
     a_start = math.atan2(start[1] - cy, start[0] - cx)
@@ -108,7 +108,7 @@ def arc_points(start: Point, end: Point, center: tuple[float, float],
 
 
 def _signed_sweep(delta: float, clockwise: bool) -> float:
-    """Ajusta o ângulo varrido para o sentido pedido pelo G2 ou G3."""
+    """ajusta o ângulo varrido para o sentido pedido pelo G2 ou G3."""
     if clockwise and delta >= 0:
         return delta - TWO_PI
     if not clockwise and delta <= 0:
@@ -117,7 +117,7 @@ def _signed_sweep(delta: float, clockwise: bool) -> float:
 
 
 class GCodeInterpreter:
-    """Mantém o estado modal da máquina enquanto percorre as linhas expandidas."""
+    """mantém o estado modal da máquina enquanto percorre as linhas expandidas."""
 
     def __init__(self, default_feed: float, limits: Limits = MACHINE_LIMITS,
                  dialect: Dialect | None = None, arc_step_deg: float = ARC_STEP_DEG) -> None:
@@ -235,7 +235,7 @@ class GCodeInterpreter:
     # --- movimentos e esperas ---
 
     def _dwell(self, duration: float) -> None:
-        """G04: espera no mesmo ponto. A unidade do P vem do dialeto."""
+        """G04: espera no mesmo ponto. a unidade do P vem do dialeto."""
         seconds = duration * self.dialect.dwell_unit
         if seconds <= 0:
             return
@@ -296,14 +296,14 @@ class GCodeInterpreter:
     # --- validação ---
 
     def _check_feed(self) -> None:
-        """Avisa uma única vez se o corte começa sem F programado."""
+        """avisa uma única vez se o corte começa sem F programado."""
         if self._feed_programmed or self._feed_warned:
             return
         self._feed_warned = True
         self._report(WARNING, tr("issue_feed_missing").format(feed=f"{self.feed:g}"))
 
     def _check_bounds(self, points: list[Point]) -> None:
-        """Reporta no máximo um problema de área de trabalho por linha."""
+        """reporta no máximo um problema de área de trabalho por linha."""
         if self._bounds_reported_line == self._lineno:
             return
         for point in points:

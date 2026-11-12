@@ -1,4 +1,4 @@
-"""Tela inicial: abrir um arquivo G-code existente ou começar a escrever do zero."""
+"""tela inicial: abrir um arquivo G-code existente ou começar a escrever do zero."""
 from __future__ import annotations
 
 import math

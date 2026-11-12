@@ -33,7 +33,7 @@ MIN_DIRECTION_LENGTH = 1e-6  # abaixo disso, o deslocamento XY é tratado como n
 
 
 def depth_gradient(count: int) -> np.ndarray:
-    """Uma cor RGB por camada, interpolada entre DEPTH_STOPS (índice 0 = mais fundo)."""
+    """uma cor RGB por camada, interpolada entre DEPTH_STOPS (índice 0 = mais fundo)."""
     stops = np.asarray(DEPTH_STOPS, dtype=float)
     positions = np.linspace(0.0, 1.0, len(stops))
     t = np.linspace(0.0, 1.0, count) if count > 1 else np.zeros(1)

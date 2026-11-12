@@ -1,4 +1,4 @@
-"""Editor de texto do programa G-code carregado. 'Aplicar' reinterpreta o texto editado."""
+"""editor de texto do programa G-code carregado. 'aplicar' reinterpreta o texto editado."""
 from __future__ import annotations
 
 from core.i18n import tr
@@ -40,7 +40,7 @@ def _shortcuts_text() -> str:
 
 
 class _LineNumberGutter(QWidget):
-    """Margem que desenha o número de cada linha visível do editor."""
+    """margem que desenha o número de cada linha visível do editor."""
 
     def __init__(self, editor: "_CodeTextEdit") -> None:
         super().__init__(editor)
@@ -99,7 +99,7 @@ class _CodeTextEdit(QPlainTextEdit):
             block_number += 1
 
     def goto_line(self, line: int) -> None:
-        """Move o cursor para a linha (1-based) e a centraliza na tela."""
+        """move o cursor para a linha (1-based) e a centraliza na tela."""
         block = self.document().findBlockByNumber(max(0, line - 1))
         if not block.isValid():
             return
@@ -109,9 +109,9 @@ class _CodeTextEdit(QPlainTextEdit):
         self.setFocus()
 
     def toggle_comment(self) -> None:
-        """Comenta ou descomenta as linhas tocadas pela seleção (ou a linha do cursor).
+        """comenta ou descomenta as linhas tocadas pela seleção (ou a linha do cursor).
 
-        Usa ';' por simplicidade e por funcionar em qualquer dialeto de G-code.
+        usa ';' por simplicidade e por funcionar em qualquer dialeto de G-code.
         Se a primeira linha do bloco já está comentada, descomenta todas; senão, comenta todas.
         """
         cursor = self.textCursor()
@@ -153,7 +153,7 @@ class _CodeTextEdit(QPlainTextEdit):
             self._update_gutter_width()
 
     def set_running_line(self, line: int | None) -> None:
-        """Destaca a linha de origem do movimento em execução (None remove o destaque)."""
+        """destaca a linha de origem do movimento em execução (None remove o destaque)."""
         block = self.document().findBlockByNumber(max(0, line - 1)) if line is not None else None
         if block is not None and block.isValid():
             selection = QTextEdit.ExtraSelection()
@@ -280,7 +280,7 @@ class GCodeEditor(QFrame):
         layout.addWidget(self._text_edit, 1)
 
     def set_text(self, text: str) -> None:
-        """Carrega um novo texto, sem marcar como alterado (uso ao abrir um arquivo)."""
+        """carrega um novo texto, sem marcar como alterado (uso ao abrir um arquivo)."""
         self._text_edit.setPlainText(text)
         self._text_edit.document().setModified(False)
         self._text_edit.set_running_line(None)
@@ -289,24 +289,24 @@ class GCodeEditor(QFrame):
         return self._text_edit.toPlainText()
 
     def mark_applied(self) -> None:
-        """Limpa o indicador de alteração pendente, sem mudar o texto."""
+        """limpa o indicador de alteração pendente, sem mudar o texto."""
         self._text_edit.document().setModified(False)
 
     def is_modified(self) -> bool:
-        """True se o texto do editor difere do que foi carregado ou aplicado por último."""
+        """true se o texto do editor difere do que foi carregado ou aplicado por último."""
         return self._text_edit.document().isModified()
 
     def goto_line(self, line: int) -> None:
-        """Mostra o editor, se escondido, e vai até a linha (1-based)."""
+        """mostra o editor, se escondido, e vai até a linha (1-based)."""
         self.setVisible(True)
         self._text_edit.goto_line(line)
 
     def set_running_line(self, line: int | None) -> None:
-        """Destaca no editor a linha do movimento em execução (None remove o destaque)."""
+        """destaca no editor a linha do movimento em execução (None remove o destaque)."""
         self._text_edit.set_running_line(line)
 
     def show_find(self) -> None:
-        """Mostra a barra de busca (equivalente a pressionar Ctrl+F com foco no editor)."""
+        """mostra a barra de busca (equivalente a pressionar Ctrl+F com foco no editor)."""
         self.setVisible(True)
         self._show_find_bar()
 
@@ -337,7 +337,7 @@ class GCodeEditor(QFrame):
         self._find_status.setText("" if found else tr("editor_not_found"))
 
     def toggle_comment(self) -> None:
-        """Comenta/descomenta a linha ou seleção atual no editor."""
+        """comenta/descomenta a linha ou seleção atual no editor."""
         self._text_edit.toggle_comment()
 
     def _emit_apply(self) -> None:

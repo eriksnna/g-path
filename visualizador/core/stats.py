@@ -1,4 +1,4 @@
-"""Estatísticas do programa. Calcula os números a partir do Toolpath, sem Qt."""
+"""estatísticas do programa. calcula os números a partir do Toolpath.."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -77,7 +77,7 @@ def format_duration(seconds: float) -> str:
 
 
 def format_length(mm: float) -> str:
-    """Usa metros acima de 1 000 mm, para o número caber no cartão."""
+    """usa metros acima de 1 000 mm, para o número caber no cartão."""
     if mm >= 1000:
         return f"{mm / 1000:.2f} m"
     return f"{mm:.1f} mm"

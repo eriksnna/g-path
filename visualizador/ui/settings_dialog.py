@@ -1,6 +1,6 @@
-"""Tela de Ajustes: navegação lateral com seções (Perfis, Atalhos, ...).
+"""tela de ajustes: navegação lateral com seções (perfis, atalhos, ...).
 
-Cada perfil reúne modo de processo, dialeto e limites de curso: a configuração
+cada perfil reúne modo de processo, dialeto e limites de curso: a configuração
 completa de uma máquina.
 """
 from __future__ import annotations
@@ -49,7 +49,7 @@ def _shortcuts_text() -> str:
 
 
 class _ProfilesPage(QWidget):
-    """Lista de perfis: cada perfil reúne modo, dialeto e limites de curso."""
+    """lista de perfis: cada perfil reúne modo, dialeto e limites de curso."""
 
     changed = Signal()
 
@@ -255,7 +255,7 @@ class _ShortcutsPage(QWidget):
 
 
 class SettingsDialog(QDialog):
-    """Diálogo de Ajustes com navegação lateral entre seções."""
+    """diálogo de ajustes com navegação lateral entre seções."""
 
     profile_changed = Signal()
 

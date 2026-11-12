@@ -1,4 +1,3 @@
-# visualizador/tests/test_version.py
 import re
 from pathlib import Path
 

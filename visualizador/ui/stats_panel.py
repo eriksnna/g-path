@@ -1,4 +1,4 @@
-"""Painel lateral com o resumo do programa e o andamento da simulação."""
+"""painel lateral com o resumo do programa e o andamento da simulação."""
 from __future__ import annotations
 
 from PySide6.QtWidgets import (
@@ -24,7 +24,7 @@ VALUE_PX_DIVISOR = 11  # fonte = largura do cartão / divisor, dentro dos limite
 
 
 class StatCard(QFrame):
-    """Cartão com título, valor em destaque e detalhe opcional. Adapta a fonte à largura."""
+    """cartão com título, valor em destaque e detalhe opcional. adapta a fonte à largura."""
 
     def __init__(self, title: str, wide: bool = False) -> None:
         super().__init__()
@@ -98,7 +98,7 @@ def _clear_layout(layout) -> None:
             _clear_layout(item.layout())
 
 def _card_grid(cards: list[StatCard]) -> QGridLayout:
-    """Organiza os cartões em duas colunas; cartões 'wide' ocupam a linha inteira."""
+    """organiza os cartões em duas colunas; cartões 'wide' ocupam a linha inteira."""
     grid = QGridLayout()
     grid.setSpacing(SPACE_SM)
     row = col = 0

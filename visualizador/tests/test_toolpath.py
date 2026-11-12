@@ -1,4 +1,3 @@
-# tests/test_toolpath.py
 import pytest
 
 from core.parser import Move

@@ -1,7 +1,7 @@
-"""Dialetos de G-code. As diferenças entre controladores ficam aqui, fora do núcleo.
+"""dialetos de G-code. as diferenças entre controladores ficam aqui, fora do núcleo.
 
-Cada perfil responde a perguntas sobre a máquina: em que unidade o G04 espera e
-quais M-codes ligam e desligam o processo (spindle, arco, tocha). Para uma máquina
+cada perfil responde a perguntas sobre a máquina: em que unidade o G04 espera e
+quais M-codes ligam e desligam o processo (spindle, arco, tocha). para uma máquina
 nova, basta acrescentar um perfil em DIALECTS.
 """
 from __future__ import annotations

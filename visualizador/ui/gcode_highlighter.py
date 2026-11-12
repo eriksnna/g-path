@@ -1,4 +1,4 @@
-"""Realce de sintaxe para G-code: comentários, G/M-codes, eixos, variáveis e sub-rotinas."""
+"""realce de sintaxe para G-code: comentários, G/M-codes, eixos, variáveis e sub-rotinas."""
 from __future__ import annotations
 
 from PySide6.QtCore import QRegularExpression
@@ -54,7 +54,7 @@ class GCodeHighlighter(QSyntaxHighlighter):
             self.setFormat(match.capturedStart(), match.capturedLength(), fmt)
 
     def _highlight_comments(self, text: str) -> None:
-        """Comentários sobrepõem qualquer outro realce que caia dentro deles."""
+        """comentários sobrepõem qualquer outro realce que caia dentro deles."""
         it = COMMENT_PAREN_RE.globalMatch(text)
         while it.hasNext():
             match = it.next()

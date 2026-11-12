@@ -1,6 +1,6 @@
-"""Perfis de máquina: limites de curso, modo de processo e dialeto por máquina.
+"""perfis de máquina: limites de curso, modo de processo e dialeto por máquina.
 
-Reúne tudo que descreve uma configuração completa de máquina/processo: limites de
+reúne tudo que descreve uma configuração completa de máquina/processo: limites de
 curso (segurança/área de trabalho), modo de processo padrão (usinagem ou deposição)
 e dialeto de G-code (como interpretar M-codes).
 """
@@ -35,7 +35,7 @@ class MachineProfile:
 
 
 def default_profiles() -> list[MachineProfile]:
-    """Perfis iniciais oferecidos na interface. O usuário pode editar qualquer campo."""
+    """perfis iniciais oferecidos na interface. o usuário pode editar qualquer campo."""
     from core.i18n import tr  # import tardio: evita ciclo e garante tradução na hora certa
     return [
         MachineProfile(tr("profile_default_name"), dict(DEFAULT_LIMITS), DEFAULT_MODE, DEFAULT_DIALECT),

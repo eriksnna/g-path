@@ -1,8 +1,5 @@
-"""Ícones da interface: Phosphor Icons (MIT), um SVG por ícone em assets/icons/.
+"""ícones da interface: Phosphor Icons (MIT), um SVG por ícone em assets/icons/."""
 
-O SVG é desenhado e depois tingido na cor pedida, então a cor original do
-arquivo não importa e não é preciso manter versões clara/escura separadas.
-"""
 from __future__ import annotations
 
 from functools import lru_cache

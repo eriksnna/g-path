@@ -1,4 +1,4 @@
-"""Marcas da timeline e navegação por movimento/camada. Não depende de Qt."""
+"""marcas da timeline e navegação por movimento/camada."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -13,14 +13,14 @@ from core.toolpath import Toolpath
 
 @dataclass(frozen=True)
 class TimelineMarks:
-    """Tudo em segundos de simulação; a interface converte para posição na barra."""
+    """tudo em segundos de simulação; a interface converte para posição na barra."""
     total: float = 0.0
     active_spans: list[tuple[float, float]] = field(default_factory=list)
     layer_starts: np.ndarray = field(default_factory=lambda: np.empty(0))
     issues: list[tuple[float, str]] = field(default_factory=list)  # (instante, severidade)
 
     def layer_at(self, t: float) -> int:
-        """Número da passada de camada em curso (1..N); 0 antes da primeira."""
+        """número da passada de camada em curso (1..N); 0 antes da primeira."""
         return int(np.searchsorted(self.layer_starts, t, side="right"))
 
 
@@ -35,12 +35,12 @@ def build_marks(toolpath: Toolpath, levels: Sequence[float],
 
 
 def step_move(toolpath: Toolpath, t: float, direction: int) -> float:
-    """Início do próximo movimento (direction=1) ou do anterior (-1)."""
+    """início do próximo movimento (direction=1) ou do anterior (-1)."""
     return _step(toolpath.cum_start, t, direction, toolpath.total_time)
 
 
 def step_layer(marks: TimelineMarks, t: float, direction: int) -> float:
-    """Início da próxima camada ou da anterior."""
+    """início da próxima camada ou da anterior."""
     return _step(marks.layer_starts, t, direction, marks.total)
 
 

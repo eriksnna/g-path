@@ -1,6 +1,6 @@
-"""Persistência dos perfis de máquina em disco (JSON na pasta de configuração do usuário).
+"""persistência dos perfis de máquina em disco (JSON na pasta de configuração do usuário).
 
-Falha ao ler ou escrever esse arquivo nunca deve travar o app: persistência é uma
+falha ao ler ou escrever esse arquivo nunca deve travar o app: persistência é uma
 conveniência, então qualquer problema (arquivo corrompido, sem permissão de escrita,
 ou um arquivo salvo por uma versão anterior sem os campos "mode"/"dialect") cai de
 volta em padrões, silenciosamente.
@@ -14,7 +14,7 @@ from core.machine_profile import MachineProfile, default_profiles
 
 
 def load_profiles() -> tuple[list[MachineProfile], str | None]:
-    """Carrega perfis salvos e o nome do perfil ativo. Sem arquivo ou corrompido -> padrões."""
+    """carrega perfis salvos e o nome do perfil ativo. sem arquivo ou corrompido -> padrões."""
     if not config.PROFILES_FILE.exists():
         return default_profiles(), None
     try:
@@ -43,7 +43,7 @@ def load_profiles() -> tuple[list[MachineProfile], str | None]:
 
 
 def save_profiles(profiles: list[MachineProfile], active_name: str) -> None:
-    """Salva perfis e qual está ativo. Erros de escrita são ignorados silenciosamente."""
+    """salva perfis e qual está ativo. erros de escrita são ignorados silenciosamente."""
     payload = {
         "active": active_name,
         "profiles": [

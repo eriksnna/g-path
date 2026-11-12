@@ -1,4 +1,4 @@
-"""Seletor de modo e parâmetros do cordão. Os campos de cordão aparecem só na deposição."""
+"""seletor de modo e parâmetros do cordão. os campos de cordão aparecem só na deposição."""
 from __future__ import annotations
 
 from PySide6.QtCore import Signal
@@ -53,7 +53,7 @@ class ModeControls(QWidget):
         return create_mode(self._combo.currentData(), bead)
 
     def set_mode(self, key: str) -> None:
-        """Define o modo programaticamente, sem emitir `changed` (evita salvar/recarregar
+        """define o modo programaticamente, sem emitir `changed` (evita salvar/recarregar
         de novo quando quem chamou já vai fazer isso, como em MainWindow._open_settings)."""
         index = self._combo.findData(key)
         if index >= 0 and index != self._combo.currentIndex():

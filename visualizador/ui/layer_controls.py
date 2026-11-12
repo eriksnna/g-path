@@ -1,4 +1,4 @@
-"""Controles de camadas: filtra por profundidade e liga a coloração por Z."""
+"""controles de camadas: filtra por profundidade e liga a coloração por Z."""
 from __future__ import annotations
 
 from core.i18n import tr
@@ -34,7 +34,7 @@ class LayerControls(QWidget):
         layout.addWidget(self._depth_check)
 
     def set_levels(self, levels: Sequence[float]) -> None:
-        """Preenche o seletor com uma entrada por profundidade, sem disparar sinais."""
+        """preenche o seletor com uma entrada por profundidade, sem disparar sinais."""
         self._combo.blockSignals(True)
         self._combo.clear()
         self._combo.addItem(tr("all_layers"), None)

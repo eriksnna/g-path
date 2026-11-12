@@ -1,4 +1,4 @@
-"""Leitura de arquivos G-code preservando a codificação original. Não depende de Qt."""
+"""leitura de arquivos G-code preservando a codificação original."""
 from __future__ import annotations
 
 import codecs
@@ -8,7 +8,7 @@ FALLBACK_ENCODINGS = ("utf-8", "cp1252", "latin-1")  # latin-1 aceita qualquer b
 
 
 def read_gcode_text(path: Path) -> tuple[str, str]:
-    """Devolve (texto, codificação) para que o salvamento use a mesma codificação."""
+    """devolve (texto, codificação) para que o salvamento use a mesma codificação."""
     data = path.read_bytes()
     if data.startswith(codecs.BOM_UTF8):
         return data.decode("utf-8-sig"), "utf-8-sig"

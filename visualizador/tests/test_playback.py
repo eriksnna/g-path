@@ -1,4 +1,3 @@
-# tests/test_playback.py
 import pytest
 
 from core.playback import Playback

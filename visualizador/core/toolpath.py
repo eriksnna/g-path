@@ -1,4 +1,4 @@
-"""Caminho da ferramenta com tempos. Converte os movimentos em arrays para a interface."""
+"""caminho da ferramenta com tempos. Converte os movimentos em arrays para a interface."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -13,7 +13,7 @@ SECONDS_PER_MINUTE = 60.0
 
 
 def interleave(starts: np.ndarray, ends: np.ndarray) -> np.ndarray:
-    """Intercala inícios e fins: [a0, b0, a1, b1, ...], formato do modo 'lines'."""
+    """intercala inícios e fins: [a0, b0, a1, b1, ...], formato do modo 'lines'."""
     points = np.empty((2 * len(starts), 3))
     points[0::2] = starts
     points[1::2] = ends
@@ -22,7 +22,7 @@ def interleave(starts: np.ndarray, ends: np.ndarray) -> np.ndarray:
 
 @dataclass(frozen=True)
 class Snapshot:
-    """Estado da simulação em um instante."""
+    """estado da simulação em um instante."""
     head: np.ndarray                 # posição da ferramenta, shape (3,)
     done: int                        # movimentos concluídos
     started: int                     # movimentos iniciados, incluindo o em curso
@@ -38,12 +38,12 @@ class Snapshot:
 
 
 class Toolpath:
-    """Movimentos com duração calculada e acumulada, prontos para consulta por tempo."""
+    """movimentos com duração calculada e acumulada, prontos para consulta por tempo."""
 
     def __init__(self, moves: Sequence[Move], rapid_feed: float = RAPID_FEED,
                  min_feed: float = MIN_FEED) -> None:
         if not moves:
-            raise ValueError("O caminho precisa de pelo menos um movimento.")
+            raise ValueError("o caminho precisa de pelo menos um movimento.")
 
         self.starts = np.array([m.start for m in moves], dtype=float)
         self.ends = np.array([m.end for m in moves], dtype=float)
@@ -78,7 +78,7 @@ class Toolpath:
         return points.min(axis=0), points.max(axis=0)
 
     def snapshot(self, t: float) -> Snapshot:
-        """Estado da ferramenta no instante t, em segundos."""
+        """estado da ferramenta no instante t, em segundos."""
         k = int(np.searchsorted(self.cum_end, t, side="right"))
         if k >= self.count:
             end = self.ends[-1].copy()
@@ -95,9 +95,9 @@ class Toolpath:
         )
 
     def time_at_line(self, line: int) -> float | None:
-        """Instante do primeiro movimento escrito na linha dada.
+        """instante do primeiro movimento escrito na linha dada.
 
-        Com sub-rotinas, a mesma linha pode executar várias vezes; usa-se a primeira.
+        com sub-rotinas, a mesma linha pode executar várias vezes; usa-se a primeira.
         Se nenhum movimento vem dessa linha, usa o próximo escrito depois dela.
         """
         exact = np.flatnonzero(self.lines == line)

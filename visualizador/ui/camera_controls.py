@@ -1,4 +1,4 @@
-"""Botões de vista padrão da câmera 3D (topo, frente, lado, isométrica)."""
+"""botões de vista padrão da câmera 3D (topo, frente, lado, isométrica)."""
 from __future__ import annotations
 
 from PySide6.QtCore import Signal

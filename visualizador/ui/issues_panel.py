@@ -1,4 +1,4 @@
-"""Painel de validação: lista os problemas e leva o usuário até a linha no caminho."""
+"""painel de validação: lista os problemas e leva o usuário até a linha no caminho."""
 from __future__ import annotations
 
 from core.i18n import tr

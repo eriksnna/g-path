@@ -1,4 +1,4 @@
-"""Estado de reprodução: tempo, velocidade e play/pause. Não depende de Qt."""
+"""estado de reprodução: tempo, velocidade e play/pause."""
 from __future__ import annotations
 
 from config import DEFAULT_SPEED, SEEK_STEP_FRACTION, SPEED_MAX, SPEED_MIN
@@ -24,7 +24,7 @@ class Playback:
         return self.elapsed >= self.total_time
 
     def reset(self, total_time: float) -> None:
-        """Prepara a reprodução para um novo caminho. A velocidade é mantida."""
+        """prepara a reprodução para um novo caminho. a velocidade é mantida."""
         self.total_time = total_time
         self.elapsed = 0.0
         self.playing = False
@@ -44,7 +44,7 @@ class Playback:
             self.play()
 
     def advance(self, real_seconds: float) -> None:
-        """Avança o relógio simulado de acordo com o tempo real decorrido."""
+        """avança o relógio simulado de acordo com o tempo real decorrido."""
         if not self.playing:
             return
         self.seek(self.elapsed + real_seconds * self.speed)

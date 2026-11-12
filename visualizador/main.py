@@ -1,4 +1,4 @@
-"""Ponto de entrada do G-Path"""
+"""ponto de entrada do G-Path"""
 import sys, traceback, json
 
 from core.i18n import set_language, tr
@@ -25,7 +25,7 @@ def _install_excepthook() -> None:
     sys.excepthook = handle
 
 def _default_language() -> str:
-    """Primeiro uso, sem settings.json salvo: segue o idioma do sistema."""
+    """primeiro uso, sem settings.json salvo: segue o idioma do sistema."""
     return "pt_BR" if QLocale.system().name().startswith("pt") else "en"
 
 def _load_saved_language() -> str:

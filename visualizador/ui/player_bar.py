@@ -309,7 +309,7 @@ class PlayerBar(QFrame):
         self._update_chips()
 
     def set_chips_allowed(self, allowed: bool) -> None:
-        """Com o editor aberto a linha já aparece destacada lá; os chips seriam repetição."""
+        """com o editor aberto a linha já aparece destacada lá; os chips seriam repetição."""
         self._chips_allowed = allowed
         self._update_chips()
 

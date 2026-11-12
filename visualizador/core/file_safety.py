@@ -14,7 +14,7 @@ from config import MAX_FILE_SIZE_BYTES, MAX_LINE_LENGTH
 
 
 class UnsafeFileError(ValueError):
-    """O arquivo foi recusado por exceder um limite de segurança."""
+    """o arquivo foi recusado por exceder um limite de segurança."""
 
 
 def check_file_size(path: Path) -> None:
