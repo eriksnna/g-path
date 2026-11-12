@@ -19,6 +19,12 @@ _STRINGS: dict[str, dict[str, str]] = {
         IT: "Strumento di visualizzazione e simulazione 3D di programmi G-code.",
     },
     "start_open_file": {PT_BR: "Abrir arquivo G-code...", EN: "Open G-code file...", IT: "Apri file G-code..."},
+    "start_drop_hint": {
+        PT_BR: "ou arraste um arquivo para esta janela",
+        EN: "or drag a file into this window",
+        IT: "oppure trascina un file in questa finestra",
+    },
+    "start_recent_title": {PT_BR: "Recentes", EN: "Recent", IT: "Recenti"},
     "start_blank": {PT_BR: "Começar do zero", EN: "Start from scratch", IT: "Inizia da zero"},
 
     # --- janela principal: cabeçalho e arquivo ---------------------------

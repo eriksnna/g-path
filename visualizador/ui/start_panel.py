@@ -1,114 +1,72 @@
-"""tela inicial: abrir um arquivo G-code existente ou começar a escrever do zero."""
+"""tela inicial: abrir um arquivo G-code existente, um recente, ou começar do zero."""
 from __future__ import annotations
 
-import math
+from pathlib import Path
 
-from PySide6.QtCore import QElapsedTimer, QTimer, Qt, Signal
-from PySide6.QtGui import QColor, QPainter, QPixmap, QRadialGradient
-from PySide6.QtWidgets import QFrame, QLabel, QPushButton, QVBoxLayout
+from PySide6.QtCore import QSize, Qt, Signal
+from PySide6.QtGui import QPixmap
+from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
 
 import config
-
-from ui.theme import ACCENT, SPACE_XL, SPACE_XXL, SURFACE_0, SURFACE_1
-
 from core.i18n import tr
+from ui.icons import SETTINGS, icon
+from ui.theme import SPACE_LG, SPACE_MD, SPACE_SM, SPACE_XL, SPACE_XXL, SPACE_XXS, TEXT_SECONDARY
 
 TITLE = "G-Path"
-LOGO_SIZE = 72
+LOGO_SIZE = 56
+CONTENT_WIDTH = 340
+BUTTON_HEIGHT = 38
+RECENT_ROW_HEIGHT = 32
+MAX_RECENT_SHOWN = 5
+SETTINGS_BUTTON_SIZE = 32
+FOLDER_MAX_WIDTH = 170  # pastas mais longas são abreviadas no meio
 
-CONTENT_WIDTH = 360
-BUTTON_WIDTH = 280
-BUTTON_HEIGHT = 48
-BUTTON_SPACING = 12
-BLOB_TICK_MS = 50
 
+class _RecentRow(QPushButton):
+    """linha clicável: nome do arquivo em destaque e a pasta, discreta, à direita."""
 
-class _LiquidBackground(QFrame):
+    def __init__(self, path: str) -> None:
+        super().__init__()
+        self.setObjectName("recentRow")
+        self.setFixedHeight(RECENT_ROW_HEIGHT)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setToolTip(path)
 
-    def __init__(self, parent=None) -> None:
-        super().__init__(parent)
-        self._clock = QElapsedTimer()
-        self._clock.start()
-        self._timer = QTimer(self)
-        self._timer.setInterval(BLOB_TICK_MS)
-        self._timer.timeout.connect(self.update)
+        name = QLabel(Path(path).name)
+        name.setObjectName("recentName")
+        folder = QLabel()
+        folder.setObjectName("recentFolder")
+        folder.setText(folder.fontMetrics().elidedText(
+            str(Path(path).parent), Qt.TextElideMode.ElideMiddle, FOLDER_MAX_WIDTH))
+        for label in (name, folder):
+            # o clique passa pelos rótulos e chega ao botão
+            label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
 
-    def showEvent(self, event) -> None:
-        super().showEvent(event)
-        self._timer.start()
-
-    def hideEvent(self, event) -> None:
-        super().hideEvent(event)
-        self._timer.stop()
-
-    def paintEvent(self, event) -> None:
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.setPen(Qt.PenStyle.NoPen)
-
-        w, h = self.width(), self.height()
-        painter.fillRect(self.rect(), QColor(SURFACE_0))
-
-        ambient_radius = math.hypot(w, h) * 0.75
-        ambient = QRadialGradient(w / 2, h / 2, ambient_radius)
-        glow = QColor(SURFACE_1)
-        glow.setAlpha(140)
-        fade = QColor(SURFACE_0)
-        fade.setAlpha(0)
-        ambient.setColorAt(0.0, glow)
-        ambient.setColorAt(1.0, fade)
-        painter.setBrush(ambient)
-        painter.drawRect(self.rect())
-
-        t = self._clock.elapsed() / 1000.0
-        blobs = [
-            (0.30 + 0.08 * math.sin(t * 0.21), 0.35 + 0.06 * math.cos(t * 0.17), 0.70, ACCENT, 55),
-            (0.70 + 0.07 * math.cos(t * 0.15), 0.60 + 0.08 * math.sin(t * 0.19), 0.65, SURFACE_1, 90),
-            (0.50 + 0.06 * math.sin(t * 0.13 + 1.5), 0.25 + 0.05 * math.cos(t * 0.22), 0.60, ACCENT, 32),
-        ]
-        for cx, cy, scale, color, alpha in blobs:
-            radius = max(w, h) * scale
-            center_x, center_y = cx * w, cy * h
-            gradient = QRadialGradient(center_x, center_y, radius)
-            solid = QColor(color)
-            solid.setAlpha(alpha)
-            gradient.setColorAt(0.0, solid)
-            faded = QColor(color)
-            faded.setAlpha(0)
-            gradient.setColorAt(1.0, faded)
-            painter.setBrush(gradient)
-            painter.drawEllipse(
-                int(center_x - radius), int(center_y - radius), int(radius * 2), int(radius * 2),
-            )
-        painter.end()
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(SPACE_MD, 0, SPACE_MD, 0)
+        layout.setSpacing(SPACE_LG)
+        layout.addWidget(name)
+        layout.addStretch()
+        layout.addWidget(folder)
 
 
 class StartPanel(QFrame):
     open_requested = Signal()
     blank_requested = Signal()
+    recent_requested = Signal(str)  # caminho do arquivo
+    settings_requested = Signal()
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.setObjectName("startPanel")
 
-        self._background = _LiquidBackground(self)
-
-        title = QLabel(TITLE)
         logo = QLabel()
-        logo.setObjectName("startLogo")
         logo.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-        pixmap = QPixmap(str(config.ASSETS_DIR / "logo.png"))
-        logo.setPixmap(
-            pixmap.scaled(
-                LOGO_SIZE, LOGO_SIZE,
-                Qt.AspectRatioMode.KeepAspectRatio,
-                Qt.TransformationMode.SmoothTransformation,
-            )
-        )
-
+        logo.setPixmap(QPixmap(str(config.ASSETS_DIR / "logo.png")).scaled(
+            LOGO_SIZE, LOGO_SIZE,
+            Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation,
+        ))
         title = QLabel(TITLE)
-        title.setObjectName("startTitle")
-        title.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         title.setObjectName("startTitle")
         title.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         subtitle = QLabel(tr("start_subtitle"))
@@ -118,42 +76,72 @@ class StartPanel(QFrame):
 
         open_button = QPushButton(tr("start_open_file"))
         open_button.setObjectName("startButton")
-        open_button.setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT)
+        open_button.setFixedHeight(BUTTON_HEIGHT)
         open_button.clicked.connect(self.open_requested.emit)
-
         blank_button = QPushButton(tr("start_blank"))
         blank_button.setObjectName("startButtonSecondary")
-        blank_button.setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT)
+        blank_button.setFixedHeight(BUTTON_HEIGHT)
         blank_button.clicked.connect(self.blank_requested.emit)
+        buttons = QHBoxLayout()
+        buttons.setSpacing(SPACE_SM)
+        buttons.addWidget(open_button, 1)
+        buttons.addWidget(blank_button, 1)
+
+        drop_hint = QLabel(tr("start_drop_hint"))
+        drop_hint.setObjectName("startHint")
+        drop_hint.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+
+        self._recent_title = QLabel(tr("start_recent_title").upper())
+        self._recent_title.setObjectName("sectionTitle")
+        self._recent_list = QVBoxLayout()
+        self._recent_list.setSpacing(SPACE_XXS)
+        self._recent_title.hide()
+
+        content_layout = QVBoxLayout()
+        content_layout.setContentsMargins(0, 0, 0, 0)
+        content_layout.setSpacing(SPACE_SM)
+        content_layout.addWidget(logo)
+        content_layout.addWidget(title)
+        content_layout.addWidget(subtitle)
+        content_layout.addSpacing(SPACE_XXL)
+        content_layout.addLayout(buttons)
+        content_layout.addWidget(drop_hint)
+        content_layout.addSpacing(SPACE_XXL)
+        content_layout.addWidget(self._recent_title)
+        content_layout.addLayout(self._recent_list)
+        content = QWidget()
+        content.setFixedWidth(CONTENT_WIDTH)
+        content.setLayout(content_layout)
+
+        settings_button = QPushButton()
+        settings_button.setObjectName("startSettings")
+        settings_button.setIcon(icon(SETTINGS, TEXT_SECONDARY))
+        settings_button.setIconSize(QSize(18, 18))
+        settings_button.setFixedSize(SETTINGS_BUTTON_SIZE, SETTINGS_BUTTON_SIZE)
+        settings_button.setToolTip(tr("settings_title"))
+        settings_button.clicked.connect(self.settings_requested.emit)
+        top = QHBoxLayout()
+        top.addStretch()
+        top.addWidget(settings_button)
 
         footer = QLabel(f"erik senna ©2026  ·  v{config.APP_VERSION}")
         footer.setObjectName("startFooter")
         footer.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
-        content_layout = QVBoxLayout()
-        content_layout.setSpacing(SPACE_XL)
-        content_layout.addWidget(logo)
-        content_layout.addWidget(title)
-        content_layout.addWidget(subtitle)
-        content_layout.addSpacing(18)
-        content_layout.addWidget(open_button, 0, Qt.AlignmentFlag.AlignHCenter)
-        content_layout.addSpacing(BUTTON_SPACING)
-        content_layout.addWidget(blank_button, 0, Qt.AlignmentFlag.AlignHCenter)
-
-        content = QFrame()
-        content.setObjectName("startContent")
-        content.setFixedWidth(CONTENT_WIDTH)
-        content.setLayout(content_layout)
-
         outer = QVBoxLayout(self)
-        outer.setContentsMargins(0, 0, 0, SPACE_XXL)
+        outer.setContentsMargins(SPACE_XL, SPACE_XL, SPACE_XL, SPACE_XXL)
+        outer.addLayout(top)
         outer.addStretch()
         outer.addWidget(content, 0, Qt.AlignmentFlag.AlignHCenter)
         outer.addStretch()
-        outer.addWidget(footer, 0, Qt.AlignmentFlag.AlignHCenter)
+        outer.addWidget(footer)
 
-        self._background.lower()
-
-    def resizeEvent(self, event) -> None:
-        super().resizeEvent(event)
-        self._background.setGeometry(self.rect())
+    def set_recent(self, paths: list[str]) -> None:
+        """mostra até MAX_RECENT_SHOWN arquivos recentes; sem nenhum, a seção some."""
+        while self._recent_list.count():
+            self._recent_list.takeAt(0).widget().deleteLater()
+        for path in paths[:MAX_RECENT_SHOWN]:
+            row = _RecentRow(path)
+            row.clicked.connect(lambda _checked=False, p=path: self.recent_requested.emit(p))
+            self._recent_list.addWidget(row)
+        self._recent_title.setVisible(bool(paths))

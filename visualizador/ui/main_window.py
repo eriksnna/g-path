@@ -299,6 +299,7 @@ class MainWindow(QMainWindow):
         self._header_widget.setVisible(False)
         self._player.setVisible(False)
         self.menuBar().setVisible(False)
+        self._refresh_start_recent()
         self._stack.setCurrentIndex(0)
         self._fade_in_current_page()
 
@@ -362,6 +363,10 @@ class MainWindow(QMainWindow):
 
         self._start_panel.open_requested.connect(lambda: self.open_file())
         self._start_panel.blank_requested.connect(self._start_blank)
+
+        self._start_panel.recent_requested.connect(lambda path: self.load_file(Path(path)))
+        self._start_panel.settings_requested.connect(self._open_settings)
+        self._refresh_start_recent()
 
         self._editor_status_timer = QTimer(self)
         self._editor_status_timer.setInterval(300)
@@ -448,6 +453,9 @@ class MainWindow(QMainWindow):
         self._enter_workspace()
         self._show_empty(status=tr("status_program_new"))
         self._encoding = "utf-8"
+
+    def _refresh_start_recent(self) -> None:
+        self._start_panel.set_recent([p for p in self._recent_files() if Path(p).exists()])
 
     def _recent_files(self) -> list[str]:
         value = self._settings.value("window/recent_files", [])
@@ -758,6 +766,10 @@ class MainWindow(QMainWindow):
             return
         action()
         event.accept()
+
+    def dragEnterEvent(self, event) -> None:
+        if self._dropped_gcode_path(event.mimeData()) is not None:
+            event.acceptProposedAction()
 
     def dropEvent(self, event) -> None:
         path = self._dropped_gcode_path(event.mimeData())
