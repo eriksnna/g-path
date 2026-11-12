@@ -21,9 +21,11 @@ from core.machine_profile import MachineProfile, default_profiles
 from core.modes import mode_choices
 from ui.theme import ACCENT_TEXT, SPACE_LG, SPACE_MD, SPACE_SM, SPACE_XL, SPACE_XXL
 
-DIALOG_SIZE = (620, 540)
+DIALOG_SIZE = (620, 600)
 NAV_WIDTH = 140
 LABEL_WIDTH = 120   # mesma largura em todos os cartões: os campos ficam alinhados entre si
+CARD_PADDING = 20
+SECTION_GAP = 12    # espaço extra acima de cada título de seção
 ABOUT_LOGO_SIZE = 44
 AXES = ("X", "Y", "Z")
 NUMBER_LOCALE = QLocale(QLocale.Language.C)  # ponto decimal, como no resto do programa
@@ -36,21 +38,20 @@ THIRD_PARTY = (
     ("Phosphor Icons", "MIT"),
 )
 
-
 def _section_title(text: str) -> QLabel:
     label = QLabel(text.upper())
     label.setObjectName("sectionTitle")
+    label.setContentsMargins(0, SECTION_GAP, 0, 0)
     return label
-
 
 def _card() -> tuple[QFrame, QGridLayout]:
     """Cartão com uma grade de duas ou mais colunas; a primeira é a dos rótulos."""
     card = QFrame()
     card.setObjectName("settingsCard")
     grid = QGridLayout(card)
-    grid.setContentsMargins(SPACE_XL, SPACE_LG, SPACE_XL, SPACE_LG)
+    grid.setContentsMargins(CARD_PADDING, SPACE_XL, CARD_PADDING, SPACE_XL)
     grid.setHorizontalSpacing(SPACE_MD)
-    grid.setVerticalSpacing(SPACE_SM)
+    grid.setVerticalSpacing(SPACE_MD)
     grid.setColumnMinimumWidth(0, LABEL_WIDTH)
     return card, grid
 
@@ -387,6 +388,7 @@ class SettingsDialog(QDialog):
 
         self._nav = QListWidget()
         self._nav.setObjectName("settingsNav")
+        self._nav.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self._nav.addItems([
             tr("nav_profiles"), tr("nav_shortcuts"), tr("nav_appearance"), tr("nav_about"),
         ])
