@@ -195,9 +195,10 @@ QComboBox:hover {{ border: 1px solid {TEXT_SECONDARY}; }}
 QComboBox:focus {{ border: 1px solid {ACCENT}; }}
 QComboBox::drop-down {{ border: none; width: 22px; }}
 QComboBox {{ combobox-popup: 0; }}
+QComboBoxPrivateContainer {{ background: {SURFACE_2}; border: none; }}
 QComboBox QAbstractItemView {{
     background: {SURFACE_2}; color: {TEXT_PRIMARY}; border: 1px solid {BORDER_STRONG};
-    padding: 4px; outline: none;
+    border-radius: {RADIUS_MD}; padding: 4px; outline: none;
 }}
 QComboBox QAbstractItemView::item {{ padding: 6px 12px; border-radius: {RADIUS_SM}; min-height: 20px; }}
 QComboBox QAbstractItemView::item:hover, QComboBox QAbstractItemView::item:selected {{
