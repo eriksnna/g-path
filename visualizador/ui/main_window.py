@@ -38,6 +38,7 @@ from ui.player_bar import PlayerBar
 from ui.stats_panel import StatsPanel
 from ui.theme import DARK_QSS
 from ui.viewport import ToolpathView
+from ui.dro import DroOverlay
 from ui.start_panel import StartPanel
 
 def _gcode_filter() -> str:
@@ -110,6 +111,7 @@ class MainWindow(QMainWindow):
         self._layer_controls = LayerControls()
         self._camera_controls = CameraControls()
         self._viewport = ToolpathView()
+        self._dro = DroOverlay(self._viewport)
         self._editor = GCodeEditor()
         self._editor.setVisible(False)
         self._stats_panel = StatsPanel()
@@ -563,6 +565,7 @@ class MainWindow(QMainWindow):
         status = status if status is not None else tr("status_no_moves")
         self._toolpath = None
         self._viewport.clear()
+        self._dro.hide()
         self._stats_panel.clear()
         self._layer_controls.set_levels([])
         if clear_issues:
@@ -651,6 +654,8 @@ class MainWindow(QMainWindow):
         self._player.set_progress(pb.progress, pb.elapsed)
         self._player.set_playing(pb.playing)
         self._update_position_chips(snapshot)
+        index = min(snapshot.done, self._toolpath.count - 1)
+        self._dro.show_state(snapshot.head, float(self._toolpath.feeds[index]), snapshot.active)
         self._stats_panel.show_progress(
             pb.elapsed, pb.total_time, snapshot.done, self._toolpath.count,
         )

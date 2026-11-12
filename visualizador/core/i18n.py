@@ -116,6 +116,8 @@ _STRINGS: dict[str, dict[str, str]] = {
         IT: "Movimento successivo (Shift: strato successivo)",
     },
     "player_layer_chip": {PT_BR: "Camada {layer}/{total}", EN: "Layer {layer}/{total}", IT: "Strato {layer}/{total}"},
+    "dro_process_on": {PT_BR: "ligado", EN: "on", IT: "attivo"},
+    "dro_process_off": {PT_BR: "desligado", EN: "off", IT: "spento"},
     "label_speed": {PT_BR: "Velocidade", EN: "Speed", IT: "Velocità"},
     "chip_process_on": {PT_BR: "Processo ligado", EN: "Process on", IT: "Processo attivo"},
     "chip_process_off": {PT_BR: "Processo desligado", EN: "Process off", IT: "Processo spento"},

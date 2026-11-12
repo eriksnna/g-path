@@ -38,3 +38,8 @@ def test_time_at_line_returns_start_of_first_move_from_that_line():
     ])
     assert path.time_at_line(2) == pytest.approx(1.0)
     assert path.time_at_line(4) is None
+
+def test_feeds_are_effective_speed_per_move():
+    from core.parser import parse_gcode
+    toolpath = Toolpath(parse_gcode("G1 X10 F200\nG4 P1\nG0 X0").moves, rapid_feed=5000)
+    assert list(toolpath.feeds) == [200.0, 0.0, 5000.0]

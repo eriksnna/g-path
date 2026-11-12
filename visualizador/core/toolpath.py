@@ -62,6 +62,8 @@ class Toolpath:
 
         # esperas duram o tempo programado; movimentos, distância / velocidade
         self.durations = np.where(self.is_dwell, self.dwell, travel)
+        # velocidade efetiva de cada movimento, em mm/min; parada durante uma espera
+        self.feeds = np.where(self.is_dwell, 0.0, feeds)
         self.cum_end = np.cumsum(self.durations)
         self.cum_start = self.cum_end - self.durations
 

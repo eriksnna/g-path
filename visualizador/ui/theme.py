@@ -129,6 +129,11 @@ QFrame#playbar {{ background: {SURFACE_1}; border: none; border-radius: {RADIUS_
 QLabel#timeLabel {{ color: {TEXT_PRIMARY}; font-family: {FONT_MONO}; font-size: {FONT_SMALL}; min-width: 44px; }}
 QLabel#timeLabelMuted {{ color: {TEXT_SECONDARY}; font-family: {FONT_MONO}; font-size: {FONT_SMALL}; min-width: 44px; }}
 QLabel#playerMessage {{ color: {TEXT_SECONDARY}; font-size: {FONT_SMALL}; }}
+
+QFrame#dro {{ background: {SURFACE_1}; border: 1px solid {BORDER}; border-radius: {RADIUS_MD}; }}
+QLabel#droName {{ color: {TEXT_SECONDARY}; font-family: {FONT_MONO}; font-size: {FONT_SMALL}; }}
+QLabel#droValue {{ color: {TEXT_PRIMARY}; font-family: {FONT_MONO}; font-size: {FONT_SMALL}; min-width: 64px; }}
+
 QLabel#chip {{
     color: {TEXT_SECONDARY}; background: {SURFACE_2}; border: 1px solid {BORDER};
     border-radius: {RADIUS_SM}; padding: 2px 8px; font-family: {FONT_MONO}; font-size: {FONT_SMALL};
