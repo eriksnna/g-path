@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import re
+from collections import Counter
 from dataclasses import dataclass
+from typing import Iterable
 
 ERROR = "erro"
 WARNING = "aviso"
@@ -22,6 +24,13 @@ class Issue:
     severity: str  # ERROR ou WARNING
     message: str
 
+def group_issues(issues: Iterable[Issue]) -> list[tuple[Issue, int]]:
+    """junta problemas idênticos (mesma linha, gravidade e mensagem) com a contagem.
+
+    uma linha dentro de sub-rotina gera o mesmo problema a cada chamada; a lista
+    mostra uma vez só. A ordem é a da primeira ocorrência.
+    """
+    return list(Counter(issues).items())
 
 def clean_line(raw: str) -> str:
     """remove comentários, espaços das pontas e padroniza em maiúsculas."""

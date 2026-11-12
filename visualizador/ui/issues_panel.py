@@ -9,6 +9,8 @@ from PySide6.QtWidgets import (
     QFrame, QLabel, QListWidget, QListWidgetItem, QVBoxLayout,
 )
 
+from core.lexer import group_issues
+
 from core.parser import ERROR, WARNING, Issue
 from ui.theme import ERROR_COLOR, WARNING_COLOR
 
@@ -59,12 +61,16 @@ class IssuesPanel(QFrame):
 
     def show_issues(self, issues: list[Issue]) -> None:
         self._list.clear()
-        for issue in issues:
-            item = QListWidgetItem(f"L{issue.line}   {issue.message}")
+        for issue, count in group_issues(issues):
+            repeat = f"   (×{count})" if count > 1 else ""
+            item = QListWidgetItem(f"L{issue.line}   {issue.message}{repeat}")
             item.setData(LINE_ROLE, issue.line)
             color = ERROR_COLOR if issue.severity == ERROR else WARNING_COLOR
             item.setForeground(QColor(color))
-            item.setToolTip(f"{tr(_SEVERITY_LABELS.get(issue.severity, issue.severity))}: {issue.message}")
+            tooltip = f"{tr(_SEVERITY_LABELS.get(issue.severity, issue.severity))}: {issue.message}"
+            if count > 1:
+                tooltip += "\n" + tr("validation_repeated").format(count=count)
+            item.setToolTip(tooltip)
             self._list.addItem(item)
 
         errors = sum(1 for issue in issues if issue.severity == ERROR)

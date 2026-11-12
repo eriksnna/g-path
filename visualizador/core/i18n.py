@@ -127,6 +127,11 @@ _STRINGS: dict[str, dict[str, str]] = {
         IT: "Questo programma usa {codes} per attivare e disattivare il processo, ma il dialetto attuale è {current}.",
     },
     "dialect_suggestion_action": {PT_BR: "Usar {name}", EN: "Use {name}", IT: "Usa {name}"},
+        "validation_repeated": {
+        PT_BR: "Ocorre {count} vezes (a linha é executada mais de uma vez)",
+        EN: "Occurs {count} times (the line runs more than once)",
+        IT: "Si verifica {count} volte (la riga viene eseguita più volte)",
+    },
     "dro_process_on": {PT_BR: "ligado", EN: "on", IT: "attivo"},
     "dro_process_off": {PT_BR: "desligado", EN: "off", IT: "spento"},
     "label_speed": {PT_BR: "Velocidade", EN: "Speed", IT: "Velocità"},
