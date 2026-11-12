@@ -5,6 +5,7 @@ from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QComboBox, QDoubleSpinBox, QHBoxLayout, QLabel, QWidget
 
 from core.i18n import tr
+from ui.combo import ComboBox
 from ui.theme import SPACE_SM
 
 from config import BEAD_HEIGHT_MM, BEAD_WIDTH_MM, DEFAULT_MODE, DEPOSIT_DENSITY_G_CM3
@@ -21,7 +22,7 @@ class ModeControls(QWidget):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
 
-        self._combo = QComboBox()
+        self._combo = ComboBox()
         for label, key in mode_choices():
             self._combo.addItem(label, key)
         self._combo.setCurrentIndex(max(0, self._combo.findData(DEFAULT_MODE)))

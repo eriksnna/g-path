@@ -164,7 +164,7 @@ QLabel#kbd {{
 }}
 QPushButton#linkDanger {{ background: transparent; color: {ERROR_COLOR}; padding: 4px 0; font-size: {FONT_SMALL}; }}
 QPushButton#linkDanger:hover {{ text-decoration: underline; }}
-QListWidget#settingsNav {{ background: transparent; border: none; }}
+QListWidget#settingsNav::item {{ padding: 8px 12px; margin-bottom: 4px; }}
 
 QFrame#card {{ background: {SURFACE_2}; border: 1px solid {BORDER}; border-radius: {RADIUS_MD}; }}
 
@@ -194,9 +194,14 @@ QComboBox {{
 QComboBox:hover {{ border: 1px solid {TEXT_SECONDARY}; }}
 QComboBox:focus {{ border: 1px solid {ACCENT}; }}
 QComboBox::drop-down {{ border: none; width: 22px; }}
+QComboBox {{ combobox-popup: 0; }}
 QComboBox QAbstractItemView {{
-    background: {SURFACE_2}; color: {TEXT_PRIMARY}; border: 1px solid {BORDER};
-    border-radius: {RADIUS_SM}; selection-background-color: {ACCENT}; outline: none;
+    background: {SURFACE_2}; color: {TEXT_PRIMARY}; border: 1px solid {BORDER_STRONG};
+    padding: 4px; outline: none;
+}}
+QComboBox QAbstractItemView::item {{ padding: 6px 12px; border-radius: {RADIUS_SM}; min-height: 20px; }}
+QComboBox QAbstractItemView::item:hover, QComboBox QAbstractItemView::item:selected {{
+    background: {SURFACE_3}; color: {TEXT_PRIMARY};
 }}
 
 QCheckBox {{ color: {TEXT_PRIMARY}; spacing: 8px; font-family: {FONT_FAMILY}; }}

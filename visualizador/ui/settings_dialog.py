@@ -19,6 +19,7 @@ from core.dialect import dialect_choices
 from core.i18n import LANGUAGES, get_language, set_language, tr
 from core.machine_profile import MachineProfile, default_profiles
 from core.modes import mode_choices
+from ui.combo import ComboBox
 from ui.theme import ACCENT_TEXT, SPACE_LG, SPACE_MD, SPACE_SM, SPACE_XL, SPACE_XXL
 
 DIALOG_SIZE = (620, 600)
@@ -90,7 +91,7 @@ class _ProfilesPage(QWidget):
         self._spinboxes: dict[str, tuple[QDoubleSpinBox, QDoubleSpinBox]] = {}
         self._loading = False
 
-        self._profile_combo = QComboBox()
+        self._profile_combo = ComboBox()
         for profile in self._profiles:
             self._profile_combo.addItem(profile.name)
         start_row = self._profiles.index(self._active) if self._active in self._profiles else 0
@@ -106,16 +107,16 @@ class _ProfilesPage(QWidget):
         profile_row.addWidget(self._profile_combo, 1)
         profile_row.addWidget(add_button)
 
-        self._mode_combo = QComboBox()
+        self._mode_combo = ComboBox()
         for label, key in mode_choices():
             self._mode_combo.addItem(label, key)
-        self._dialect_combo = QComboBox()
+        self._dialect_combo = ComboBox()
         for label, key in dialect_choices():
             self._dialect_combo.addItem(label, key)
         config_card, config_grid = _card()
-        config_grid.addWidget(QLabel(tr("label_mode_colon")), 0, 0)
+        config_grid.addWidget(QLabel(tr("label_mode_colon").rstrip(":")), 0, 0)
         config_grid.addWidget(self._mode_combo, 0, 1)
-        config_grid.addWidget(QLabel(tr("label_dialect_colon")), 1, 0)
+        config_grid.addWidget(QLabel(tr("label_dialect_colon").rstrip(":")), 1, 0)
         config_grid.addWidget(self._dialect_combo, 1, 1)
         config_grid.setColumnStretch(1, 1)
 
@@ -146,7 +147,7 @@ class _ProfilesPage(QWidget):
             ("label_arc_resolution", self._arc_step_spin),
         )
         for row, (key, spin) in enumerate(advanced_fields):
-            advanced_grid.addWidget(QLabel(tr(key)), row, 0)
+            advanced_grid.addWidget(QLabel(tr(key).rstrip(":")), row, 0)
             advanced_grid.addWidget(spin, row, 1)
         advanced_grid.setColumnStretch(1, 1)
 
@@ -286,7 +287,7 @@ class _ShortcutsPage(QWidget):
 class _AppearancePage(QWidget):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        self._language_combo = QComboBox()
+        self._language_combo = ComboBox()
         for code, label in LANGUAGES:
             self._language_combo.addItem(label, code)
         self._language_combo.setCurrentIndex(
@@ -297,7 +298,7 @@ class _AppearancePage(QWidget):
         note.setWordWrap(True)
 
         card, grid = _card()
-        grid.addWidget(QLabel(tr("appearance_language_label")), 0, 0)
+        grid.addWidget(QLabel(tr("appearance_language_label").rstrip(":")), 0, 0)
         grid.addWidget(self._language_combo, 0, 1)
         grid.addWidget(note, 1, 1)
         grid.setColumnStretch(1, 1)

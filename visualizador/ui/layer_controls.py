@@ -7,6 +7,7 @@ from typing import Sequence
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QCheckBox, QComboBox, QHBoxLayout, QLabel, QWidget
 
+from ui.combo import ComboBox
 from ui.theme import SPACE_SM
 
 COMBO_MIN_WIDTH = 140
@@ -19,7 +20,7 @@ class LayerControls(QWidget):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
 
-        self._combo = QComboBox()
+        self._combo = ComboBox()
         self._combo.setMinimumWidth(COMBO_MIN_WIDTH)
         self._combo.currentIndexChanged.connect(self._on_index_changed)
 
