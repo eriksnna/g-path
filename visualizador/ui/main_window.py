@@ -46,6 +46,8 @@ def _gcode_filter() -> str:
     patterns = " ".join(f"*{ext}" for ext in config.GCODE_EXTENSIONS)
     return f"G-code ({patterns});;{tr('file_filter_all')} (*)"
 
+MAX_DISMISSED_SUGGESTIONS = 50
+
 def _vsep() -> QFrame:
     """linha vertical fina pra separar grupos de controles na barra superior."""
     line = QFrame()
@@ -114,7 +116,6 @@ class MainWindow(QMainWindow):
         self._viewport = ToolpathView()
         self._dro = DroOverlay(self._viewport)
         self._banner = SuggestionBanner()
-        self._dismissed_dialect: str | None = None
         self._editor = GCodeEditor()
         self._editor.setVisible(False)
         self._stats_panel = StatsPanel()
@@ -393,7 +394,7 @@ class MainWindow(QMainWindow):
 
     def _update_dialect_suggestion(self) -> None:
         key = suggest_dialect(self._text or "", self._profile.dialect_key)
-        if key is None or key == self._dismissed_dialect:
+        if key is None or self._dismissal_id(key) in self._dismissed_suggestions():
             self._banner.hide()
             return
         self._banner.show_suggestion(
@@ -403,9 +404,21 @@ class MainWindow(QMainWindow):
             tr("dialect_suggestion_action").format(name=dialect_label(key)),
         )
 
+    def _dismissal_id(self, key: str) -> str:
+        """Identifica a sugestão por arquivo: dispensar em um não cala nos outros."""
+        return f"{self._path or ''}|{key}"
+
+    def _dismissed_suggestions(self) -> list[str]:
+        value = self._settings.value("suggestions/dismissed", [])
+        if isinstance(value, str):  # QSettings devolve string quando sobra só 1 item salvo
+            value = [value]
+        return list(value or [])
+
     def _dismiss_dialect(self, key: str) -> None:
-        """não sugere de novo o mesmo dialeto até outro arquivo ser aberto."""
-        self._dismissed_dialect = key
+        """O × vale para este arquivo, e continua valendo nas próximas aberturas."""
+        dismissed = self._dismissed_suggestions()
+        dismissed.insert(0, self._dismissal_id(key))
+        self._settings.setValue("suggestions/dismissed", dismissed[:MAX_DISMISSED_SUGGESTIONS])
 
     def _use_dialect(self, key: str) -> None:
         """troca o dialeto do perfil ativo pelo sugerido e reinterpreta o programa."""
@@ -475,7 +488,6 @@ class MainWindow(QMainWindow):
             return
         self._encoding = encoding
         self._path = path
-        self._dismissed_dialect = None
         self._text = text
         self._saved_text = text
         self._file_label.setText(str(path))
