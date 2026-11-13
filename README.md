@@ -105,7 +105,24 @@ If the file uses codes from another dialect (for example, M8/M9 to turn the arc 
 
 <!-- ### Examples
 
-The `examples/` folder (included in the `.zip`) has 10 ready-made programs: six machining programs (`machining_*`) and four WAAM deposition programs (`waam_*`). Comments in each file are in English and Portuguese. -->
+The `examples/` folder (included in the `.zip`) has 10 ready-made programs:
+
+| File | What it shows |
+|---|---|
+| `machining_01_face_milling.nc` | Zigzag passes |
+| `machining_02_contour_with_hole.nc` | Contour and hole at different depths |
+| `machining_03_drilling_grid.nc` | Drilling with dwell (G4) |
+| `machining_04_circles_g2_g3.nc` | Arcs with I/J |
+| `machining_05_pocket_in_passes.nc` | Variables, subroutine, and repetitiono |
+| `machining_06_inches_incremental.nc` | Inches (G20) and incremental (G91) |
+| `waam_01_straight_wall.nc` | 4-layer wall |
+| `waam_02_rectangular_frame.nc` | Closed frame in layers |
+| `waam_03_cylinder_in_layers.nc` | Cylindrical wall with subroutine |
+| `waam_04_dots_arc_m8_m9.nc` | Point-by-point deposition, M8/M9 dialect |
+
+- 10 arquivos de exemplo (6 de usinagem, 4 de deposição WAAM), com comentários em português e inglês
+
+- 10 example files (6 machining programs, four WAAM deposition programs), with comments in each file in english and portuguese.-->
 
 ### Running from source
 
