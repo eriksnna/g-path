@@ -8,11 +8,6 @@
   <a href="#português">Português</a> · <a href="#english">English</a>
 </p>
 
-> ⚠️ O download .zip ainda não está disponível. Por enquanto, instale o `.exe` pela página de [**Releases**](https://github.com/eriksnna/g-path/releases).
-
-
-> ⚠️ The .zip download not available yet. for now, install the `.exe` from the [**Releases**](https://github.com/eriksnna/g-path/releases) page.
-
 ## Português
 
 Ferramenta de visualização e simulação 3D de programas G-code, para usinagem e deposição (WAAM).
