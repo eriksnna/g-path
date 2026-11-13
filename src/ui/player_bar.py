@@ -22,7 +22,7 @@ from core.stats import format_duration
 from core.timeline import TimelineMarks
 from ui.theme import ( 
     ACCENT, ACCENT_TEXT, SPACE_XXS, SPACE_MD, SPACE_SM, SPACE_XL, BORDER_STRONG,
-    TEXT_MUTED, ON_ACCENT, SPACE_LG
+    TEXT_MUTED, TEXT_PRIMARY, ON_ACCENT, SPACE_LG
 )
 from ui.text import plain_tooltip
 from ui.icons import FAST_FORWARD, PAUSE, PLAY, REWIND, SKIP_BACK, SKIP_FORWARD, icon
@@ -82,7 +82,7 @@ class _Slider(QSlider):
             painter.setBrush(QColor(ACCENT if self.isEnabled() else TEXT_MUTED))
             painter.drawRoundedRect(filled, radius, radius)
 
-        painter.setBrush(QColor("#ffffff" if self.isEnabled() else TEXT_MUTED))
+        painter.setBrush(QColor(TEXT_PRIMARY if self.isEnabled() else TEXT_MUTED))
         painter.drawEllipse(QPointF(handle_x, track.center().y()), self.HANDLE_RADIUS, self.HANDLE_RADIUS)
         painter.end()
 

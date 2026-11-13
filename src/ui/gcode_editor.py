@@ -16,7 +16,7 @@ from ui import theme
 from ui.icons import CLOSE, HELP, icon
 from ui.gcode_highlighter import GCodeHighlighter
 
-EDITOR_FONT_FAMILY = "Consolas"
+EDITOR_FONT_FAMILIES = ["Consolas", "Cascadia Mono", "DejaVu Sans Mono", "Menlo"]
 EDITOR_FONT_SIZE = 12
 APPLY_SHORTCUT = "Ctrl+Return"
 FIND_SHORTCUT = "Ctrl+F"
@@ -192,7 +192,9 @@ class GCodeEditor(QFrame):
         self._text_edit = _CodeTextEdit()
         self._text_edit.setObjectName("codeEditor")
         self._text_edit.setPlaceholderText(tr("editor_placeholder"))
-        font = QFont(EDITOR_FONT_FAMILY, EDITOR_FONT_SIZE)
+        font = QFont()
+        font.setFamilies(EDITOR_FONT_FAMILIES)
+        font.setPointSize(EDITOR_FONT_SIZE)
         font.setStyleHint(QFont.StyleHint.Monospace)
         self._text_edit.setFont(font)
         self._text_edit.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
@@ -233,7 +235,6 @@ class GCodeEditor(QFrame):
         self._status_label = QLabel("")
         self._status_label.setObjectName("editorStatus")
 
-        self._apply_button = QPushButton(tr("editor_apply_button"))
         self._apply_button = QPushButton(tr("editor_apply_button"))
         self._apply_button.clicked.connect(self._emit_apply)
 

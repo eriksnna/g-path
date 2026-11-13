@@ -4,7 +4,9 @@ from __future__ import annotations
 from PySide6.QtCore import QRegularExpression
 from PySide6.QtGui import QColor, QFont, QSyntaxHighlighter, QTextCharFormat
 
-# Ordem importa: comentários são aplicados por último, para cobrir qualquer coisa dentro deles.
+from ui import theme
+
+# ordem importa: comentários são aplicados por último, para cobrir qualquer coisa dentro deles.
 COMMENT_PAREN_RE = QRegularExpression(r"\([^)]*\)")
 COMMENT_SEMI_RE = QRegularExpression(r";.*$")
 SUBROUTINE_LABEL_RE = QRegularExpression(r"^\s*O\d+\b")
@@ -31,16 +33,16 @@ class GCodeHighlighter(QSyntaxHighlighter):
     def __init__(self, document) -> None:
         super().__init__(document)
         self._rules = [
-            (SUBROUTINE_LABEL_RE, _format("#c792ea", bold=True)),   # rótulo O1000
-            (G_CODE_RE, _format("#82aaff", bold=True)),             # G1, G90...
-            (M_CODE_RE, _format("#f78c6c", bold=True)),             # M8, M98...
-            (AXIS_RE, _format("#c3e88d")),                          # X10, Z-5...
-            (FEED_SPEED_RE, _format("#ffcb6b")),                    # F400, S1200
-            (CALL_PARAM_RE, _format("#ffcb6b")),                    # P1000, L8
-            (VARIABLE_RE, _format("#f07178", bold=True)),           # #1, #5
-            (NUMBER_RE, _format("#89ddff")),                        # números soltos
+            (SUBROUTINE_LABEL_RE, _format(theme.SYNTAX_LABEL, bold=True)),
+            (G_CODE_RE, _format(theme.SYNTAX_G_CODE, bold=True)),
+            (M_CODE_RE, _format(theme.SYNTAX_M_CODE, bold=True)),
+            (AXIS_RE, _format(theme.SYNTAX_AXIS)),
+            (FEED_SPEED_RE, _format(theme.SYNTAX_PARAM)),
+            (CALL_PARAM_RE, _format(theme.SYNTAX_PARAM)),
+            (VARIABLE_RE, _format(theme.SYNTAX_VARIABLE, bold=True)),
+            (NUMBER_RE, _format(theme.SYNTAX_NUMBER)),
         ]
-        self._comment_format = _format("#5c6370", italic=True)
+        self._comment_format = _format(theme.SYNTAX_COMMENT, italic=True)
 
     def highlightBlock(self, text: str) -> None:
         for pattern, fmt in self._rules:

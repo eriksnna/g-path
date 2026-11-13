@@ -37,7 +37,7 @@ from ui.settings_dialog import SettingsDialog
 from ui.player_bar import PlayerBar
 from ui.stats_panel import StatsPanel
 from ui.text import plain_tooltip
-from ui.theme import DARK_QSS
+from ui.theme import DARK_QSS, SPACE_LG, SPACE_MD
 from ui.viewport import ToolpathView
 from ui.dro import DroOverlay
 from ui.suggestion_banner import SuggestionBanner
@@ -154,7 +154,7 @@ class MainWindow(QMainWindow):
         root.setSizeConstraint(QLayout.SizeConstraint.SetNoConstraint)
 
         header = QHBoxLayout()
-        header.setSpacing(10)
+        header.setSpacing(SPACE_MD)
         header.addWidget(self._file_label, 1)
         header.addWidget(self._profile_label)
         header.addWidget(_vsep())
@@ -202,8 +202,8 @@ class MainWindow(QMainWindow):
 
         workspace = QWidget()
         workspace_layout = QVBoxLayout(workspace)
-        workspace_layout.setContentsMargins(12, 12, 12, 12)
-        workspace_layout.setSpacing(10)
+        workspace_layout.setContentsMargins(SPACE_LG, SPACE_LG, SPACE_LG, SPACE_LG)
+        workspace_layout.setSpacing(SPACE_MD)
         workspace_layout.addWidget(self._header_widget)
         workspace_layout.addWidget(self._banner)
         workspace_layout.addWidget(body, 1)

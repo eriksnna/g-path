@@ -21,7 +21,6 @@ ON_ACCENT = "#ffffff"   # cor de texto/ícone sobre fundo ACCENT
 SUCCESS = "#30d158"
 ERROR_COLOR = "#ff6b6b"
 WARNING_COLOR = "#f0b429"
-ICON_COLOR = TEXT_PRIMARY
 
 RADIUS_SM = "6px"
 RADIUS_MD = "8px"
@@ -37,7 +36,7 @@ SPACE_XXL = 16
 
 FONT_FAMILY = "'Segoe UI Variable Display', 'Segoe UI', sans-serif"
 
-FONT_MONO = "Consolas, 'Cascadia Mono', monospace"
+FONT_MONO = "Consolas, 'Cascadia Mono', 'DejaVu Sans Mono', monospace"
 FONT_CAPTION = "11px"
 FONT_SMALL = "12px"
 FONT_BODY = "13px"
@@ -73,6 +72,14 @@ EDITOR_GUTTER_BG = "#191b21"
 EDITOR_GUTTER_TEXT = "#555c6b"
 EDITOR_CURRENT_LINE_BG = "#23262f"
 EDITOR_RUNNING_LINE_BG = "#3a2f12"
+SYNTAX_LABEL = "#c792ea"      # rótulo O1000
+SYNTAX_G_CODE = "#82aaff"     # G1, G90...
+SYNTAX_M_CODE = "#f78c6c"     # M8, M98...
+SYNTAX_AXIS = "#c3e88d"       # X10, Z-5...
+SYNTAX_PARAM = "#ffcb6b"      # F400, S1200, P1000, L8
+SYNTAX_VARIABLE = "#f07178"   # #1, #5
+SYNTAX_NUMBER = "#89ddff"     # números soltos
+SYNTAX_COMMENT = "#5c6370"
 
 # --- folha de estilo ------------------------------------------------------
 
@@ -122,7 +129,6 @@ QPushButton#transport:pressed {{ background: {SURFACE_1}; }}
 
 QPushButton#preset {{ padding: 3px 10px; font-size: {FONT_SMALL}; border-radius: {RADIUS_SM}; background: {SURFACE_2}; }}
 QPushButton#preset:hover {{ background: {SURFACE_3}; }}
-QPushButton#preset:checked {{ background: {ACCENT}; color: {ON_ACCENT}; }}
 
 QFrame#playbar {{ background: {SURFACE_1}; border: none; border-radius: {RADIUS_LG}; }}
 
@@ -172,16 +178,17 @@ QFrame#headerSeparator {{ background: {BORDER}; max-width: 1px; min-width: 1px; 
 
 QLabel#cardTitle {{ color: {TEXT_SECONDARY}; font-size: {FONT_CAPTION}; font-weight: {WEIGHT_STRONG}; letter-spacing: 0.5px; }}
 QLabel#cardValue {{ color: {TEXT_PRIMARY}; font-size: {FONT_VALUE}; font-weight: {WEIGHT_STRONG}; }}
+QLabel#cardDetail {{ color: {TEXT_SECONDARY}; font-size: {FONT_CAPTION}; }}
 QLabel#sectionTitle {{ color: {TEXT_SECONDARY}; font-size: {FONT_CAPTION}; font-weight: {WEIGHT_STRONG}; margin-top: 4px; }}
 
 QProgressBar {{ background: {SURFACE_2}; border: none; border-radius: 4px; }}
-QProgressBar::chunk {{ background: {ACCENT}; border-radius: 4px; }}
+QProgressBar::chunk {{ background: {TEXT_SECONDARY}; border-radius: 4px; }}
 
 QListWidget {{
     background: {SURFACE_2}; color: {TEXT_PRIMARY};
     border: none; border-radius: {RADIUS_MD}; font-size: {FONT_SMALL};
 }}
-QListWidget::item {{ padding: 6px 10px; border-radius: 6px; }}
+QListWidget::item {{ padding: 6px 10px; border-radius: {RADIUS_SM}; }}
 QListWidget::item:hover {{ background: {SURFACE_3}; }}
 QListWidget::item:selected {{ background: {ACCENT_SOFT}; color: {ACCENT_TEXT}; }}
 
@@ -245,8 +252,6 @@ QPlainTextEdit#codeEditor {{
     selection-background-color: {ACCENT};
 }}
 QLabel#editorStatus {{ color: {WARNING_COLOR}; font-size: {FONT_CAPTION}; font-weight: {WEIGHT_STRONG}; }}
-QPushButton#applyEdit {{ background: {ACCENT}; }}
-QPushButton#applyEdit:hover {{ background: {ACCENT_HOVER}; }}
 QPushButton#editorToggle:checked {{ background: {ACCENT_SOFT}; color: {ACCENT_TEXT}; }}
 QPushButton#saveEdit {{ background: {SURFACE_2}; }}
 QPushButton#saveAsEdit {{ background: {SURFACE_2}; }}

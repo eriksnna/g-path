@@ -13,7 +13,7 @@ from core.lexer import group_issues
 
 from core.parser import ERROR, WARNING, Issue
 from ui.text import plain_tooltip
-from ui.theme import ERROR_COLOR, WARNING_COLOR
+from ui.theme import ERROR_COLOR, SPACE_SM, SPACE_XL, WARNING_COLOR
 
 PANEL_WIDTH = 300
 LINE_ROLE = Qt.ItemDataRole.UserRole
@@ -51,8 +51,8 @@ class IssuesPanel(QFrame):
         self._detail.setWordWrap(True)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(14, 14, 14, 14)
-        layout.setSpacing(8)
+        layout.setContentsMargins(SPACE_XL, SPACE_XL, SPACE_XL, SPACE_XL)
+        layout.setSpacing(SPACE_SM)
         layout.addWidget(title)
         layout.addWidget(self._summary)
         layout.addWidget(self._list, 1)
