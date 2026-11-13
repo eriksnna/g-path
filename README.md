@@ -4,25 +4,128 @@
   <img src="assets/logo.png" alt="Logo do G-Path" width="120">
 </p>
 
-## Sobre
+<p align="center">
+  <a href="#português">Português</a> · <a href="#english">English</a>
+</p>
 
-Ferramenta de visualização e simulação 3D de programas G-code.
+## Português
 
-## Instalação e uso
+Ferramenta de visualização e simulação 3D de programas G-code, para usinagem e deposição (WAAM).
 
-1. Baixe o executável mais recente na aba [**Releases**](https://github.com/eriksnna/g-path/releases);
-2. Rode o `G-Path.exe` — não precisa instalar Python nem nenhuma dependência;
-3. Na tela inicial, escolha **abrir um arquivo G-code** existente ou **começar do zero** no editor.
+### Instalação
+
+1. Baixe o `.zip` mais recente na aba [**Releases**](https://github.com/eriksnna/g-path/releases);
+2. Extraia a pasta inteira;
+3. Abra o `G-Path.exe`. Não precisa instalar Python nem nenhuma dependência.
 
 > ⚠️ Na primeira execução, o Windows pode exibir um aviso do SmartScreen ("O Windows protegeu seu PC"), já que o executável ainda não tem assinatura digital. Clique em **"Mais informações" → "Executar assim mesmo"**.
 
-Pra testar sem ter um G-code à mão, use os arquivos de exemplo na pasta `examples/` do repositório (um de usinagem, outro de deposição/WAAM).
+### Como usar
+
+1. Na tela inicial, **abra um arquivo G-code**, escolha um **recente**, **arraste um arquivo** para a janela ou **comece do zero** no editor;
+2. Use a barra de reprodução para simular o percurso. A leitura no canto do visualizador mostra a posição, o avanço e se o processo está ligado;
+3. Escolha o **modo** (Usinagem ou Deposição) no cabeçalho. O painel lateral mostra as estatísticas de cada modo;
+4. O painel de **validação** lista os problemas do programa. Clique em um deles para ir até a linha;
+5. Em **Ajustes**, configure o perfil da máquina: modo, dialeto, limites de curso e avanços.
+
+Se o arquivo usar códigos de outro dialeto (por exemplo, M8/M9 para abrir e fechar o arco), o G-Path sugere a troca.
+
+| Atalho | Ação |
+|---|---|
+| Espaço | Reproduzir ou pausar |
+| ← → | Movimento anterior ou próximo |
+| Shift + ← → | Camada anterior ou próxima |
+| Home / End | Ir ao início ou ao fim |
+| Ctrl + Enter | Aplicar o código do editor |
+| Ctrl + S | Salvar |
+
+### Exemplos
+
+A pasta `examples/` (incluída no `.zip`) traz 10 programas prontos:
+
+| Arquivo | O que mostra |
+|---|---|
+| `machining_01_face_milling.nc` | Passadas em zigue-zague |
+| `machining_02_contour_with_hole.nc` | Contorno e furo em profundidades diferentes |
+| `machining_03_drilling_grid.nc` | Furação com espera (G4) |
+| `machining_04_circles_g2_g3.nc` | Arcos com I/J |
+| `machining_05_pocket_in_passes.nc` | Variáveis, sub-rotina e repetição |
+| `machining_06_inches_incremental.nc` | Polegadas (G20) e incremental (G91) |
+| `waam_01_straight_wall.nc` | Parede em 4 camadas |
+| `waam_02_rectangular_frame.nc` | Quadro fechado em camadas |
+| `waam_03_cylinder_in_layers.nc` | Parede cilíndrica com sub-rotina |
+| `waam_04_dots_arc_m8_m9.nc` | Deposição ponto a ponto, dialeto M8/M9 |
+
+- 10 arquivos de exemplo (6 de usinagem, 4 de deposição WAAM), com comentários em português e inglês
+
+### Rodar a partir do código-fonte
+
+Funciona em Windows, Linux e macOS, com Python 3.14.7 ou mais novo:
+
+`pip install -r requirements.txt`
+`cd visualizador`
+`python main.py`
+
+
+Testes: `pip install -r requirements-dev.txt` e `python -m pytest`, dentro de `visualizador/`.
+
+### Créditos e licença
+
+G-Path é distribuído sob a licença [MIT](LICENSE). Bibliotecas de terceiros: veja [THIRD-PARTY-LICENSES.txt](THIRD-PARTY-LICENSES.txt).
+Ícones: [Phosphor Icons](https://phosphoricons.com) — MIT License, © Phosphor Icons.
+
+## English
+
+3D visualization and simulation tool for G-code programs, for machining and deposition (WAAM).
+
+### Installation
+
+1. Download the latest `.zip` from the [**Releases**](https://github.com/eriksnna/g-path/releases) tab;
+2. Extract the whole folder;
+3. Run `G-Path.exe`. No Python or other dependency is needed.
+
+> ⚠️ On first run, Windows may show a SmartScreen warning ("Windows protected your PC"), since the executable is not digitally signed yet. Click **"More info" → "Run anyway"**.
+
+### How to use
+
+1. On the start screen, **open a G-code file**, pick a **recent** one, **drag a file** into the window or **start from scratch** in the editor;
+2. Use the playback bar to simulate the toolpath. The readout in the viewer corner shows the position, the feed and whether the process is on;
+3. Choose the **mode** (Machining or Deposition) in the header. The side panel shows the statistics for each mode;
+4. The **validation** panel lists the program's issues. Click one to jump to its line;
+5. In **Settings**, configure the machine profile: mode, dialect, travel limits and feeds.
+
+If the file uses codes from another dialect (for example, M8/M9 to turn the arc on and off), G-Path suggests switching.
+
+| Shortcut | Action |
+|---|---|
+| Space | Play or pause |
+| ← → | Previous or next move |
+| Shift + ← → | Previous or next layer |
+| Home / End | Go to start or end |
+| Ctrl + Enter | Apply the editor code |
+| Ctrl + S | Save |
+
+### Examples
+
+The `examples/` folder (included in the `.zip`) has 10 ready-made programs: six machining programs (`machining_*`) and four WAAM deposition programs (`waam_*`). Comments in each file are in English and Portuguese.
+
+### Running from source
+
+Works on Windows, Linux and macOS, with Python 3.14.7 or newer:
+
+`pip install -r requirements.txt`
+`cd visualizador`
+`python main.py`
+
+
+Tests: `pip install -r requirements-dev.txt` and `python -m pytest`, inside `visualizador/`.
+
+### Credits and license
+
+G-Path is distributed under the [MIT](LICENSE) license. Third-party libraries: see [THIRD-PARTY-LICENSES.txt](THIRD-PARTY-LICENSES.txt).
+Icons: [Phosphor Icons](https://phosphoricons.com) — MIT License, © Phosphor Icons.
 
 <!-- TODO: gifs de uso aqui — abrir arquivo, reprodução da simulação, troca de modo/idioma -->
-
-## Créditos
-
-Ícones: [Phosphor Icons](https://phosphoricons.com) — MIT License, © Phosphor Icons.
 
 Diário de Dev 🤠👇👇
 

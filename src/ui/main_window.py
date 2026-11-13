@@ -36,6 +36,7 @@ from core.profile_store import load_profiles, save_profiles
 from ui.settings_dialog import SettingsDialog
 from ui.player_bar import PlayerBar
 from ui.stats_panel import StatsPanel
+from ui.text import plain_tooltip
 from ui.theme import DARK_QSS
 from ui.viewport import ToolpathView
 from ui.dro import DroOverlay
@@ -60,6 +61,7 @@ class _ElidingLabel(QLabel):
     def __init__(self, text: str = "", parent=None) -> None:
         super().__init__(parent)
         self._full_text = text
+        self.setTextFormat(Qt.TextFormat.PlainText)
         self.setMinimumWidth(140)
         super().setText(text)
 
@@ -76,7 +78,7 @@ class _ElidingLabel(QLabel):
             self._full_text, Qt.TextElideMode.ElideMiddle, self.width()
         )
         super().setText(elided)
-        self.setToolTip(self._full_text)
+        self.setToolTip(plain_tooltip(self._full_text))
 
 class MainWindow(QMainWindow):
 

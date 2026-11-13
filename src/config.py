@@ -7,7 +7,7 @@ CONFIG_DIR = Path(os.environ.get("APPDATA", str(Path.home() / ".config"))) / "GP
 PROFILES_FILE = CONFIG_DIR / "profiles.json"
 SETTINGS_FILE = CONFIG_DIR / "settings.json"
 
-APP_VERSION = "0.2.1-beta"
+APP_VERSION = "0.3.0-beta"
 
 APP_TITLE = "G-Path"
 AUTHOR_NAME = "Erik Senna"
@@ -53,6 +53,7 @@ LAYER_DECIMALS = 3
 # expansão de sub-rotinas
 MAX_CALL_DEPTH = 10            # níveis de M98 aninhados antes de considerar recursão
 MAX_EXPANDED_LINES = 100_000   # limite de segurança para o programa expandido
+MAX_MOVES = 1_000_000          # movimentos gerados; acima disso a memória não aguenta em máquinas modestas
 
 # dialeto padrão de G-code (chave em core/dialect.py). Troque para o perfil da sua máquina.
 DEFAULT_DIALECT = "generico"

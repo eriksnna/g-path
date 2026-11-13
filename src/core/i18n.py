@@ -10,8 +10,6 @@ IT = "it"
 LANGUAGES = [(PT_BR, "Português (Brasil)"), (EN, "English"), (IT, "Italiano")]
 
 _STRINGS: dict[str, dict[str, str]] = {
-    "app_title": {PT_BR: "G-Path", EN: "G-Path", IT: "G-Path"},
-
     # --- tela inicial ---------------------------------------------------
     "start_subtitle": {
         PT_BR: "Ferramenta de visualização e simulação 3D de programas G-code.",
@@ -108,8 +106,6 @@ _STRINGS: dict[str, dict[str, str]] = {
     # --- barra de reprodução ------------------------------------------------
     "tooltip_play_pause": {PT_BR: "Reproduzir / pausar", EN: "Play / pause", IT: "Riproduci / pausa"},
     "tooltip_go_start": {PT_BR: "Ir para o início", EN: "Go to start", IT: "Vai all'inizio"},
-    "tooltip_rewind": {PT_BR: "Retroceder", EN: "Rewind", IT: "Indietro"},
-    "tooltip_forward": {PT_BR: "Avançar", EN: "Forward", IT: "Avanti"},
     "tooltip_go_end": {PT_BR: "Ir para o fim", EN: "Go to end", IT: "Vai alla fine"},
     "tooltip_step_back": {
         PT_BR: "Movimento anterior (Shift: camada anterior)",
@@ -283,7 +279,6 @@ _STRINGS: dict[str, dict[str, str]] = {
         EN: 'Remove the profile "{name}"?',
         IT: 'Rimuovere il profilo "{name}"?',
     },
-    "shortcuts_label": {PT_BR: "Atalhos do editor:", EN: "Editor shortcuts:", IT: "Scorciatoie dell'editor:"},
     "appearance_language_label": {PT_BR: "Idioma:", EN: "Language:", IT: "Lingua:"},
     "appearance_restart_note": {
         PT_BR: "Reinicie o programa para aplicar o novo idioma.",
@@ -379,6 +374,11 @@ _STRINGS: dict[str, dict[str, str]] = {
         PT_BR: "chamadas aninhadas acima de {max_depth} níveis; possível recursão",
         EN: "nested calls beyond {max_depth} levels; possible recursion",
         IT: "chiamate annidate oltre {max_depth} livelli; possibile ricorsione",
+    },
+    "issue_too_many_moves": {
+        PT_BR: "programa acima de {max_moves} movimentos; o restante foi ignorado",
+        EN: "program beyond {max_moves} moves; the rest was ignored",
+        IT: "programma oltre {max_moves} movimenti; il resto è stato ignorato",
     },
     "issue_expansion_too_long": {
         PT_BR: "programa expandido acima de {max_lines} linhas; expansão interrompida",

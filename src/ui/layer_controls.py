@@ -5,7 +5,7 @@ from core.i18n import tr
 from typing import Sequence
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QCheckBox, QComboBox, QHBoxLayout, QLabel, QWidget
+from PySide6.QtWidgets import QCheckBox, QHBoxLayout, QLabel, QWidget
 
 from ui.combo import ComboBox
 from ui.theme import SPACE_SM

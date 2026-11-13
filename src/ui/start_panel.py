@@ -11,6 +11,7 @@ import config
 from core.i18n import tr
 from ui.icons import SETTINGS, icon
 from ui.start_background import StartBackground
+from ui.text import plain_tooltip
 from ui.theme import SPACE_LG, SPACE_MD, SPACE_SM, SPACE_XL, SPACE_XXL, SPACE_XXS, TEXT_SECONDARY
 
 TITLE = "G-Path"
@@ -31,7 +32,7 @@ class _RecentRow(QPushButton):
         self.setObjectName("recentRow")
         self.setFixedHeight(RECENT_ROW_HEIGHT)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.setToolTip(path)
+        self.setToolTip(plain_tooltip(path))
 
         name = QLabel(Path(path).name)
         name.setObjectName("recentName")
@@ -40,6 +41,7 @@ class _RecentRow(QPushButton):
         folder.setText(folder.fontMetrics().elidedText(
             str(Path(path).parent), Qt.TextElideMode.ElideMiddle, FOLDER_MAX_WIDTH))
         for label in (name, folder):
+            label.setTextFormat(Qt.TextFormat.PlainText)
             # o clique passa pelos rótulos e chega ao botão
             label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
 

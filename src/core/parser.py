@@ -8,7 +8,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 
-from config import ARC_STEP_DEG, DEFAULT_DIALECT, DEFAULT_FEED, INCH_TO_MM
+from config import ARC_STEP_DEG, DEFAULT_DIALECT, DEFAULT_FEED, INCH_TO_MM, MAX_MOVES
 from core.machine_profile import DEFAULT_LIMITS as MACHINE_LIMITS
 from core.dialect import Dialect, get_dialect
 from core.expander import expand_program
@@ -141,9 +141,12 @@ class GCodeInterpreter:
         self._feed_programmed = False
         self._feed_warned = False
         self._bounds_reported_line = 0
+        self._overflow = False  # passou de MAX_MOVES: as linhas seguintes são ignoradas
 
     def run_line(self, line: str, lineno: int) -> None:
         self._lineno = lineno
+        if self._overflow:
+            return
         try:
             self._execute(line)
         except GCodeError as err:
@@ -234,13 +237,20 @@ class GCodeInterpreter:
 
     # --- movimentos e esperas ---
 
+    def _add_move(self, move: Move) -> None:
+        """único ponto de entrada de movimentos, para o limite valer em retas, arcos e esperas."""
+        if len(self.moves) >= MAX_MOVES:
+            self._overflow = True
+            raise GCodeError(tr("issue_too_many_moves").format(max_moves=MAX_MOVES))
+        self.moves.append(move)
+
     def _dwell(self, duration: float) -> None:
         """G04: espera no mesmo ponto. a unidade do P vem do dialeto."""
         seconds = duration * self.dialect.dwell_unit
         if seconds <= 0:
             return
         self.commands["G4"] += 1
-        self.moves.append(Move(
+        self._add_move(Move(
             start=self.position,
             end=self.position,
             is_cut=False,
@@ -257,7 +267,7 @@ class GCodeInterpreter:
         if is_cut:
             self._check_feed()
         self._check_bounds([end])
-        self.moves.append(Move(
+        self._add_move(Move(
             self.position, end, is_cut, self.feed, self._lineno,
             active=self.process_active,
             rapid=self.motion == G_RAPID,
@@ -287,7 +297,7 @@ class GCodeInterpreter:
 
         previous = start
         for point in points:
-            self.moves.append(Move(
+            self._add_move(Move(
                 previous, point, True, self.feed, self._lineno,
                 active=self.process_active,
             ))

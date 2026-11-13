@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
 from core.lexer import group_issues
 
 from core.parser import ERROR, WARNING, Issue
+from ui.text import plain_tooltip
 from ui.theme import ERROR_COLOR, WARNING_COLOR
 
 PANEL_WIDTH = 300
@@ -46,6 +47,7 @@ class IssuesPanel(QFrame):
 
         self._detail = QLabel(tr("validation_hint"))
         self._detail.setObjectName("issueDetail")
+        self._detail.setTextFormat(Qt.TextFormat.PlainText)
         self._detail.setWordWrap(True)
 
         layout = QVBoxLayout(self)
@@ -70,7 +72,7 @@ class IssuesPanel(QFrame):
             tooltip = f"{tr(_SEVERITY_LABELS.get(issue.severity, issue.severity))}: {issue.message}"
             if count > 1:
                 tooltip += "\n" + tr("validation_repeated").format(count=count)
-            item.setToolTip(tooltip)
+            item.setToolTip(plain_tooltip(tooltip))
             self._list.addItem(item)
 
         errors = sum(1 for issue in issues if issue.severity == ERROR)

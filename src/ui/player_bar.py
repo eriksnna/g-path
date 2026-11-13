@@ -24,6 +24,7 @@ from ui.theme import (
     ACCENT, ACCENT_TEXT, SPACE_XXS, SPACE_MD, SPACE_SM, SPACE_XL, BORDER_STRONG,
     TEXT_MUTED, ON_ACCENT, SPACE_LG
 )
+from ui.text import plain_tooltip
 from ui.icons import FAST_FORWARD, PAUSE, PLAY, REWIND, SKIP_BACK, SKIP_FORWARD, icon
 
 PLAY_BUTTON_SIZE = (40, 40)
@@ -185,11 +186,13 @@ class PlayerBar(QFrame):
         self._speed_actions: list[tuple[float, QAction]] = []
         self._speed_button = self._make_speed_button()
 
-        self._message = QLabel()
         self._line_chip = self._make_chip()
         self._layer_chip = self._make_chip()
         self._layer_total = 0
         self._chips_allowed = True
+        self._message = QLabel()
+        self._message.setObjectName("playerMessage")
+        self._message.setTextFormat(Qt.TextFormat.PlainText)
         self._message = QLabel()
         self._message.setObjectName("playerMessage")
         self._message_timer = QTimer(self)
@@ -343,7 +346,7 @@ class PlayerBar(QFrame):
         """mensagem à esquerda do transporte. timeout_ms=0 deixa a mensagem fixa."""
         metrics = self._message.fontMetrics()
         self._message.setText(metrics.elidedText(text, Qt.TextElideMode.ElideMiddle, MESSAGE_MAX_WIDTH))
-        self._message.setToolTip(text)
+        self._message.setToolTip(plain_tooltip(text))
         self._update_chips()
         self._message_timer.stop()
         if text and timeout_ms > 0:

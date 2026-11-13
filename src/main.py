@@ -1,7 +1,7 @@
 """ponto de entrada do G-Path"""
 import sys, traceback, json
 
-from core.i18n import set_language, tr
+from core.i18n import LANGUAGES, set_language, tr
 import config
 
 from PySide6.QtCore import QLocale
@@ -29,11 +29,13 @@ def _default_language() -> str:
     return "pt_BR" if QLocale.system().name().startswith("pt") else "en"
 
 def _load_saved_language() -> str:
+    """idioma salvo, se for um dos suportados; qualquer problema no arquivo cai no padrão."""
     try:
         data = json.loads(config.SETTINGS_FILE.read_text(encoding="utf-8"))
-        return data.get("language") or _default_language()
-    except (FileNotFoundError, json.JSONDecodeError):
+        language = data.get("language")
+    except (OSError, ValueError, AttributeError):
         return _default_language()
+    return language if language in {code for code, _ in LANGUAGES} else _default_language()
 
 def main() -> int:
     set_language(_load_saved_language())
