@@ -4,7 +4,7 @@ import sys, traceback, json
 from core.i18n import set_language, tr
 import config
 
-from PySide6.QtCore import QLocale, Qt
+from PySide6.QtCore import QLocale
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 from ui.main_window import MainWindow
@@ -39,8 +39,6 @@ def main() -> int:
     set_language(_load_saved_language())
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
-    # a lista dos combos abre com o fade do próprio programa, não com o deslize do sistema
-    app.setEffectEnabled(Qt.UIEffect.UI_AnimateCombo, False)
     _install_excepthook()
     window = MainWindow()
     window.show()

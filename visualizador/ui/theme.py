@@ -187,23 +187,14 @@ QListWidget::item:selected {{ background: {ACCENT_SOFT}; color: {ACCENT_TEXT}; }
 
 QListWidget#issues::item {{ margin-right: 6px; }}
 
-QComboBox {{
-    background: {SURFACE_2}; color: {TEXT_PRIMARY};
-    border: 1px solid {BORDER_STRONG}; border-radius: {RADIUS_MD}; padding: 5px 10px; min-width: 120px;
+QPushButton#combo {{
+    background: {SURFACE_2}; color: {TEXT_PRIMARY}; text-align: left;
+    border: 1px solid {BORDER_STRONG}; border-radius: {RADIUS_MD}; padding: 7px 28px 7px 10px;
 }}
-QComboBox:hover {{ border: 1px solid {TEXT_SECONDARY}; }}
-QComboBox:focus {{ border: 1px solid {ACCENT}; }}
-QComboBox::drop-down {{ border: none; width: 22px; }}
-QComboBox {{ combobox-popup: 0; }}
-QComboBoxPrivateContainer {{ background: {SURFACE_2}; border: none; }}
-QComboBox QAbstractItemView {{
-    background: {SURFACE_2}; color: {TEXT_PRIMARY}; border: 1px solid {BORDER_STRONG};
-    border-radius: {RADIUS_MD}; padding: 4px; outline: none;
-}}
-QComboBox QAbstractItemView::item {{ padding: 6px 12px; border-radius: {RADIUS_SM}; min-height: 20px; }}
-QComboBox QAbstractItemView::item:hover, QComboBox QAbstractItemView::item:selected {{
-    background: {SURFACE_3}; color: {TEXT_PRIMARY};
-}}
+QPushButton#combo:hover, QPushButton#combo:pressed {{ background: {SURFACE_2}; border: 1px solid {TEXT_SECONDARY}; }}
+QPushButton#combo:focus {{ border: 1px solid {ACCENT}; }}
+QPushButton#combo:disabled {{ color: {TEXT_MUTED}; }}
+QPushButton#combo::menu-indicator {{ image: none; }}
 
 QCheckBox {{ color: {TEXT_PRIMARY}; spacing: 8px; font-family: {FONT_FAMILY}; }}
 QCheckBox::indicator {{
