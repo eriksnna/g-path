@@ -67,7 +67,7 @@ Funciona em Windows, Linux e macOS, com Python 3.14.7 ou mais novo:
 `python main.py`
 
 
-Testes: `pip install -r requirements-dev.txt` e `python -m pytest`, dentro de `visualizador/`.
+Testes: `pip install -r requirements-dev.txt` e `python -m pytest`, dentro de `src/`.
 
 ### Créditos e licença
 
@@ -118,7 +118,7 @@ Works on Windows, Linux and macOS, with Python 3.14.7 or newer:
 `python main.py`
 
 
-Tests: `pip install -r requirements-dev.txt` and `python -m pytest`, inside `visualizador/`.
+Tests: `pip install -r requirements-dev.txt` and `python -m pytest`, inside `src/`.
 
 ### Credits and license
 
