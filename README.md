@@ -63,7 +63,7 @@ A pasta `examples/` (incluída no `.zip`) traz 10 programas prontos:
 Funciona em Windows, Linux e macOS, com Python 3.14.7 ou mais novo:
 
 `pip install -r requirements.txt`
-`cd visualizador`
+`cd src`
 `python main.py`
 
 
@@ -114,7 +114,7 @@ The `examples/` folder (included in the `.zip`) has 10 ready-made programs: six 
 Works on Windows, Linux and macOS, with Python 3.14.7 or newer:
 
 `pip install -r requirements.txt`
-`cd visualizador`
+`cd src`
 `python main.py`
 
 
