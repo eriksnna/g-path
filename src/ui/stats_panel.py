@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from PySide6.QtWidgets import (
-    QFrame, QGridLayout, QLabel, QProgressBar, QSizePolicy, QVBoxLayout, QGraphicsOpacityEffect,
+    QFrame, QGridLayout, QLabel, QSizePolicy, QVBoxLayout, QGraphicsOpacityEffect,
 )
 
 from PySide6.QtCore import QEasingCurve, QPropertyAnimation
@@ -16,7 +16,6 @@ from ui.theme import SPACE_LG, SPACE_MD, SPACE_SM, SPACE_XL, SPACE_XXS
 from core.modes.base import ModeCard
 
 PANEL_MIN_WIDTH = 180
-PROGRESS_STEPS = 1000
 EMPTY_VALUE = "—"
 VALUE_MIN_PX = 12
 VALUE_MAX_PX = 18
@@ -85,7 +84,7 @@ class StatCard(QFrame):
 
 
 def _section_title(text: str) -> QLabel:
-    label = QLabel(text)
+    label = QLabel(text.upper())
     label.setObjectName("sectionTitle")
     return label
 
@@ -131,17 +130,6 @@ class StatsPanel(QFrame):
             "size": StatCard(tr("card_size"), wide=True),
         }
 
-        self._progress_bar = QProgressBar()
-        self._progress_bar.setRange(0, PROGRESS_STEPS)
-        self._progress_bar.setTextVisible(False)
-        self._progress_bar.setFixedHeight(8)
-        self._progress = {
-            "percent": StatCard(tr("card_percent")),
-            "current": StatCard(tr("card_current")),
-            "elapsed": StatCard(tr("card_elapsed")),
-            "remaining": StatCard(tr("card_remaining")),
-        }
-
         self._mode_title = _section_title(tr("label_mode"))
 
         self._mode_box = QVBoxLayout()
@@ -160,9 +148,6 @@ class StatsPanel(QFrame):
         layout.addWidget(self._mode_title)
         layout.addLayout(self._mode_box)
 
-        layout.addWidget(_section_title(tr("section_simulation")))
-        layout.addWidget(self._progress_bar)
-        layout.addLayout(_card_grid(list(self._progress.values())))
         layout.addStretch()
 
     # --- atualização do estado exibido ---
@@ -170,9 +155,8 @@ class StatsPanel(QFrame):
     def clear(self) -> None:
         _clear_layout(self._mode_box)
         self._mode_title.setVisible(False)
-        for card in (*self._program.values(), *self._progress.values()):
+        for card in self._program.values():
             card.set_value(EMPTY_VALUE)
-        self._progress_bar.setValue(0)
 
     def show_program(self, stats: ProgramStats) -> None:
         p = self._program
@@ -196,17 +180,6 @@ class StatsPanel(QFrame):
             tr("detail_size_axes"),
             animate=True,
         )
-        
-    def show_progress(self, elapsed: float, total_time: float,
-                      done: int, count: int) -> None:
-        fraction = elapsed / total_time if total_time > 0 else 0.0
-        self._progress_bar.setValue(round(fraction * PROGRESS_STEPS))
-
-        g = self._progress
-        g["percent"].set_value(f"{fraction * 100:.0f}%")
-        g["current"].set_value(f"{done} / {count}")
-        g["elapsed"].set_value(format_duration(elapsed))
-        g["remaining"].set_value(format_duration(max(0.0, total_time - elapsed)))
 
     def show_mode(self, title: str, cards: list[ModeCard]) -> None:
         _clear_layout(self._mode_box)

@@ -716,9 +716,6 @@ class MainWindow(QMainWindow):
         self._update_position_chips(snapshot)
         index = min(snapshot.done, self._toolpath.count - 1)
         self._dro.show_state(snapshot.head, float(self._toolpath.feeds[index]), snapshot.active)
-        self._stats_panel.show_progress(
-            pb.elapsed, pb.total_time, snapshot.done, self._toolpath.count,
-        )
         self._update_running_line(snapshot)
         self._sync_timer()
 

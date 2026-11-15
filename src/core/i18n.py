@@ -142,7 +142,6 @@ _STRINGS: dict[str, dict[str, str]] = {
 
     # --- painel de estatísticas ----------------------------------------------
     "section_program_summary": {PT_BR: "Resumo do programa", EN: "Program summary", IT: "Riepilogo del programma"},
-    "section_simulation": {PT_BR: "Simulação", EN: "Simulation", IT: "Simulazione"},
     "section_mode_prefix": {PT_BR: "Modo: {title}", EN: "Mode: {title}", IT: "Modalità: {title}"},
     "card_total_time": {PT_BR: "Tempo total", EN: "Total time", IT: "Tempo totale"},
     "card_layers": {PT_BR: "Camadas", EN: "Layers", IT: "Strati"},
@@ -152,10 +151,6 @@ _STRINGS: dict[str, dict[str, str]] = {
     "card_rapid_length": {PT_BR: "Trajeto rápido", EN: "Rapid path", IT: "Percorso rapido"},
     "card_moves": {PT_BR: "Comandos de movimento", EN: "Movement commands", IT: "Comandi di movimento"},
     "card_size": {PT_BR: "Dimensões (mm)", EN: "Dimensions (mm)", IT: "Dimensioni (mm)"},
-    "card_percent": {PT_BR: "Concluído", EN: "Completed", IT: "Completato"},
-    "card_current": {PT_BR: "Movimento", EN: "Move", IT: "Movimento"},
-    "card_elapsed": {PT_BR: "Decorrido", EN: "Elapsed", IT: "Trascorso"},
-    "card_remaining": {PT_BR: "Restante", EN: "Remaining", IT: "Rimanente"},
     "detail_commands": {PT_BR: "{count} comandos", EN: "{count} commands", IT: "{count} comandi"},
     "detail_breakdown": {PT_BR: "{breakdown}  ·  {segments} segmentos", EN: "{breakdown}  ·  {segments} segments", IT: "{breakdown}  ·  {segments} segmenti"},
     "detail_none": {PT_BR: "nenhum", EN: "none", IT: "nessuno"},

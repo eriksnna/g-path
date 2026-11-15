@@ -181,9 +181,6 @@ QLabel#cardValue {{ color: {TEXT_PRIMARY}; font-size: {FONT_VALUE}; font-weight:
 QLabel#cardDetail {{ color: {TEXT_SECONDARY}; font-size: {FONT_CAPTION}; }}
 QLabel#sectionTitle {{ color: {TEXT_SECONDARY}; font-size: {FONT_CAPTION}; font-weight: {WEIGHT_STRONG}; margin-top: 4px; }}
 
-QProgressBar {{ background: {SURFACE_2}; border: none; border-radius: 4px; }}
-QProgressBar::chunk {{ background: {TEXT_SECONDARY}; border-radius: 4px; }}
-
 QListWidget {{
     background: {SURFACE_2}; color: {TEXT_PRIMARY};
     border: none; border-radius: {RADIUS_MD}; font-size: {FONT_SMALL};
