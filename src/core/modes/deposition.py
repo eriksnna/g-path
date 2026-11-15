@@ -28,6 +28,13 @@ class DepositionMode(ProcessMode):
     key = "deposicao"
     name = "Deposição (WAAM)"
 
+    summary_labels = {
+        "cut_time": "card_arc_time",
+        "rapid_time": "card_idle_time",
+        "cut_length": "card_arc_path",
+        "rapid_length": "card_idle_path",
+    }
+
     def __init__(self, bead: BeadSpec) -> None:
         self.bead = bead
 
@@ -58,14 +65,15 @@ class DepositionMode(ProcessMode):
         arc_time = float(toolpath.durations[toolpath.active].sum())
         rate = mass_kg / (arc_time / 3600) if arc_time > 0 else 0.0
 
-        return [
+        cards = [
             ModeCard(tr("card_deposited_material"), f"{mass_kg:.3f} kg",
                      f"{volume / MM3_PER_CM3:.1f} cm³ · {tr('detail_density')} {self.bead.density:g} g/cm³"),
             ModeCard(tr("card_deposition_rate"), f"{rate:.2f} kg/h",
                      tr("detail_arc_time").format(time=format_duration(arc_time))),
-            ModeCard(tr("card_deposited_path"), format_length(bead_length),
-                     tr("detail_dots_deposited").format(count=dots)),
         ]
+        if dots:
+            cards.append(ModeCard(tr("card_dots"), str(dots)))
+        return cards
 
     def deposited_volume(self, bead_length: float, dots: int) -> float:
         """volume em mm³. Cordão: comprimento × largura × altura. Ponto: cilindro de diâmetro = largura."""

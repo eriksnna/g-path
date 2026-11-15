@@ -2,11 +2,11 @@
 from __future__ import annotations
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QDoubleSpinBox, QHBoxLayout, QLabel, QWidget
+from PySide6.QtWidgets import QDoubleSpinBox, QFrame, QGridLayout, QHBoxLayout, QLabel, QWidget
 
 from core.i18n import tr
 from ui.combo import ComboBox
-from ui.theme import SPACE_SM
+from ui.theme import SPACE_LG, SPACE_MD, SPACE_SM, SPACE_XS
 
 from config import BEAD_HEIGHT_MM, BEAD_WIDTH_MM, DEFAULT_MODE, DEPOSIT_DENSITY_G_CM3
 from core.modes import create_mode, mode_choices
@@ -41,9 +41,8 @@ class ModeControls(QWidget):
         layout.setSpacing(SPACE_SM)
         layout.addWidget(QLabel(tr("label_mode")))
         layout.addWidget(self._combo)
-        for label, spin in self._bead_fields:
-            layout.addWidget(label)
-            layout.addWidget(spin)
+
+        self.bead_panel = self._build_bead_panel()
 
         self._combo.currentIndexChanged.connect(self._on_mode_changed)
         self._update_visibility()
@@ -64,6 +63,32 @@ class ModeControls(QWidget):
             self._update_visibility()
             self._signature = self._current_signature()
 
+    def _build_bead_panel(self) -> QFrame:
+        """cartão com os campos do cordão; mora no painel lateral, junto dos números que ele altera."""
+        panel = QFrame()
+        panel.setObjectName("card")
+        title = QLabel(tr("bead_title").upper())
+        title.setObjectName("cardTitle")
+        caption = QLabel(tr("bead_caption"))
+        caption.setObjectName("cardDetail")
+        caption.setWordWrap(True)
+
+        grid = QGridLayout(panel)
+        grid.setContentsMargins(SPACE_LG, SPACE_SM, SPACE_LG, SPACE_MD)
+        grid.setHorizontalSpacing(SPACE_SM)
+        grid.setVerticalSpacing(SPACE_XS)
+        grid.setColumnStretch(1, 1)
+        grid.addWidget(title, 0, 0, 1, 2)
+        for row, (label, spin) in enumerate(self._bead_fields, start=1):
+            grid.addWidget(label, row, 0)
+            grid.addWidget(spin, row, 1)
+        grid.addWidget(caption, len(self._bead_fields) + 1, 0, 1, 2)
+        return panel
+
+    def place_bead_panel(self, layout) -> None:
+        layout.addWidget(self.bead_panel)
+        self._update_visibility()
+
     def _make_spin(self, low: float, high: float, value: float, suffix: str) -> QDoubleSpinBox:
         spin = QDoubleSpinBox()
         spin.setRange(low, high)
@@ -71,7 +96,7 @@ class ModeControls(QWidget):
         spin.setSingleStep(0.1)
         spin.setValue(value)
         spin.setSuffix(suffix)
-        spin.setFixedWidth(SPIN_WIDTH)
+        spin.setMinimumWidth(SPIN_WIDTH)
         spin.editingFinished.connect(self._emit_if_changed)
         return spin
 
@@ -90,7 +115,6 @@ class ModeControls(QWidget):
         self._emit_if_changed()
 
     def _update_visibility(self) -> None:
-        deposition = self._combo.currentData() == DepositionMode.key
-        for label, spin in self._bead_fields:
-            label.setVisible(deposition)
-            spin.setVisible(deposition)
+        # sem pai, setVisible(True) abriria o cartão como janela solta
+        if self.bead_panel.parentWidget() is not None:
+            self.bead_panel.setVisible(self._combo.currentData() == DepositionMode.key)

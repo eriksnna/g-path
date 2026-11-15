@@ -78,3 +78,10 @@ def test_deposition_without_any_process_on_warns():
     mode = DepositionMode(BEAD)
     issues = mode.validate(applied("G1 X10 F100", mode))
     assert any("nenhum depósito encontrado" in i.message for i in issues)
+
+def test_summary_labels_exist_for_every_mode():
+    from core.i18n import _STRINGS
+    cards = {"cut_time", "rapid_time", "cut_length", "rapid_length"}
+    for mode in (MachiningMode(), DepositionMode(BEAD)):
+        assert set(mode.summary_labels) == cards
+        assert all(key in _STRINGS for key in mode.summary_labels.values())

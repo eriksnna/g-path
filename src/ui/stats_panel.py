@@ -50,8 +50,12 @@ class StatCard(QFrame):
         layout.addWidget(self._title)
         layout.addWidget(self._value)
         layout.addWidget(self._detail)
+        layout.addStretch()
 
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+    def set_title(self, title: str) -> None:
+        self._title.setText(title.upper())
 
     def set_value(self, text: str, detail: str = "", animate: bool = False) -> None:
         self._value.setText(text)
@@ -132,6 +136,7 @@ class StatsPanel(QFrame):
 
         self._mode_title = _section_title(tr("label_mode"))
 
+        self.inputs_layout = QVBoxLayout()
         self._mode_box = QVBoxLayout()
 
         self._build_layout()
@@ -180,6 +185,11 @@ class StatsPanel(QFrame):
             tr("detail_size_axes"),
             animate=True,
         )
+
+    def set_summary_labels(self, labels: dict[str, str]) -> None:
+        """labels: nome do cartão -> chave i18n do título, conforme o modo de processo."""
+        for name, key in labels.items():
+            self._program[name].set_title(tr(key))
 
     def show_mode(self, title: str, cards: list[ModeCard]) -> None:
         _clear_layout(self._mode_box)

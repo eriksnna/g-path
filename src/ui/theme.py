@@ -108,8 +108,8 @@ QDialog {{ background: {SURFACE_0}; }}
 QDialog QLabel {{ color: {TEXT_PRIMARY}; }}
 
 QLabel {{ color: {TEXT_PRIMARY}; background: transparent; font-family: {FONT_FAMILY}; font-size: {FONT_BODY}; }}
-QLabel#fileLabel {{ color: {TEXT_SECONDARY}; }}
-QLabel#profileLabel {{ color: {TEXT_SECONDARY}; font-weight: {WEIGHT_STRONG}; }}
+QLabel#fileLabel {{ color: {TEXT_PRIMARY}; font-weight: {WEIGHT_STRONG}; }}
+QLabel#profileLabel {{ color: {TEXT_SECONDARY}; }}
 
 QPushButton {{
     background: {SURFACE_2}; color: {TEXT_PRIMARY}; font-family: {FONT_FAMILY};

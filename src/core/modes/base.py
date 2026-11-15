@@ -21,6 +21,14 @@ class ProcessMode(ABC):
     key: str
     name: str
 
+    # chaves i18n dos cartões de tempo e trajeto do resumo, que mudam de nome conforme o processo
+    summary_labels = {
+        "cut_time": "card_cut_time",
+        "rapid_time": "card_rapid_time",
+        "cut_length": "card_cut_length",
+        "rapid_length": "card_rapid_length",
+    }
+
     @abstractmethod
     def is_work(self, move: Move) -> bool:
         """true se o movimento produz trabalho (corte ou depósito)."""

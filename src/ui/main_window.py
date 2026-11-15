@@ -53,9 +53,8 @@ MAX_DISMISSED_SUGGESTIONS = 50
 def _vsep() -> QFrame:
     """linha vertical fina pra separar grupos de controles na barra superior."""
     line = QFrame()
-    line.setFrameShape(QFrame.Shape.VLine)
-    line.setFrameShadow(QFrame.Shadow.Plain)
     line.setObjectName("headerSeparator")
+    line.setFixedWidth(1)
     return line
 
 class _ElidingLabel(QLabel):
@@ -125,6 +124,7 @@ class MainWindow(QMainWindow):
         self._editor = GCodeEditor()
         self._editor.setVisible(False)
         self._stats_panel = StatsPanel()
+        self._mode_controls.place_bead_panel(self._stats_panel.inputs_layout)
         self._issues_panel = IssuesPanel()
         self._player = PlayerBar()
 
@@ -595,7 +595,6 @@ class MainWindow(QMainWindow):
         self._issues = sorted([*result.issues, *mode.validate(moves)], key=lambda i: i.line)
         self._issues_panel.show_issues(self._issues)
         self._update_dialect_suggestion()
-        self._layer_overlay.setVisible(mode.key != "deposicao")
 
         if not moves:
             status = (tr("status_no_moves_see_issues").format(count=len(self._issues))
@@ -611,6 +610,7 @@ class MainWindow(QMainWindow):
         self._viewport.show_toolpath(toolpath, levels)
         self._viewport.set_show_torch(mode.key == "deposicao")
         self._stats_panel.show_program(compute_stats(toolpath, result.commands))
+        self._stats_panel.set_summary_labels(mode.summary_labels)
         self._stats_panel.show_mode(mode_display_name(mode.key), mode.cards(toolpath))
         self._player.set_enabled(True)
         self._marks = build_marks(toolpath, levels, self._issues)
