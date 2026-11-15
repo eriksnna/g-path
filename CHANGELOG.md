@@ -3,6 +3,54 @@
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e versionamento [SemVer](https://semver.org/lang/pt-BR/).
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [SemVer](https://semver.org/) versioning.
 
+## [0.3.1-beta] - 2026-11-15
+
+### Português
+
+**Adicionado**
+- Gizmo de orientação no visualizador: mostra os eixos e alinha a vista com um clique
+- Cartão "Cordão" no painel lateral, ao lado dos números que ele altera
+- Botão "Reiniciar agora" ao trocar o idioma; o aviso só aparece quando o idioma muda
+
+**Alterado**
+- Filtro de camada e "Colorir por profundidade" ficam sobre o visualizador e valem nos dois modos
+- Cabeçalho mostra só o nome do arquivo (caminho completo na dica) e ficou menor
+- No modo deposição, o resumo fala em tempo e trajeto com arco e sem arco
+- Seção "Simulação" removida do painel lateral
+- Botões de vista substituídos pelo gizmo
+- O pacote para Windows é um .zip: extraia tudo antes de abrir o G-Path.exe
+
+**Corrigido**
+- Filtro de camada não escondia nada em programas de deposição por pontos
+- Trocar o idioma deixava a tela com textos em duas línguas até reiniciar
+- Campos do cordão usavam vírgula decimal, diferente do resto do programa
+- Fonte do editor sem alternativa monoespaçada no Linux
+- Cartões da mesma linha com valores em alturas diferentes
+- Regras de estilo e textos sem uso removidos
+
+### English
+
+**Added**
+- Orientation gizmo in the viewer: shows the axes and aligns the view with one click
+- "Bead" card in the side panel, next to the figures it changes
+- "Restart now" button when changing the language; the note only shows when the language changes
+
+**Changed**
+- Layer filter and "Color by depth" sit over the viewer and work in both modes
+- Header shows only the file name (full path in the tooltip) and is leaner
+- In deposition mode, the summary uses arc-on and arc-off time and path
+- "Simulation" section removed from the side panel (the player bar already shows progress)
+- View buttons replaced by the gizmo
+- The Windows package is a .zip: extract everything before opening G-Path.exe
+
+**Fixed**
+- Layer filter hid nothing in dot-deposition programs
+- Changing the language left the screen in two languages until restart
+- Bead fields used a decimal comma, unlike the rest of the program
+- Editor font had no monospace fallback on Linux
+- Cards in the same row showed values at different heights
+- Unused style rules and strings removed
+
 ## [0.3.0-beta] - 2026-11-13
 
 ### Português

@@ -7,7 +7,7 @@ CONFIG_DIR = Path(os.environ.get("APPDATA", str(Path.home() / ".config"))) / "GP
 PROFILES_FILE = CONFIG_DIR / "profiles.json"
 SETTINGS_FILE = CONFIG_DIR / "settings.json"
 
-APP_VERSION = "0.3.0-beta"
+APP_VERSION = "0.3.1-beta"
 
 APP_TITLE = "G-Path"
 AUTHOR_NAME = "Erik Senna"
