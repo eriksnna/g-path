@@ -290,6 +290,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         EN: "Restart the program to apply the new language.",
         IT: "Riavvia il programma per applicare la nuova lingua.",
     },
+    "appearance_restart_button": {PT_BR: "Reiniciar agora", EN: "Restart now", IT: "Riavvia ora"},
 
     # --- modos de processo (core/modes) ------------------------------------
     "mode_machining_name": {PT_BR: "Usinagem", EN: "Machining", IT: "Lavorazione"},

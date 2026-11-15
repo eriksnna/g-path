@@ -1,9 +1,11 @@
 """janela principal: liga a interface ao modo de processo, ao modelo e à reprodução."""
 from __future__ import annotations
 
+import sys
+
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QElapsedTimer, QSettings, QTimer, QEasingCurve, QPropertyAnimation
+from PySide6.QtCore import Qt, QElapsedTimer, QProcess, QSettings, QTimer, QEasingCurve, QPropertyAnimation
 from PySide6.QtGui import QIcon, QCloseEvent, QAction, QKeySequence
 from PySide6.QtWidgets import (
     QFileDialog, QFrame, QHBoxLayout, QLabel, QMainWindow, QPushButton,
@@ -101,6 +103,7 @@ class MainWindow(QMainWindow):
         self._issues: list[Issue] = []
         self._source_lines: list[str] = []
         self._playback = Playback()
+        self._restarting = False
         self._profiles, _active_name = load_profiles()
         self._profile = next((p for p in self._profiles if p.name == _active_name), self._profiles[0])
 
@@ -394,6 +397,20 @@ class MainWindow(QMainWindow):
         self._mode_controls.set_mode(self._profile.mode_key)
         self._update_profile_label()
         self._reload()
+
+        if dialog.restart_wanted:
+            self._restart()
+
+    def _restart(self) -> None:
+        """fecha e abre o programa de novo (aplica a troca de idioma). o último arquivo reabre sozinho."""
+        if not self._confirm_discard_changes():
+            return
+        self._settings.setValue("window/geometry", self.saveGeometry())
+        self._settings.sync()
+        arguments = sys.argv[1:] if getattr(sys, "frozen", False) else sys.argv
+        QProcess.startDetached(sys.executable, arguments)
+        self._restarting = True
+        QApplication.quit()
 
     def _update_profile_label(self) -> None:
         name = tr("profile_label").format(name=self._profile.name)
@@ -746,7 +763,7 @@ class MainWindow(QMainWindow):
             self._timer.stop()
     
     def closeEvent(self, event: QCloseEvent) -> None:
-        if self._has_unsaved_changes() and not self._confirm_discard_changes():
+        if not self._restarting and self._has_unsaved_changes() and not self._confirm_discard_changes():
             event.ignore()
             return
         self._settings.setValue("window/geometry", self.saveGeometry())

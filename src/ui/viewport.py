@@ -15,7 +15,7 @@ from config import (
     CUT_WIDTH, HEAD_SIZE, RAPID_WIDTH, TORCH_HEIGHT, TORCH_MAX_TILT_DEG,
     TORCH_RADIUS, WIRE_STICKOUT, WIRE_WIDTH_PX, ZOOM_MIN_DISTANCE, ZOOM_STEP,
 )
-from core.layers import layer_indices
+from core.layers import filter_layers, layer_indices
 from core.toolpath import Snapshot, Toolpath, interleave
 from ui.theme import (
     ARC_HEAD_COLOR, BACKGROUND, BRIGHT_CUT, BRIGHT_RAPID, CUT_DEPTH_ALPHA, DEPTH_STOPS,
@@ -75,6 +75,7 @@ class ToolpathView(gl.GLViewWidget):
         self._is_cut = np.empty(0, dtype=bool)
         self._levels = np.empty(0)
         self._layer_of = np.empty(0, dtype=int)
+        self._filter_layer_of = np.empty(0, dtype=int)
         self._dim: np.ndarray | None = None
         self._bright: np.ndarray | None = None
         self._cut_item: gl.GLLinePlotItem | None = None
@@ -111,6 +112,7 @@ class ToolpathView(gl.GLViewWidget):
         self._is_cut = toolpath.is_cut
         self._levels = np.asarray(levels, dtype=float)
         self._layer_of = layer_indices(toolpath, self._levels)
+        self._filter_layer_of = filter_layers(toolpath, self._levels)
         self._layer_filter = None
         self._last_started = None
         self._colors_dirty = True
@@ -181,7 +183,7 @@ class ToolpathView(gl.GLViewWidget):
             colors = np.where(lit[:, None], self._bright, self._dim)
 
             if self._layer_filter is not None:
-                hidden = self._is_cut & (self._layer_of != self._layer_filter)
+                hidden = self._filter_layer_of != self._layer_filter
                 colors[hidden, 3] = 0.0
 
             self._set_item_colors(self._cut_item, colors, self._is_cut)

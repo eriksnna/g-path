@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
 
 import config
 from core.dialect import dialect_choices
-from core.i18n import LANGUAGES, get_language, set_language, tr
+from core.i18n import LANGUAGES, get_language, tr
 from core.machine_profile import MachineProfile, default_profiles
 from core.modes import mode_choices
 from ui.combo import ComboBox
@@ -284,29 +284,60 @@ class _ShortcutsPage(QWidget):
         layout.addStretch(1)
 
 
+def _saved_language() -> str:
+    """idioma gravado nos ajustes; pode diferir do que está em uso até o programa reiniciar."""
+    try:
+        saved = json.loads(config.SETTINGS_FILE.read_text(encoding="utf-8")).get("language")
+        return saved or get_language()
+    except (OSError, ValueError, AttributeError):
+        return get_language()
+
+
 class _AppearancePage(QWidget):
+    restart_requested = Signal()
+
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._language_combo = ComboBox()
         for code, label in LANGUAGES:
             self._language_combo.addItem(label, code)
         self._language_combo.setCurrentIndex(
-            max(0, self._language_combo.findData(get_language()))
+            max(0, self._language_combo.findData(_saved_language()))
         )
-        note = QLabel(tr("appearance_restart_note"))
-        note.setObjectName("fieldCaption")
-        note.setWordWrap(True)
+        self._language_combo.currentIndexChanged.connect(self._update_restart_row)
+
+        def selected_language(self) -> str:
+            return self._language_combo.currentData()
+
+        self._note = QLabel(tr("appearance_restart_note"))
+        self._note.setObjectName("fieldCaption")
+        self._note.setWordWrap(True)
+        self._restart_button = QPushButton(tr("appearance_restart_button"))
+        self._restart_button.setObjectName("suggestionButton")
+        self._restart_button.clicked.connect(self.restart_requested.emit)
+
+        restart_row = QHBoxLayout()
+        restart_row.setSpacing(SPACE_MD)
+        restart_row.addWidget(self._note, 1)
+        restart_row.addWidget(self._restart_button)
 
         card, grid = _card()
         grid.addWidget(QLabel(tr("appearance_language_label").rstrip(":")), 0, 0)
         grid.addWidget(self._language_combo, 0, 1)
-        grid.addWidget(note, 1, 1)
+        grid.addLayout(restart_row, 1, 1)
         grid.setColumnStretch(1, 1)
 
         layout = _page_layout(self)
         layout.addWidget(_section_title(tr("nav_appearance")))
         layout.addWidget(card)
         layout.addStretch(1)
+        self._update_restart_row()
+
+    def _update_restart_row(self) -> None:
+        """o aviso e o botão só aparecem quando o idioma escolhido difere do que está em uso."""
+        changed = self.selected_language() != get_language()
+        self._note.setVisible(changed)
+        self._restart_button.setVisible(changed)
 
     def selected_language(self) -> str:
         return self._language_combo.currentData()
@@ -385,6 +416,7 @@ class SettingsDialog(QDialog):
     ) -> None:
         super().__init__(parent)
         self.setWindowTitle(tr("settings_title"))
+        self.restart_wanted = False
         self.resize(*DIALOG_SIZE)
 
         self._nav = QListWidget()
@@ -400,6 +432,7 @@ class SettingsDialog(QDialog):
         self._profiles_page = _ProfilesPage(profiles or default_profiles(), active_profile)
         self._profiles_page.changed.connect(self.profile_changed.emit)
         self._appearance_page = _AppearancePage()
+        self._appearance_page.restart_requested.connect(self._on_restart_requested)
         for page in (self._profiles_page, _ShortcutsPage(), self._appearance_page, _AboutPage()):
             self._pages.addWidget(page)
 
@@ -435,9 +468,13 @@ class SettingsDialog(QDialog):
         self._save_language()
         super().accept()
 
+    def _on_restart_requested(self) -> None:
+        self.restart_wanted = True
+        self.accept()
+
     def _save_language(self) -> None:
+        # só grava: o idioma em uso não muda até reiniciar, para a tela não ficar em duas línguas
         chosen = self._appearance_page.selected_language()
-        set_language(chosen)  # já aplica aos textos que ainda forem montados nesta sessão
         try:
             config.SETTINGS_FILE.parent.mkdir(parents=True, exist_ok=True)
             config.SETTINGS_FILE.write_text(json.dumps({"language": chosen}), encoding="utf-8")
