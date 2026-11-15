@@ -39,6 +39,7 @@ from ui.stats_panel import StatsPanel
 from ui.text import plain_tooltip
 from ui.theme import DARK_QSS, SPACE_LG, SPACE_MD
 from ui.viewport import ToolpathView
+from ui.corner_overlay import CornerOverlay
 from ui.dro import DroOverlay
 from ui.suggestion_banner import SuggestionBanner
 from ui.start_panel import StartPanel
@@ -61,12 +62,14 @@ class _ElidingLabel(QLabel):
     def __init__(self, text: str = "", parent=None) -> None:
         super().__init__(parent)
         self._full_text = text
+        self._tooltip = text
         self.setTextFormat(Qt.TextFormat.PlainText)
         self.setMinimumWidth(140)
         super().setText(text)
 
-    def setText(self, text: str) -> None:
+    def setText(self, text: str, tooltip: str | None = None) -> None:
         self._full_text = text
+        self._tooltip = tooltip or text
         self._update_elided_text()
 
     def resizeEvent(self, event) -> None:
@@ -78,7 +81,7 @@ class _ElidingLabel(QLabel):
             self._full_text, Qt.TextElideMode.ElideMiddle, self.width()
         )
         super().setText(elided)
-        self.setToolTip(plain_tooltip(self._full_text))
+        self.setToolTip(plain_tooltip(self._tooltip))
 
 class MainWindow(QMainWindow):
 
@@ -117,6 +120,7 @@ class MainWindow(QMainWindow):
         self._camera_controls = CameraControls()
         self._viewport = ToolpathView()
         self._dro = DroOverlay(self._viewport)
+        self._layer_overlay = CornerOverlay(self._viewport, self._layer_controls)
         self._banner = SuggestionBanner()
         self._editor = GCodeEditor()
         self._editor.setVisible(False)
@@ -159,7 +163,6 @@ class MainWindow(QMainWindow):
         header.addWidget(self._profile_label)
         header.addWidget(_vsep())
         header.addWidget(self._mode_controls)
-        header.addWidget(self._layer_controls)
         header.addWidget(_vsep())
         header.addWidget(self._editor_toggle)
         header.addWidget(self._camera_controls)
@@ -500,7 +503,7 @@ class MainWindow(QMainWindow):
         self._path = path
         self._text = text
         self._saved_text = text
-        self._file_label.setText(str(path))
+        self._file_label.setText(path.name, str(path))
         self._settings.setValue("window/last_file", str(path))
         self._add_recent_file(path)
         self._editor.set_text(text)
@@ -545,7 +548,7 @@ class MainWindow(QMainWindow):
         path = Path(path_str)
         if self._write_to_path(path, text):
             self._path = path
-            self._file_label.setText(str(path))
+            self._file_label.setText(path.name, str(path))
 
     def _write_to_path(self, path: Path, text: str) -> bool:
         try:
@@ -593,7 +596,7 @@ class MainWindow(QMainWindow):
         self._issues = sorted([*result.issues, *mode.validate(moves)], key=lambda i: i.line)
         self._issues_panel.show_issues(self._issues)
         self._update_dialect_suggestion()
-        self._layer_controls.setVisible(mode.key != "deposicao")
+        self._layer_overlay.setVisible(mode.key != "deposicao")
 
         if not moves:
             status = (tr("status_no_moves_see_issues").format(count=len(self._issues))
