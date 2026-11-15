@@ -22,6 +22,10 @@ SUCCESS = "#30d158"
 ERROR_COLOR = "#ff6b6b"
 WARNING_COLOR = "#f0b429"
 
+AXIS_X = "#e5646a"   # eixos do gizmo de orientação
+AXIS_Y = "#7ecb6f"
+AXIS_Z = "#5b9cf5"
+
 RADIUS_SM = "6px"
 RADIUS_MD = "8px"
 RADIUS_LG = "12px"
@@ -126,9 +130,6 @@ QPushButton#play:disabled {{ background: {SURFACE_3}; }}
 QPushButton#transport {{ background: transparent; border-radius: 17px; padding: 0; }}
 QPushButton#transport:hover {{ background: {SURFACE_3}; }}
 QPushButton#transport:pressed {{ background: {SURFACE_1}; }}
-
-QPushButton#preset {{ padding: 3px 10px; font-size: {FONT_SMALL}; border-radius: {RADIUS_SM}; background: {SURFACE_2}; }}
-QPushButton#preset:hover {{ background: {SURFACE_3}; }}
 
 QFrame#playbar {{ background: {SURFACE_1}; border: none; border-radius: {RADIUS_LG}; }}
 

@@ -424,11 +424,13 @@ _STRINGS: dict[str, dict[str, str]] = {
         IT: "passo tra gli strati di {step} mm; cordone configurato a {height} mm",
     },
 
-    # --- vistas de câmera (se você já aplicou o item 3 do passo anterior) ----
-    "camera_top": {PT_BR: "Topo", EN: "Top", IT: "Alto"},
-    "camera_front": {PT_BR: "Frente", EN: "Front", IT: "Fronte"},
-    "camera_side": {PT_BR: "Lado", EN: "Side", IT: "Lato"},
-    "camera_iso": {PT_BR: "Isométrica", EN: "Isometric", IT: "Isometrica"},
+    # --- vistas de câmera - gizmo ----
+
+    "gizmo_tooltip": {
+        PT_BR: "Clique em um eixo para alinhar a vista. Clique fora deles para a vista isométrica.",
+        EN: "Click an axis to align the view. Click outside them for the isometric view.",
+        IT: "Fai clic su un asse per allineare la vista. Fai clic fuori per la vista isometrica.",
+    },
 
     "profile_default_name": {PT_BR: "Minha máquina", EN: "My machine", IT: "La mia macchina"},
     "profile_unlimited_name": {
@@ -455,5 +457,5 @@ def get_language() -> str:
 def tr(key: str) -> str:
     entry = _STRINGS.get(key)
     if entry is None:
-        return key  # chave esquecida — melhor mostrar a chave do que quebrar o app
+        return key
     return entry.get(_current, entry.get(PT_BR, key))

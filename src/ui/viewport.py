@@ -8,7 +8,7 @@ import numpy as np
 import pyqtgraph as pg
 import pyqtgraph.opengl as gl
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 
 from config import (
     CAMERA_MARGIN, CAMERA_MIN_DISTANCE, CAMERA_START_DISTANCE,
@@ -59,6 +59,8 @@ def _tilt_direction(start: np.ndarray, end: np.ndarray) -> np.ndarray | None:
 PLAYBACK_KEYS = {Qt.Key.Key_Space, Qt.Key.Key_Left, Qt.Key.Key_Right, Qt.Key.Key_Home, Qt.Key.Key_End}
 
 class ToolpathView(gl.GLViewWidget):
+
+    camera_changed = Signal()
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
@@ -261,6 +263,14 @@ class ToolpathView(gl.GLViewWidget):
             event.ignore()
             return
         super().keyPressEvent(event)
+
+    def setCameraPosition(self, *args, **kwargs) -> None:
+        super().setCameraPosition(*args, **kwargs)
+        self.camera_changed.emit()
+
+    def orbit(self, azim, elev) -> None:
+        super().orbit(azim, elev)
+        self.camera_changed.emit()
 
     def set_preset_view(self, name: str) -> None:
         """gira a câmera para uma vista padrão, mantendo a distância (zoom) atual."""
