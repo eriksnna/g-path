@@ -151,6 +151,7 @@ class StatsPanel(QFrame):
         layout.addLayout(_card_grid(list(self._program.values())))
 
         layout.addWidget(self._mode_title)
+        layout.addLayout(self.inputs_layout)
         layout.addLayout(self._mode_box)
 
         layout.addStretch()
