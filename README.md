@@ -14,8 +14,9 @@ Ferramenta de visualização e simulação 3D de programas G-code, para usinagem
 
 ### Instalação
 
-1. Baixe o `.exe` [**Releases**](https://github.com/eriksnna/g-path/releases);
-2. Abra o `G-Path.exe`. Não precisa instalar Python nem nenhuma dependência.
+1. Baixe o `.zip` mais recente na aba [**Releases**](https://github.com/eriksnna/g-path/releases);
+2. Extraia a pasta inteira;
+3. Abra o `G-Path.exe`. Não precisa instalar Python nem nenhuma dependência.
 
 > ⚠️ Na primeira execução, o Windows pode exibir um aviso do SmartScreen ("O Windows protegeu seu PC"), já que o executável ainda não tem assinatura digital. Clique em **"Mais informações" → "Executar assim mesmo"**.
 
@@ -38,7 +39,7 @@ Se o arquivo usar códigos de outro dialeto (por exemplo, M8/M9 para abrir e fec
 | Ctrl + Enter | Aplicar o código do editor |
 | Ctrl + S | Salvar |
 
-<!-- ### Exemplos
+### Exemplos
 
 A pasta `examples/` (incluída no `.zip`) traz 10 programas prontos:
 
@@ -55,7 +56,7 @@ A pasta `examples/` (incluída no `.zip`) traz 10 programas prontos:
 | `waam_03_cylinder_in_layers.nc` | Parede cilíndrica com sub-rotina |
 | `waam_04_dots_arc_m8_m9.nc` | Deposição ponto a ponto, dialeto M8/M9 |
 
-- 10 arquivos de exemplo (6 de usinagem, 4 de deposição WAAM), com comentários em português e inglês -->
+- 10 arquivos de exemplo (6 de usinagem, 4 de deposição WAAM), com comentários em português e inglês
 
 ### Rodar a partir do código-fonte
 
@@ -79,8 +80,9 @@ G-Path é distribuído sob a licença [MIT](LICENSE). Bibliotecas de terceiros: 
 
 ### Installation
 
-1. Download the latest `.exe` from the [**Releases**](https://github.com/eriksnna/g-path/releases) tab;
-2. Run `G-Path.exe`. No Python or other dependency is needed.
+1. Download the latest `.zip` from the [**Releases**](https://github.com/eriksnna/g-path/releases) tab;
+2. Extract the whole folder;
+3. Run `G-Path.exe`. No Python or other dependency is needed.
 
 > ⚠️ On first run, Windows may show a SmartScreen warning ("Windows protected your PC"), since the executable is not digitally signed yet. Click **"More info" → "Run anyway"**.
 
@@ -103,7 +105,7 @@ If the file uses codes from another dialect (for example, M8/M9 to turn the arc 
 | Ctrl + Enter | Apply the editor code |
 | Ctrl + S | Save |
 
-<!-- ### Examples
+### Examples
 
 The `examples/` folder (included in the `.zip`) has 10 ready-made programs:
 
@@ -122,7 +124,7 @@ The `examples/` folder (included in the `.zip`) has 10 ready-made programs:
 
 - 10 arquivos de exemplo (6 de usinagem, 4 de deposição WAAM), com comentários em português e inglês
 
-- 10 example files (6 machining programs, four WAAM deposition programs), with comments in each file in english and portuguese.-->
+- 10 example files (6 machining programs, four WAAM deposition programs), with comments in each file in english and portuguese.
 
 ### Running from source
 
