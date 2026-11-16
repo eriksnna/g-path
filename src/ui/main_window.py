@@ -560,7 +560,7 @@ class MainWindow(QMainWindow):
         path = self._path
         if path is None or not path.exists():
             return
-        self._watch_file(path)  # quem regrava por substituição faz o monitor soltar o arquivo
+        self._watch_file(path)
         try:
             check_file_size(path)
             text, encoding = read_gcode_text(path)
@@ -568,7 +568,7 @@ class MainWindow(QMainWindow):
         except (UnsafeFileError, OSError):
             return
         if text == self._saved_text:
-            return  # foi o próprio G-Path que salvou
+            return
         if self._has_unsaved_changes():
             answer = QMessageBox.question(
                 self, tr("disk_change_title"), tr("disk_change_text"),
