@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import json
 
-from PySide6.QtCore import QLocale, Qt, Signal
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (
     QDialog, QDoubleSpinBox, QFrame, QGridLayout, QHBoxLayout, QInputDialog,
@@ -20,6 +20,7 @@ from core.i18n import LANGUAGES, get_language, tr
 from core.machine_profile import MachineProfile, default_profiles
 from core.modes import mode_choices
 from ui.combo import ComboBox
+from ui.spin import SpinBox
 from ui.theme import ACCENT_TEXT, SPACE_LG, SPACE_MD, SPACE_SM, SPACE_XL, SPACE_XXL
 
 DIALOG_SIZE = (620, 600)
@@ -29,7 +30,6 @@ CARD_PADDING = 20
 SECTION_GAP = 12    # espaço extra acima de cada título de seção
 ABOUT_LOGO_SIZE = 44
 AXES = ("X", "Y", "Z")
-NUMBER_LOCALE = QLocale(QLocale.Language.C)  # ponto decimal, como no resto do programa
 
 THIRD_PARTY = (
     ("Qt for Python (PySide6)", "LGPL-3.0"),
@@ -58,9 +58,7 @@ def _card() -> tuple[QFrame, QGridLayout]:
 
 
 def _spin(minimum: float, maximum: float, decimals: int, suffix: str = "") -> QDoubleSpinBox:
-    spin = QDoubleSpinBox()
-    spin.setLocale(NUMBER_LOCALE)
-    spin.setGroupSeparatorShown(False)
+    spin = SpinBox()
     spin.setRange(minimum, maximum)
     spin.setDecimals(decimals)
     spin.setSuffix(suffix)

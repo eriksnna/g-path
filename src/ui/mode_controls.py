@@ -1,11 +1,12 @@
 """seletor de modo e parâmetros do cordão. os campos de cordão aparecem só na deposição."""
 from __future__ import annotations
 
-from PySide6.QtCore import QLocale, Signal
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QDoubleSpinBox, QFrame, QGridLayout, QHBoxLayout, QLabel, QWidget
 
 from core.i18n import tr
 from ui.combo import ComboBox
+from ui.spin import SpinBox
 from ui.theme import SPACE_LG, SPACE_MD, SPACE_SM, SPACE_XS
 
 from config import BEAD_HEIGHT_MM, BEAD_WIDTH_MM, DEFAULT_MODE, DEPOSIT_DENSITY_G_CM3
@@ -90,8 +91,7 @@ class ModeControls(QWidget):
         self._update_visibility()
 
     def _make_spin(self, low: float, high: float, value: float, suffix: str) -> QDoubleSpinBox:
-        spin = QDoubleSpinBox()
-        spin.setLocale(QLocale(QLocale.Language.C))
+        spin = SpinBox()
         spin.setRange(low, high)
         spin.setDecimals(2)
         spin.setSingleStep(0.1)
