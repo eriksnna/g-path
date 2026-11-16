@@ -658,6 +658,7 @@ Novidades:
 
 **Novidades:**
 - CHANGELOG adicionado de acordo com o padrão universal
+- Adição de licensas e créditos no código
 
 **Correções:**
 - Limpeza do código e uso de regras de padronização estética
