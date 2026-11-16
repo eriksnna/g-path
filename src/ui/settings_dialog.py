@@ -137,7 +137,7 @@ class _ProfilesPage(QWidget):
 
         self._rapid_feed_spin = _spin(1.0, 100_000.0, 1, " mm/min")
         self._default_feed_spin = _spin(1.0, 100_000.0, 1, " mm/min")
-        self._min_feed_spin = _spin(0.1, 10_000.0, 2, " mm/min")
+        self._min_feed_spin = _spin(0.1, 10_000.0, 1, " mm/min")
         self._arc_step_spin = _spin(0.1, 45.0, 1, "°")
         advanced_card, advanced_grid = _card()
         advanced_fields = (

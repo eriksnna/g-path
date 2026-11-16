@@ -12,6 +12,8 @@
 
 Ferramenta de visualização e simulação 3D de programas G-code, para usinagem e deposição (WAAM).
 
+> 🔍 A simulação é uma conferência visual e não substitui o teste em vazio na máquina.
+
 ### Instalação
 
 1. Baixe o `.zip` mais recente na aba [**Releases**](https://github.com/eriksnna/g-path/releases);
@@ -77,6 +79,8 @@ G-Path é distribuído sob a licença [MIT](LICENSE). Bibliotecas de terceiros: 
 ## English
 
 3D visualization and simulation tool for G-code programs, for machining and deposition (WAAM).
+
+> 🔎 The simulation is a visual conference and does not replace the empty test on the machine.
 
 ### Installation
 
