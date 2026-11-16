@@ -671,4 +671,5 @@ Novidades:
 - Novo grupo de cards com informações do cordão
 - Novo cabeçalho removendo informações redundantes do painel
 - Novo botão de reiniciar ao trocar língua
+- Novos exemplos de código em inglês (10 no total)
 
