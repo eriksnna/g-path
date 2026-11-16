@@ -147,12 +147,18 @@ class StatsPanel(QFrame):
         layout.setContentsMargins(SPACE_XL, SPACE_XL, SPACE_XL, SPACE_XL)
         layout.setSpacing(SPACE_MD)
 
+        cards = list(self._program.values())
         layout.addWidget(_section_title(tr("section_program_summary")))
-        layout.addLayout(_card_grid(list(self._program.values())))
+        layout.addLayout(_card_grid([card for card in cards if not card.wide]))
 
         layout.addWidget(self._mode_title)
         layout.addLayout(self.inputs_layout)
         layout.addLayout(self._mode_box)
+
+        # joga os parâmetros do cordão pra cima
+        # comandos e dimensões são os menos consultados: ficam por último
+        layout.addWidget(_section_title(tr("section_details")))
+        layout.addLayout(_card_grid([card for card in cards if card.wide]))
 
         layout.addStretch()
 

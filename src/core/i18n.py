@@ -142,6 +142,7 @@ _STRINGS: dict[str, dict[str, str]] = {
 
     # --- painel de estatísticas ----------------------------------------------
     "section_program_summary": {PT_BR: "Resumo do programa", EN: "Program summary", IT: "Riepilogo del programma"},
+    "section_details": {PT_BR: "Detalhes", EN: "Details", IT: "Dettagli"},
     "section_mode_prefix": {PT_BR: "Modo: {title}", EN: "Mode: {title}", IT: "Modalità: {title}"},
     "card_total_time": {PT_BR: "Tempo total", EN: "Total time", IT: "Tempo totale"},
     "card_layers": {PT_BR: "Camadas", EN: "Layers", IT: "Strati"},

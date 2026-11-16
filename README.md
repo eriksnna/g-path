@@ -639,6 +639,7 @@ Novidades:
 - [X] Mais detalhamento no processo
 - [X] Tela inicial mais autoral
 - [X] Identidade visual mais definida
+- [] Visualização do Arco em 3D
 
 ### 12/11 — quinta-feira - Refinamento e novas funcionalidades (~7h)
 
