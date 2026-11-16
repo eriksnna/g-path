@@ -104,6 +104,7 @@ class MainWindow(QMainWindow):
         self._source_lines: list[str] = []
         self._playback = Playback()
         self._restarting = False
+        self._editor_collapsed = False
         self._profiles, _active_name = load_profiles()
         self._profile = next((p for p in self._profiles if p.name == _active_name), self._profiles[0])
 
@@ -186,12 +187,13 @@ class MainWindow(QMainWindow):
         self._issues_panel.setMinimumHeight(160)
 
         self._viewport.setMinimumSize(280, 180)
-        main_area = QSplitter(Qt.Orientation.Vertical)
+        main_area = self._main_area = QSplitter(Qt.Orientation.Vertical)
         main_area.addWidget(self._viewport)
         main_area.addWidget(self._editor)
         main_area.setStretchFactor(0, 1)
         main_area.setStretchFactor(1, 0)
         main_area.setChildrenCollapsible(True)
+        main_area.splitterMoved.connect(self._on_main_splitter_moved)
 
         body = QSplitter(Qt.Orientation.Horizontal)
         body.addWidget(main_area)
@@ -808,8 +810,15 @@ class MainWindow(QMainWindow):
         self._editor_toggle.setChecked(True)
         self._editor.show_find()
 
+    def _on_main_splitter_moved(self, _position: int, _index: int) -> None:
+        """recolher o editor arrastando a alça equivale a desligar o botão Editor."""
+        if self._editor_toggle.isChecked() and self._main_area.sizes()[1] == 0:
+            self._editor_collapsed = True
+            self._editor_toggle.setChecked(False)
+
     def _on_editor_toggled(self, visible: bool) -> None:
         self._editor.setVisible(visible)
-        self._player.set_chips_allowed(not visible)
-        if visible and self._toolpath is not None:
-            self._update_running_line(self._toolpath.snapshot(self._playback.elapsed))
+        if visible and self._editor_collapsed:
+            self._editor_collapsed = False
+            height = self._main_area.height()
+            self._main_area.setSizes([height - height // 3, height // 3])
