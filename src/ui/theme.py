@@ -1,5 +1,9 @@
 # --- tokens de design ---------------------------------------------------
 
+import config
+
+# bob labob the bob bubu
+
 SURFACE_0 = "#0d0e12"   # fundo da janela
 SURFACE_1 = "#17191f"   # painéis (cartões, barra de reprodução, editor...)
 SURFACE_2 = "#1f222a"   # elementos dentro de painéis (inputs, itens de lista)
@@ -17,6 +21,8 @@ ACCENT_PRESSED = "#97471b"
 ACCENT_SOFT = "#3b2c29"   # fundo de estado ativo/selecionado (laranja 18% sobre SURFACE_2)
 ACCENT_TEXT = "#e8894f"   # texto/ícone laranja sobre fundos escuros
 ON_ACCENT = "#ffffff"   # cor de texto/ícone sobre fundo ACCENT
+
+CHECK_ICON = (config.ASSETS_DIR / "icons" / "check-on-accent.svg").as_posix()
 
 SUCCESS = "#30d158"
 ERROR_COLOR = "#ff6b6b"
@@ -208,7 +214,9 @@ QCheckBox::indicator {{
 }}
 QCheckBox::indicator:hover {{ border: 1px solid {ACCENT}; }}
 QCheckBox::indicator:focus {{ border: 1px solid {ACCENT}; }}
-QCheckBox::indicator:checked {{ background: {ACCENT}; border: 1px solid {ACCENT}; }}
+QCheckBox::indicator:checked {{
+    background: {ACCENT}; border: 1px solid {ACCENT}; image: url("{CHECK_ICON}");
+}}
 
 
 QLineEdit {{
