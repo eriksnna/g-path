@@ -5,7 +5,9 @@ import sys
 
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QElapsedTimer, QProcess, QSettings, QTimer, QEasingCurve, QPropertyAnimation
+from PySide6.QtCore import (
+    Qt, QElapsedTimer, QFileSystemWatcher, QProcess, QSettings, QTimer, QEasingCurve, QPropertyAnimation,
+)
 from PySide6.QtGui import QIcon, QCloseEvent, QAction, QKeySequence
 from PySide6.QtWidgets import (
     QFileDialog, QFrame, QHBoxLayout, QLabel, QMainWindow, QPushButton,
@@ -51,6 +53,8 @@ def _gcode_filter() -> str:
     return f"G-code ({patterns});;{tr('file_filter_all')} (*)"
 
 MAX_DISMISSED_SUGGESTIONS = 50
+
+DISK_RELOAD_DELAY_MS = 400
 
 def _vsep() -> QFrame:
     """linha vertical fina pra separar grupos de controles na barra superior."""
@@ -105,6 +109,14 @@ class MainWindow(QMainWindow):
         self._playback = Playback()
         self._restarting = False
         self._editor_collapsed = False
+
+        # recarrega quando outro programa regrava o arquivo aberto
+        self._watcher = QFileSystemWatcher(self)
+        self._disk_change_timer = QTimer(self)
+        self._disk_change_timer.setSingleShot(True)
+        self._disk_change_timer.setInterval(DISK_RELOAD_DELAY_MS)
+        self._disk_change_timer.timeout.connect(self._on_file_changed_on_disk)
+        self._watcher.fileChanged.connect(lambda _path: self._disk_change_timer.start())
         self._profiles, _active_name = load_profiles()
         self._profile = next((p for p in self._profiles if p.name == _active_name), self._profiles[0])
 
@@ -299,6 +311,7 @@ class MainWindow(QMainWindow):
         if not self._confirm_discard_changes():
             return
         self._path = None
+        self._watch_file(None)
         self._text = None
         self._saved_text = None
         self._settings.remove("window/last_file")
@@ -467,6 +480,7 @@ class MainWindow(QMainWindow):
         if not self._confirm_discard_changes():
             return
         self._path = None
+        self._watch_file(None)
         self._settings.remove("window/last_file")
         self._text = ""
         self._saved_text = ""
@@ -519,6 +533,7 @@ class MainWindow(QMainWindow):
             return
         self._encoding = encoding
         self._path = path
+        self._watch_file(path)
         self._text = text
         self._saved_text = text
         self._file_label.setText(path.name, str(path))
@@ -532,6 +547,42 @@ class MainWindow(QMainWindow):
         """na tela inicial a barra de status está oculta, então o erro vai num diálogo."""
         self._player.set_status(message)
         QMessageBox.warning(self, tr("open_error_title"), message)
+
+    def _watch_file(self, path: Path | None) -> None:
+        """passa a vigiar só o arquivo aberto (ou nenhum)."""
+        watched = self._watcher.files()
+        if watched:
+            self._watcher.removePaths(watched)
+        if path is not None:
+            self._watcher.addPath(str(path))
+
+    def _on_file_changed_on_disk(self) -> None:
+        path = self._path
+        if path is None or not path.exists():
+            return
+        self._watch_file(path)  # quem regrava por substituição faz o monitor soltar o arquivo
+        try:
+            check_file_size(path)
+            text, encoding = read_gcode_text(path)
+            check_line_lengths(text)
+        except (UnsafeFileError, OSError):
+            return
+        if text == self._saved_text:
+            return  # foi o próprio G-Path que salvou
+        if self._has_unsaved_changes():
+            answer = QMessageBox.question(
+                self, tr("disk_change_title"), tr("disk_change_text"),
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
+            )
+            if answer != QMessageBox.StandardButton.Yes:
+                return
+        self._encoding = encoding
+        self._text = text
+        self._saved_text = text
+        self._editor.set_text(text)
+        self._reload()
+        self._player.set_status(tr("status_reloaded_from_disk"))
 
     def _confirm_discard_changes(self) -> bool:
         """pergunta antes de descartar edições não salvas. True se pode prosseguir."""
@@ -566,6 +617,7 @@ class MainWindow(QMainWindow):
         path = Path(path_str)
         if self._write_to_path(path, text):
             self._path = path
+            self._watch_file(path)
             self._file_label.setText(path.name, str(path))
 
     def _write_to_path(self, path: Path, text: str) -> bool:

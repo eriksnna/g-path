@@ -83,6 +83,17 @@ _STRINGS: dict[str, dict[str, str]] = {
     "status_file_rejected": {PT_BR: "Arquivo recusado: {err}", EN: "File rejected: {err}", IT: "File rifiutato: {err}"},
     "status_open_error": {PT_BR: "Erro ao abrir arquivo: {err}", EN: "Error opening file: {err}", IT: "Errore nell'apertura del file: {err}"},
     "status_saved_at": {PT_BR: "Salvo em {path}", EN: "Saved to {path}", IT: "Salvato in {path}"},
+    "status_reloaded_from_disk": {
+        PT_BR: "Arquivo recarregado: foi alterado por outro programa",
+        EN: "File reloaded: it was changed by another program",
+        IT: "File ricaricato: modificato da un altro programma",
+    },
+    "disk_change_title": {PT_BR: "Arquivo alterado", EN: "File changed", IT: "File modificato"},
+    "disk_change_text": {
+        PT_BR: "O arquivo foi alterado por outro programa. Recarregar e descartar as edições não salvas?",
+        EN: "The file was changed by another program. Reload and discard unsaved edits?",
+        IT: "Il file è stato modificato da un altro programma. Ricaricare e scartare le modifiche non salvate?",
+    },
     "status_no_moves_from_line": {
         PT_BR: "Nenhum movimento a partir da linha {line}.",
         EN: "No moves from line {line} onward.",
