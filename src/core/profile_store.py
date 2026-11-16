@@ -10,6 +10,7 @@ import math
 
 import config
 from core.dialect import DIALECTS
+from core.file_io import write_text_atomic
 from core.machine_profile import DEFAULT_LIMITS, MachineProfile, default_profiles
 from core.modes import mode_choices
 
@@ -92,8 +93,8 @@ def save_profiles(profiles: list[MachineProfile], active_name: str) -> None:
     }
     try:
         config.PROFILES_FILE.parent.mkdir(parents=True, exist_ok=True)
-        config.PROFILES_FILE.write_text(
-            json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8"
+        write_text_atomic(
+            config.PROFILES_FILE, json.dumps(payload, indent=2, ensure_ascii=False), "utf-8"
         )
     except OSError:
         pass

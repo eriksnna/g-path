@@ -30,7 +30,7 @@ from core.stats import compute_stats
 from core.toolpath import Snapshot, Toolpath
 from core.file_safety import UnsafeFileError, check_file_size, check_line_lengths
 from core.dialect import dialect_label, get_dialect, process_codes_label, suggest_dialect
-from core.file_io import read_gcode_text
+from core.file_io import read_gcode_text, write_text_atomic
 from ui.gcode_editor import GCodeEditor
 from ui.issues_panel import IssuesPanel
 from ui.layer_controls import LayerControls
@@ -623,11 +623,11 @@ class MainWindow(QMainWindow):
     def _write_to_path(self, path: Path, text: str) -> bool:
         try:
             try:
-                path.write_text(text, encoding=self._encoding)
+                write_text_atomic(path, text, self._encoding)
             except UnicodeEncodeError:
                 # texto novo tem caractere que a codificação antiga não comporta
                 self._encoding = "utf-8"
-                path.write_text(text, encoding=self._encoding)
+                write_text_atomic(path, text, self._encoding)
         except OSError as err:
             QMessageBox.warning(self, tr("save_error_title"), tr("save_error_text").format(err=err))
             return False
