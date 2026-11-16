@@ -342,15 +342,19 @@ _STRINGS: dict[str, dict[str, str]] = {
         IT: "arco nel piano G{plane} non supportato; solo G17 (XY)",
     },
     "issue_arc_missing_center": {
-        PT_BR: "arco sem centro: informe I e/ou J",
-        EN: "arc without center: provide I and/or J",
-        IT: "arco senza centro: indica I e/o J",
+        PT_BR: "arco sem centro: informe I/J ou R",
+        EN: "arc without center: provide I/J or R",
+        IT: "arco senza centro: indica I/J o R",
     },
-
-    "issue_arc_r_unsupported": {
-        PT_BR: "arco com R não suportado; use I/J",
-        EN: "arc with R is not supported; use I/J",
-        IT: "arco con R non supportato; usa I/J",
+    "issue_arc_r_full_circle": {
+        PT_BR: "arco com R precisa de início e fim diferentes; para círculo completo use I/J",
+        EN: "an arc with R needs different start and end points; use I/J for a full circle",
+        IT: "un arco con R richiede inizio e fine diversi; per un cerchio completo usa I/J",
+    },
+    "issue_arc_r_too_small": {
+        PT_BR: "raio R{radius:.3f} pequeno demais: a distância até o destino exige pelo menos {needed:.3f} mm",
+        EN: "radius R{radius:.3f} is too small: the distance to the target needs at least {needed:.3f} mm",
+        IT: "raggio R{radius:.3f} troppo piccolo: la distanza dalla destinazione richiede almeno {needed:.3f} mm",
     },
     "issue_feed_missing": {
         PT_BR: "avanço F ausente; usando {feed} mm/min",

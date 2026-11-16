@@ -13,7 +13,6 @@ from core.machine_profile import DEFAULT_LIMITS as MACHINE_LIMITS
 from core.dialect import Dialect, get_dialect
 from core.expander import expand_program
 from core.i18n import tr
-# re-exportados: quem importa de core.parser continua funcionando
 from core.lexer import ERROR, WARNING, GCodeError, Issue, clean_line, parse_words
 
 Point = tuple[float, float, float]
@@ -35,6 +34,8 @@ MOTION_ARCS = (G_CW_ARC, G_CCW_ARC)
 AXES = "XYZ"
 BOUNDS_TOLERANCE = 1e-6
 TWO_PI = 2 * math.pi
+MIN_CHORD = 1e-9          # mm; abaixo disso início e fim do arco são o mesmo ponto
+RADIUS_TOLERANCE = 1e-3   # folga para o arredondamento do pós-processador (0,1% do raio)
 
 __all__ = [
     "ERROR", "WARNING", "Issue", "Move", "ParseResult", "arc_points",
@@ -106,6 +107,21 @@ def arc_points(start: Point, end: Point, center: tuple[float, float],
     points[-1] = end  # o último ponto é exatamente o destino
     return points
 
+def center_from_radius(start: Point, end: Point, radius: float,
+                       clockwise: bool) -> tuple[float, float]:
+    """centro de um arco programado com R. R positivo é o arco de até 180°; negativo, o maior."""
+    dx, dy = end[0] - start[0], end[1] - start[1]
+    chord = math.hypot(dx, dy)
+    if chord < MIN_CHORD:
+        raise GCodeError(tr("issue_arc_r_full_circle"))
+    half = chord / 2
+    if half > abs(radius) * (1 + RADIUS_TOLERANCE):
+        raise GCodeError(tr("issue_arc_r_too_small").format(radius=abs(radius), needed=half))
+    height = math.sqrt(max(0.0, radius * radius - half * half))
+    # o centro fica à esquerda da corda no G3 e à direita no G2; R negativo inverte o lado
+    side = 1.0 if clockwise == (radius < 0) else -1.0
+    middle_x, middle_y = (start[0] + end[0]) / 2, (start[1] + end[1]) / 2
+    return (middle_x - side * height * dy / chord, middle_y + side * height * dx / chord)
 
 def _signed_sweep(delta: float, clockwise: bool) -> float:
     """ajusta o ângulo varrido para o sentido pedido pelo G2 ou G3."""
@@ -274,26 +290,24 @@ class GCodeInterpreter:
         ))
 
     def _arc(self, end: Point, words: dict[str, float]) -> None:
-        if "R" in words:
-            raise GCodeError(tr("issue_arc_r_unsupported"))
         if self.plane != G_PLANE_XY:
             raise GCodeError(tr("issue_arc_plane_unsupported").format(plane=self.plane))
-        if "I" not in words and "J" not in words:
+
+        start = self.position
+        clockwise = self.motion == G_CW_ARC
+        if "R" in words:  # quando R e I/J aparecem juntos, vale o R, como nos controladores
+            center = center_from_radius(start, end, words["R"] * self.unit_scale, clockwise)
+        elif "I" in words or "J" in words:
+            center = (
+                start[0] + words.get("I", 0.0) * self.unit_scale,
+                start[1] + words.get("J", 0.0) * self.unit_scale,
+            )
+        else:
             raise GCodeError(tr("issue_arc_missing_center"))
 
         self._check_feed()
-        start = self.position
-        center = (
-            start[0] + words.get("I", 0.0) * self.unit_scale,
-            start[1] + words.get("J", 0.0) * self.unit_scale,
-        )
-        points = arc_points(start, end, center, clockwise=self.motion == G_CW_ARC, step_deg=self.arc_step_deg)
+        points = arc_points(start, end, center, clockwise=clockwise, step_deg=self.arc_step_deg)
         self._check_bounds(points)
-
-        if self.plane != G_PLANE_XY:
-            raise GCodeError(tr("issue_arc_plane_unsupported").format(plane=self.plane))
-        if "I" not in words and "J" not in words:
-            raise GCodeError(tr("issue_arc_missing_center"))
 
         previous = start
         for point in points:
