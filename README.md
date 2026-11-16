@@ -539,7 +539,7 @@ Novidades:
 - Agora é possivel acessar as opções Arquivo, Editar e Ajustes;
 - Permanência de perfil com Modo, Dialeto e Limites
 
-### 26/10 — segunda-feira a 29/10 — quinta-feira - Adições extras e ajustes gerais (~30h)
+### 26/10 — segunda-feira a 29/10 — quinta-feira - Adições extras e ajustes gerais (~23h)
 
 1. **Identidade:**
 
@@ -567,7 +567,7 @@ Novidades:
 - Adição de pasta de exemplos, com modelos de código G-Code de usinagem e WAAM.
 - Correção de bug de redimensionamento da janela.
 
-### 01/11 — domingo a 03/11 — terça-feira - Suporte à outras línguas (~23h)
+### 01/11 — domingo a 03/11 — terça-feira - Suporte à outras línguas (~15h)
 
 1. **Novidade:**
 
@@ -616,3 +616,59 @@ Novidades:
 
 **Correções:**
 - Ajuste de labels hardcodadas em PT-BR
+
+### 10/11 — terça-feira e 11/11 — quarta-feira - Correção geral de bugs (~12h)
+
+**Novidades:**
+- Novos ícones
+- Player bar repaginada: novos ícones e novas cores
+- Chips de status em tempo real
+- Nova timeline
+
+**Correções:**
+
+- Bug subrotina
+- Bugs G92, G28, planos, arcos sem centro e G desconhecido
+- Ajuste no filtro de arquivos G-Code
+- Bug - no moves found
+
+### 11/11 — quarta-feira - Reunião com cliente para revisão, teste e brainstorm (~4h)
+
+**Próximos objetivos:**
+
+- [X] Mais detalhamento no processo
+- [X] Tela inicial mais autoral
+- [X] Identidade visual mais definida
+
+### 12/11 — quinta-feira - Refinamento e novas funcionalidades (~7h)
+
+**Novidades:**
+- Visualização de Leitura Digital (DRO)
+- Sugestão de troca de Dialeto
+- Tela inicial repaginada
+- Arrastar e Soltar arquivos direto na tela inicial
+
+**Correções:**
+- Ajuste na player bar: agora ocupa uma só linha
+- Ajuste no aviso de sugestão
+- Painel de issues mais enxuto
+- Diversos ajustes e padronização estética
+
+### 13/11 — sexta-feira - Padronização e lançamento da v0.3.0 (~5h)
+
+**Novidades:**
+- CHANGELOG adicionado de acordo com o padrão universal
+
+**Correções:**
+- Limpeza do código e uso de regras de padronização estética
+
+### 15/11 — domingo - Correção da release v0.3.0 quebrada e novas funcionalidades (~7h)
+
+**Novidades:**
+- Lançamento da v0.3.1, corrigindo a v0.3.0 quebrada
+- Novo Gizmo tridimensional, substituindo os botões de vistas adicionados na v0.2.0-beta
+- Versão 0.3.1 totalmente funcional, agora zipada corretamente
+- Novo grupo de cards com informações do cordão
+- Novo cabeçalho removendo informações redundantes do painel
+- Novo botão de reiniciar ao trocar língua
+
