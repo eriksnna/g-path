@@ -29,7 +29,7 @@ from core.playback import Playback
 from core.stats import compute_stats
 from core.toolpath import Snapshot, Toolpath
 from core.file_safety import UnsafeFileError, check_file_size, check_line_lengths
-from core.dialect import dialect_label, get_dialect, process_codes_label, suggest_dialect
+from core.dialect import dialect_label, get_dialect, process_codes_label
 from core.file_io import read_gcode_text, write_text_atomic
 from ui.gcode_editor import GCodeEditor
 from ui.issues_panel import IssuesPanel
@@ -46,13 +46,12 @@ from ui.corner_overlay import CornerOverlay
 from ui.dro import DroOverlay
 from ui.gizmo import ViewGizmo
 from ui.suggestion_banner import SuggestionBanner
+from ui.dialect_suggestion import DialectSuggestion
 from ui.start_panel import StartPanel
 
 def _gcode_filter() -> str:
     patterns = " ".join(f"*{ext}" for ext in config.GCODE_EXTENSIONS)
     return f"G-code ({patterns});;{tr('file_filter_all')} (*)"
-
-MAX_DISMISSED_SUGGESTIONS = 50
 
 DISK_RELOAD_DELAY_MS = 400
 
@@ -120,6 +119,8 @@ class MainWindow(QMainWindow):
         self._timer.timeout.connect(self._on_tick)
         self._frame_clock = QElapsedTimer()
         self._settings = QSettings(str(config.WINDOW_STATE_FILE), QSettings.Format.IniFormat)
+
+        self._dialect_suggestion = DialectSuggestion(self._banner, self._settings)
 
         self._build_layout()
         self._build_menu_bar()
@@ -349,7 +350,6 @@ class MainWindow(QMainWindow):
         self._issues_panel.issue_selected.connect(self._go_to_issue)
         self._issues_panel.issue_selected.connect(self._editor.goto_line)
         self._banner.accepted.connect(self._use_dialect)
-        self._banner.dismissed.connect(self._dismiss_dialect)
 
         self._start_panel.open_requested.connect(lambda: self.open_file())
         self._start_panel.blank_requested.connect(self._start_blank)
@@ -400,34 +400,6 @@ class MainWindow(QMainWindow):
         self._profile_label.setText(f"{name}  ·  {dialect_label(self._profile.dialect_key)}")
         self._profile_label.setToolTip(tr("profile_dialect_tooltip").format(
             codes=process_codes_label(self._profile.dialect_key)))
-
-    def _update_dialect_suggestion(self) -> None:
-        key = suggest_dialect(self._text or "", self._profile.dialect_key)
-        if key is None or self._dismissal_id(key) in self._dismissed_suggestions():
-            self._banner.hide()
-            return
-        self._banner.show_suggestion(
-            key,
-            tr("dialect_suggestion").format(
-                codes=process_codes_label(key), current=dialect_label(self._profile.dialect_key)),
-            tr("dialect_suggestion_action").format(name=dialect_label(key)),
-        )
-
-    def _dismissal_id(self, key: str) -> str:
-        """Identifica a sugestão por arquivo: dispensar em um não cala nos outros."""
-        return f"{self._path or ''}|{key}"
-
-    def _dismissed_suggestions(self) -> list[str]:
-        value = self._settings.value("suggestions/dismissed", [])
-        if isinstance(value, str):  # QSettings devolve string quando sobra só 1 item salvo
-            value = [value]
-        return list(value or [])
-
-    def _dismiss_dialect(self, key: str) -> None:
-        """O × vale para este arquivo, e continua valendo nas próximas aberturas."""
-        dismissed = self._dismissed_suggestions()
-        dismissed.insert(0, self._dismissal_id(key))
-        self._settings.setValue("suggestions/dismissed", dismissed[:MAX_DISMISSED_SUGGESTIONS])
 
     def _use_dialect(self, key: str) -> None:
         """troca o dialeto do perfil ativo pelo sugerido e reinterpreta o programa."""
@@ -633,7 +605,7 @@ class MainWindow(QMainWindow):
         self._source_lines = self._text.splitlines()
         self._issues = sorted([*result.issues, *mode.validate(moves)], key=lambda i: i.line)
         self._issues_panel.show_issues(self._issues)
-        self._update_dialect_suggestion()
+        self._dialect_suggestion.update(self._text or "", self._path, self._profile.dialect_key)
 
         if not moves:
             status = (tr("status_no_moves_see_issues").format(count=len(self._issues))
