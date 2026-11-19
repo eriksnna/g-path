@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 from PySide6.QtCore import (
-    Qt, QElapsedTimer, QFileSystemWatcher, QProcess, QSettings, QTimer, QEasingCurve, QPropertyAnimation,
+    Qt, QFileSystemWatcher, QProcess, QSettings, QTimer, QEasingCurve, QPropertyAnimation,
 )
 from PySide6.QtGui import QIcon, QCloseEvent, QAction, QKeySequence
 from PySide6.QtWidgets import (
@@ -15,17 +15,16 @@ from PySide6.QtWidgets import (
     QLayout, QGraphicsOpacityEffect, QApplication,
 )
 
-from config import APP_TITLE, ICON_PATH, TICK_MS, WINDOW_SIZE
+from config import APP_TITLE, ICON_PATH, WINDOW_SIZE
 from ui.icons import APPLY, DISCARD, NEW_FILE, OPEN_FILE, QUIT, SAVE, SEARCH, SETTINGS, icon
 
 import config
 from core.layers import depth_levels
 from core.lexer import Issue, clean_line
-from core.timeline import TimelineMarks, build_marks, step_layer, step_move
+from core.timeline import TimelineMarks, build_marks
 from core.modes import apply_mode, mode_display_name
 from core.i18n import tr
 from core.parser import parse_gcode
-from core.playback import Playback
 from core.stats import compute_stats
 from core.toolpath import Snapshot, Toolpath
 from core.file_safety import UnsafeFileError, check_file_size, check_line_lengths
@@ -48,6 +47,7 @@ from ui.gizmo import ViewGizmo
 from ui.suggestion_banner import SuggestionBanner
 from ui.dialect_suggestion import DialectSuggestion
 from ui.start_panel import StartPanel
+from ui.playback_controller import PlaybackController
 
 def _gcode_filter() -> str:
     patterns = " ".join(f"*{ext}" for ext in config.GCODE_EXTENSIONS)
@@ -73,7 +73,7 @@ class MainWindow(QMainWindow):
         self._marks = TimelineMarks()
         self._issues: list[Issue] = []
         self._source_lines: list[str] = []
-        self._playback = Playback()
+        self._playback = PlaybackController(self)
         self._restarting = False
         self._editor_collapsed = False
 
@@ -114,10 +114,6 @@ class MainWindow(QMainWindow):
         self._start_panel = StartPanel()
         self._stack = QStackedWidget()
 
-        self._timer = QTimer(self)
-        self._timer.setInterval(TICK_MS)
-        self._timer.timeout.connect(self._on_tick)
-        self._frame_clock = QElapsedTimer()
         self._settings = QSettings(str(config.WINDOW_STATE_FILE), QSettings.Format.IniFormat)
 
         self._dialect_suggestion = DialectSuggestion(self._banner, self._settings)
@@ -334,13 +330,14 @@ class MainWindow(QMainWindow):
         self._editor.apply_requested.connect(self._apply_edited_text)
         self._gizmo.view_requested.connect(self._viewport.set_preset_view)
 
+        self._playback.changed.connect(self._refresh)
         p = self._player
-        p.play_clicked.connect(self._toggle_play)
-        p.start_clicked.connect(self._go_to_start)
-        p.end_clicked.connect(self._go_to_end)
+        p.play_clicked.connect(self._playback.toggle)
+        p.start_clicked.connect(self._playback.go_to_start)
+        p.end_clicked.connect(self._playback.go_to_end)
         p.step_clicked.connect(self._step)
-        p.scrub_started.connect(self._pause)
-        p.scrubbed.connect(self._scrub_to)
+        p.scrub_started.connect(self._playback.pause)
+        p.scrubbed.connect(self._playback.scrub)
         p.speed_changed.connect(self._change_speed)
 
         c = self._layer_controls
@@ -591,7 +588,7 @@ class MainWindow(QMainWindow):
         """reinterpreta o texto atual com o modo e o dialeto escolhidos."""
         if self._text is None:
             return
-        self._pause()
+        self._playback.pause()
 
         mode = self._mode_controls.current_mode()
         dialect = get_dialect(self._profile.dialect_key)
@@ -617,7 +614,6 @@ class MainWindow(QMainWindow):
         levels = depth_levels(toolpath)
         self._toolpath = toolpath
         self._layer_controls.set_levels(levels)
-        self._playback.reset(toolpath.total_time)
         self._viewport.show_toolpath(toolpath, levels)
         self._viewport.set_show_torch(mode.key == "deposicao")
         self._stats_panel.show_program(compute_stats(toolpath, result.commands))
@@ -625,6 +621,7 @@ class MainWindow(QMainWindow):
         self._stats_panel.show_mode(mode_display_name(mode.key), mode.cards(toolpath))
         self._player.set_enabled(True)
         self._marks = build_marks(toolpath, levels, self._issues)
+        self._playback.load(toolpath, self._marks)
         self._player.set_enabled(True)
         self._player.set_marks(self._marks)
         self._player.set_status("")
@@ -659,58 +656,18 @@ class MainWindow(QMainWindow):
             self._player.set_status(tr("status_no_moves_from_line").format(line=line))
             return
 
-        self._playback.pause()
         self._playback.seek(t)
-        self._refresh()
 
     # --- ações de reprodução ---
 
-    def _toggle_play(self) -> None:
-        self._playback.toggle()
-        self._refresh()
-
-    def _pause(self) -> None:
-        self._playback.pause()
-        self._timer.stop()
-        self._refresh()
-
-    def _go_to_start(self) -> None:
-        self._playback.pause()
-        self._playback.seek(0.0)
-        self._refresh()
-
-    def _go_to_end(self) -> None:
-        self._playback.pause()
-        self._playback.seek(self._playback.total_time)
-        self._refresh()
-
     def _step(self, direction: int) -> None:
         """pula um movimento; com Shift, uma camada inteira."""
-        if self._toolpath is None:
-            return
-        t = self._playback.elapsed
-        by_layer = QApplication.keyboardModifiers() & Qt.KeyboardModifier.ShiftModifier
-        if by_layer and self._marks.layer_starts.size:
-            target = step_layer(self._marks, t, direction)
-        else:
-            target = step_move(self._toolpath, t, direction)
-        self._playback.pause()
-        self._playback.seek(target)
-        self._refresh()
-
-    def _scrub_to(self, fraction: float) -> None:
-        self._playback.seek_fraction(fraction)
-        self._refresh()
+        by_layer = bool(QApplication.keyboardModifiers() & Qt.KeyboardModifier.ShiftModifier)
+        self._playback.step(direction, by_layer)
 
     def _change_speed(self, value: float) -> None:
         self._playback.set_speed(value)
         self._player.set_speed(self._playback.speed)
-        self._refresh()
-
-    def _on_tick(self) -> None:
-        seconds = self._frame_clock.restart() / 1000.0
-        self._playback.advance(seconds)
-        self._refresh()
 
     # --- sincronização da tela com o estado ---
 
@@ -727,7 +684,6 @@ class MainWindow(QMainWindow):
         index = min(snapshot.done, self._toolpath.count - 1)
         self._dro.show_state(snapshot.head, float(self._toolpath.feeds[index]), snapshot.active)
         self._update_running_line(snapshot)
-        self._sync_timer()
 
     def _update_running_line(self, snapshot: Snapshot) -> None:
         """destaca no editor a linha de origem do movimento atualmente em execução."""
@@ -748,13 +704,6 @@ class MainWindow(QMainWindow):
             self._marks.layer_at(self._playback.elapsed), len(self._marks.layer_starts),
             snapshot.active,
         )
-
-    def _sync_timer(self) -> None:
-        if self._playback.playing and not self._timer.isActive():
-            self._frame_clock.start()
-            self._timer.start()
-        elif not self._playback.playing and self._timer.isActive():
-            self._timer.stop()
     
     def closeEvent(self, event: QCloseEvent) -> None:
         if not self._restarting and self._has_unsaved_changes() and not self._confirm_discard_changes():
@@ -771,11 +720,11 @@ class MainWindow(QMainWindow):
             event.accept()
             return
         actions = {
-            Qt.Key.Key_Space: self._toggle_play,
+            Qt.Key.Key_Space: self._playback.toggle,
             Qt.Key.Key_Left: lambda: self._step(-1),
             Qt.Key.Key_Right: lambda: self._step(1),
-            Qt.Key.Key_Home: self._go_to_start,
-            Qt.Key.Key_End: self._go_to_end,
+            Qt.Key.Key_Home: self._playback.go_to_start,
+            Qt.Key.Key_End: self._playback.go_to_end,
         }
         action = actions.get(event.key())
         if action is None or self._toolpath is None:
