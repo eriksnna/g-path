@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 
 from config import ARC_STEP_DEG, DEFAULT_DIALECT, DEFAULT_FEED, INCH_TO_MM, MAX_MOVES
 from core.machine_profile import DEFAULT_LIMITS as MACHINE_LIMITS
+from core.cycles import DRILL_CYCLES, DWELL, RAPID, drill_steps
 from core.dialect import Dialect, get_dialect
 from core.expander import expand_program
 from core.i18n import tr
@@ -30,7 +31,11 @@ G_INCREMENTAL = 91
 G_PLANE_XY = 17
 G_SET_POSITION = 92
 G_NOT_SIMULATED = {10, 28, 30, 53}  # usam X/Y/Z, mas não como destino de corte
-G_IGNORED = {17, 18, 19, 40, 41, 42, 43, 49, 54, 55, 56, 57, 58, 59, 61, 64, 80, 94}
+G_IGNORED = {17, 18, 19, 40, 41, 42, 43, 49, 54, 55, 56, 57, 58, 59, 61, 64, 94}
+G_CYCLE_CANCEL = 80
+G_RETURN_INITIAL = 98  # ciclo recua ao nível em que começou
+G_RETURN_R = 99        # ciclo recua só até o plano R
+CYCLE_WORDS = "ZRQP"   # parâmetros que o ciclo guarda de uma linha para a outra
 MOTION_ARCS = (G_CW_ARC, G_CCW_ARC)
 AXES = "XYZ"
 BOUNDS_TOLERANCE = 1e-6
@@ -153,6 +158,10 @@ class GCodeInterpreter:
         self.plane = G_PLANE_XY
         self.offset = [0.0, 0.0, 0.0]  # deslocamento do G92, por eixo
         self._unknown_warned: set[int] = set()
+        self.cycle: int | None = None        # ciclo de furação ativo (G73/G81/G82/G83)
+        self.cycle_words: dict[str, float] = {}
+        self.cycle_initial_z = 0.0
+        self.return_to_r = False             # G99; o padrão (G98) volta ao nível inicial
 
         self._lineno = 0
         self._feed_programmed = False
@@ -202,12 +211,24 @@ class GCodeInterpreter:
             self._report(WARNING, tr("issue_g_not_simulated").format(code=skipped[0]))
             return
 
-        if any(axis in params for axis in AXES):
+        if self.cycle is not None:
+            self._drill(params)
+        elif any(axis in params for axis in AXES):
             self._move(params)
 
     def _apply_g_code(self, code: int) -> None:
         if code in (G_RAPID, G_LINEAR, *MOTION_ARCS):
             self.motion = code
+            self.cycle = None  # um movimento comum encerra o ciclo
+        elif code in DRILL_CYCLES:
+            if self.cycle is None:
+                self.cycle_initial_z = self.position[2]
+                self.cycle_words = {}
+            self.cycle = code
+        elif code == G_CYCLE_CANCEL:
+            self.cycle = None
+        elif code in (G_RETURN_INITIAL, G_RETURN_R):
+            self.return_to_r = code == G_RETURN_R
         elif code in G_UNITS:
             self.unit_scale = G_UNITS[code]
         elif code == G_ABSOLUTE:
@@ -246,6 +267,53 @@ class GCodeInterpreter:
             return value + self.offset[i] if self.absolute else current + value
 
         return (resolve(0, "X"), resolve(1, "Y"), resolve(2, "Z"))
+
+    # --- ciclos de furação ---
+
+    def _drill(self, words: dict[str, float]) -> None:
+        """no ciclo, Z é a profundidade e R o plano de aproximação; cada X/Y é um furo."""
+        self.cycle_words.update({k: v for k, v in words.items() if k in CYCLE_WORDS})
+        if "X" not in words and "Y" not in words:
+            return  # a linha só ajusta parâmetros; o furo sai quando vier uma posição
+        if "Z" not in self.cycle_words or "R" not in self.cycle_words:
+            raise GCodeError(tr("issue_cycle_missing_zr").format(code=self.cycle))
+
+        r_level, bottom = self._cycle_levels()
+        retract = r_level if self.return_to_r else max(self.cycle_initial_z, r_level)
+        peck = abs(self.cycle_words.get("Q", 0.0)) * self.unit_scale
+        steps = drill_steps(self.cycle, r_level, bottom, retract, peck)
+
+        x, y, _ = self._target({k: v for k, v in words.items() if k in "XY"})
+        self._check_feed()
+        self._check_bounds([(x, y, z) for z in (self.position[2], r_level, bottom, retract)])
+        name = f"G{self.cycle}"
+        self.commands[name] = self.commands.get(name, 0) + 1
+
+        self._cycle_segment((x, y, self.position[2]), rapid=True)
+        for step in steps:
+            if step.kind == DWELL:
+                seconds = self.cycle_words.get("P", 0.0) * self.dialect.dwell_unit
+                if seconds > 0:
+                    self._add_move(Move(self.position, self.position, False, self.feed, self._lineno,
+                                        active=self.process_active, dwell=seconds))
+            else:
+                self._cycle_segment((x, y, step.z), rapid=step.kind == RAPID)
+
+    def _cycle_levels(self) -> tuple[float, float]:
+        """(plano R, fundo) em coordenadas de máquina. em G91, R conta do nível inicial e Z, do R."""
+        r = self.cycle_words["R"] * self.unit_scale
+        z = self.cycle_words["Z"] * self.unit_scale
+        if self.absolute:
+            return r + self.offset[2], z + self.offset[2]
+        r_level = self.cycle_initial_z + r
+        return r_level, r_level + z
+
+    def _cycle_segment(self, end: Point, rapid: bool) -> None:
+        if end == self.position:
+            return
+        self._add_move(Move(self.position, end, not rapid, self.feed, self._lineno,
+                            active=self.process_active, rapid=rapid))
+        self.position = end
 
     def _set_position(self, words: dict[str, float]) -> None:
         """G92: a posição atual passa a valer o que a linha diz, sem mover a ferramenta."""

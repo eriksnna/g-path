@@ -332,6 +332,22 @@ _STRINGS: dict[str, dict[str, str]] = {
         IT: "G04 senza tempo di sosta: indica P o X",
     },
 
+    "issue_cycle_missing_zr": {
+        PT_BR: "ciclo G{code} sem Z ou R: informe a profundidade e o plano de aproximação",
+        EN: "cycle G{code} without Z or R: provide the depth and the approach plane",
+        IT: "ciclo G{code} senza Z o R: indica la profondità e il piano di avvicinamento",
+    },
+    "issue_cycle_missing_q": {
+        PT_BR: "ciclo G{code} sem Q: informe a profundidade de cada bicada",
+        EN: "cycle G{code} without Q: provide the depth of each peck",
+        IT: "ciclo G{code} senza Q: indica la profondità di ogni beccata",
+    },
+    "issue_cycle_bottom_above_r": {
+        PT_BR: "ciclo G{code}: o fundo (Z) está acima do plano R",
+        EN: "cycle G{code}: the bottom (Z) is above the R plane",
+        IT: "ciclo G{code}: il fondo (Z) è sopra il piano R",
+    },
+
     "issue_g_not_simulated": {
         PT_BR: "G{code} não é simulado; coordenadas da linha ignoradas",
         EN: "G{code} is not simulated; coordinates on this line ignored",

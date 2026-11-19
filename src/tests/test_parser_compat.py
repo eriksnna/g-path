@@ -29,7 +29,7 @@ def test_g28_is_warned_and_not_drawn():
 
 
 def test_unknown_g_code_warns_once():
-    result = parse_gcode("G1 X1 F100\nG99\nG99")
+    result = parse_gcode("G1 X1 F100\nG38\nG38")
     assert [i.line for i in result.issues] == [2]
 
 
