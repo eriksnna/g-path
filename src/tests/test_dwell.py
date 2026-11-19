@@ -1,7 +1,7 @@
 import pytest
 
 from core.dialect import Dialect, get_dialect
-from core.parser import parse_gcode
+from core.parser import WARNING, parse_gcode
 from core.stats import compute_stats
 from core.toolpath import Toolpath
 
@@ -58,3 +58,29 @@ def test_active_time_sums_moves_and_dwells_with_process_on():
     result = parse_gcode(text, dialect=ARC_SECONDS)
     stats = compute_stats(Toolpath(result.moves), result.commands)
     assert stats.active_time == pytest.approx(1.0 + 2.0)
+
+def test_dwell_in_x_is_time_not_a_coordinate():
+    result = parse_gcode("G1 X10 F600\nG04 X2\nG1 Y5", dialect=ARC_SECONDS)
+    dwell = result.moves[1]
+    assert dwell.dwell == pytest.approx(2.0)
+    assert dwell.start == dwell.end == (10.0, 0.0, 0.0)   # a ferramenta não foi para X2
+    assert result.moves[-1].end == (10.0, 5.0, 0.0)
+
+
+def test_dwell_in_x_is_seconds_even_when_p_is_milliseconds():
+    result = parse_gcode("G04 X1.5", dialect=ARC_MILLISECONDS)
+    assert result.moves[0].dwell == pytest.approx(1.5)
+
+
+def test_dwell_in_u_is_seconds():
+    assert parse_gcode("G04 U3", dialect=ARC_SECONDS).moves[0].dwell == pytest.approx(3.0)
+
+
+def test_dwell_in_x_ignores_inches():
+    result = parse_gcode("G20\nG04 X2", dialect=ARC_SECONDS)
+    assert result.moves[0].dwell == pytest.approx(2.0)
+
+
+def test_dwell_without_time_is_a_warning():
+    result = parse_gcode("G04")
+    assert [i.severity for i in result.issues] == [WARNING]

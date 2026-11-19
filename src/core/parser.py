@@ -23,6 +23,7 @@ G_LINEAR = 1
 G_CW_ARC = 2
 G_CCW_ARC = 3
 G_DWELL = 4
+DWELL_SECONDS_WORDS = ("X", "U")
 G_UNITS = {20: INCH_TO_MM, 21: 1.0}
 G_ABSOLUTE = 90
 G_INCREMENTAL = 91
@@ -190,7 +191,8 @@ class GCodeInterpreter:
             self._feed_programmed = True
 
         if G_DWELL in g_codes:
-            self._dwell(params.get("P", 0.0))
+            self._dwell(self._dwell_seconds(params))
+            return  # na linha do G04, X e U são tempo de espera, nunca coordenada
 
         if G_SET_POSITION in g_codes:
             self._set_position(params)
@@ -260,9 +262,18 @@ class GCodeInterpreter:
             raise GCodeError(tr("issue_too_many_moves").format(max_moves=MAX_MOVES))
         self.moves.append(move)
 
-    def _dwell(self, duration: float) -> None:
-        """G04: espera no mesmo ponto. a unidade do P vem do dialeto."""
-        seconds = duration * self.dialect.dwell_unit
+    def _dwell_seconds(self, params: dict[str, float]) -> float:
+        """tempo do G04: P na unidade do dialeto; X ou U sempre em segundos."""
+        if "P" in params:
+            return params["P"] * self.dialect.dwell_unit
+        for letter in DWELL_SECONDS_WORDS:
+            if letter in params:
+                return params[letter]
+        self._report(WARNING, tr("issue_dwell_without_time"))
+        return 0.0
+
+    def _dwell(self, seconds: float) -> None:
+        """G04: espera no mesmo ponto."""
         if seconds <= 0:
             return
         self.commands["G4"] += 1

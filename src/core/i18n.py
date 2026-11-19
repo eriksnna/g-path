@@ -326,6 +326,12 @@ _STRINGS: dict[str, dict[str, str]] = {
     "severity_error": {PT_BR: "Erro", EN: "Error", IT: "Errore"},
     "severity_warning": {PT_BR: "Aviso", EN: "Warning", IT: "Avviso"},
 
+    "issue_dwell_without_time": {
+        PT_BR: "G04 sem tempo de espera: informe P ou X",
+        EN: "G04 without a dwell time: provide P or X",
+        IT: "G04 senza tempo di sosta: indica P o X",
+    },
+
     "issue_g_not_simulated": {
         PT_BR: "G{code} não é simulado; coordenadas da linha ignoradas",
         EN: "G{code} is not simulated; coordinates on this line ignored",
