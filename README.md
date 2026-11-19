@@ -80,7 +80,7 @@ G-Path é distribuído sob a licença [MIT](LICENSE). Bibliotecas de terceiros: 
 
 3D visualization and simulation tool for G-code programs, for machining and deposition (WAAM).
 
-> 🔎 The simulation is a visual conference and does not replace the empty test on the machine.
+> 🔎 The simulation is a visual check and does not replace a dry run on the machine.
 
 ### Installation
 

@@ -247,6 +247,11 @@ _STRINGS: dict[str, dict[str, str]] = {
     "nav_about": {PT_BR: "Sobre", EN: "About", IT: "Informazioni"},
     "shortcuts_section_player": {PT_BR: "Reprodução", EN: "Playback", IT: "Riproduzione"},
     "shortcuts_section_editor": {PT_BR: "Editor", EN: "Editor", IT: "Editor"},
+    "shortcuts_section_view": {PT_BR: "Vista", EN: "View", IT: "Vista"},
+    "shortcut_view_top": {PT_BR: "Vista de topo", EN: "Top view", IT: "Vista dall'alto"},
+    "shortcut_view_front": {PT_BR: "Vista frontal", EN: "Front view", IT: "Vista frontale"},
+    "shortcut_view_side": {PT_BR: "Vista lateral", EN: "Side view", IT: "Vista laterale"},
+    "shortcut_view_iso": {PT_BR: "Vista isométrica", EN: "Isometric view", IT: "Vista isometrica"},
     "shortcut_play_pause": {PT_BR: "Reproduzir ou pausar", EN: "Play or pause", IT: "Riproduci o metti in pausa"},
     "shortcut_step_move": {PT_BR: "Movimento anterior ou próximo", EN: "Previous or next move", IT: "Movimento precedente o successivo"},
     "shortcut_step_layer": {PT_BR: "Camada anterior ou próxima", EN: "Previous or next layer", IT: "Strato precedente o successivo"},
@@ -470,9 +475,9 @@ _STRINGS: dict[str, dict[str, str]] = {
     # --- vistas de câmera - gizmo ----
 
     "gizmo_tooltip": {
-        PT_BR: "Clique em um eixo para alinhar a vista. Clique fora deles para a vista isométrica.",
-        EN: "Click an axis to align the view. Click outside them for the isometric view.",
-        IT: "Fai clic su un asse per allineare la vista. Fai clic fuori per la vista isometrica.",
+        PT_BR: "Clique em um eixo para alinhar a vista, ou fora deles para a isométrica. Teclas 1 a 4 também trocam a vista.",
+        EN: "Click an axis to align the view, or outside them for isometric. Keys 1 to 4 also switch the view.",
+        IT: "Fai clic su un asse per allineare la vista, o fuori per l'isometrica. Anche i tasti da 1 a 4 cambiano la vista.",
     },
 
     "profile_default_name": {PT_BR: "Minha máquina", EN: "My machine", IT: "La mia macchina"},

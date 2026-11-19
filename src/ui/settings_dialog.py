@@ -260,6 +260,12 @@ class _ShortcutsPage(QWidget):
                 ("Shift + ←  →", "shortcut_step_layer"),
                 ("Home  End", "shortcut_start_end"),
             )),
+            ("shortcuts_section_view", (
+                ("1", "shortcut_view_top"),
+                ("2", "shortcut_view_front"),
+                ("3", "shortcut_view_side"),
+                ("4", "shortcut_view_iso"),
+            )),
             ("shortcuts_section_editor", (
                 ("Ctrl + Enter", "editor_shortcut_apply"),
                 ("Ctrl + S", "editor_shortcut_save"),

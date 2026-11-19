@@ -41,7 +41,7 @@ from ui.player_bar import PlayerBar
 from ui.stats_panel import StatsPanel
 from ui.text import plain_tooltip
 from ui.theme import DARK_QSS, SPACE_LG, SPACE_MD
-from ui.viewport import ToolpathView
+from ui.viewport import VIEW_SHORTCUTS, ToolpathView
 from ui.corner_overlay import CornerOverlay
 from ui.dro import DroOverlay
 from ui.gizmo import ViewGizmo
@@ -824,7 +824,12 @@ class MainWindow(QMainWindow):
         event.accept()
 
     def keyPressEvent(self, event) -> None:
-        """atalhos de reprodução. só chegam aqui quando o editor não está com o foco."""
+        """atalhos de reprodução e de vista. só chegam aqui quando o editor não está com o foco."""
+        view = VIEW_SHORTCUTS.get(event.key())
+        if view is not None and not event.modifiers() & ~Qt.KeyboardModifier.KeypadModifier:
+            self._viewport.set_preset_view(view)
+            event.accept()
+            return
         actions = {
             Qt.Key.Key_Space: self._toggle_play,
             Qt.Key.Key_Left: lambda: self._step(-1),
@@ -874,3 +879,6 @@ class MainWindow(QMainWindow):
             self._editor_collapsed = False
             height = self._main_area.height()
             self._main_area.setSizes([height - height // 3, height // 3])
+        self._player.set_chips_allowed(not visible)
+        if visible and self._toolpath is not None:
+            self._update_running_line(self._toolpath.snapshot(self._playback.elapsed))

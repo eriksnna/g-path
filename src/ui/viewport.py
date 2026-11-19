@@ -46,6 +46,8 @@ def _make_torch() -> gl.GLMeshItem:
     return item
 
 PLAYBACK_KEYS = {Qt.Key.Key_Space, Qt.Key.Key_Left, Qt.Key.Key_Right, Qt.Key.Key_Home, Qt.Key.Key_End}
+# teclas 1 a 4, na ordem dos antigos botões de vista; valem também no teclado numérico
+VIEW_SHORTCUTS = {Qt.Key.Key_1: "top", Qt.Key.Key_2: "front", Qt.Key.Key_3: "side", Qt.Key.Key_4: "iso"}
 
 class ToolpathView(gl.GLViewWidget):
 
@@ -236,7 +238,7 @@ class ToolpathView(gl.GLViewWidget):
 
     def keyPressEvent(self, event) -> None:
         """deixa os atalhos de reprodução subirem para a janela principal."""
-        if event.key() in PLAYBACK_KEYS:
+        if event.key() in PLAYBACK_KEYS or event.key() in VIEW_SHORTCUTS:
             event.ignore()
             return
         super().keyPressEvent(event)

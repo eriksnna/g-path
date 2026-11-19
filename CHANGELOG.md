@@ -3,6 +3,62 @@
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e versionamento [SemVer](https://semver.org/lang/pt-BR/).
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [SemVer](https://semver.org/) versioning.
 
+## [0.3.2-beta] - 2026-11-19
+
+### Português
+
+**Adicionado**
+- Arcos programados com raio (`R`), além de `I`/`J`
+- Arcos nos planos `G18` (XZ) e `G19` (YZ)
+- Ciclos de furação `G73`, `G81`, `G82` e `G83`, com `G98`/`G99` e `G80`
+- Atalhos `1` a `4` para as vistas de topo, frente, lado e isométrica
+- O arquivo aberto é recarregado sozinho quando outro programa o altera; com edições não salvas, o G-Path pergunta antes
+- Testes e pacote do Windows gerados automaticamente no GitHub, com o SHA-256 do zip
+
+**Alterado**
+- Tocha fica na vertical durante a reprodução no modo deposição
+- Deslocamentos em cinza-azulado; o vermelho fica reservado para erros
+- Painel lateral: a seção do modo vem logo abaixo do resumo; comandos e dimensões ficam em "Detalhes"
+- Campos numéricos só respondem à roda do mouse depois de clicados
+- Avanços nos Ajustes com o mesmo número de casas decimais
+- README avisa que a simulação não substitui o teste em vazio na máquina
+
+**Corrigido**
+- `G04 X` era lido como coordenada: a ferramenta se deslocava em vez de pausar; agora `X` e `U` valem como tempo em segundos
+- `G04` sem tempo era ignorado sem aviso
+- Checkbox marcado não mostrava o sinal de marcado
+- Botão "Editor" continuava aceso com o editor recolhido pela alça
+
+**Segurança**
+- Salvar grava primeiro num arquivo temporário: uma falha no meio da gravação não corrompe mais o G-code nem os perfis
+
+### English
+
+**Added**
+- Arcs programmed with a radius (`R`), besides `I`/`J`
+- Arcs in the `G18` (XZ) and `G19` (YZ) planes
+- Drilling cycles `G73`, `G81`, `G82` and `G83`, with `G98`/`G99` and `G80`
+- Shortcuts `1` to `4` for the top, front, side and isometric views
+- The open file reloads by itself when another program changes it; with unsaved edits, G-Path asks first
+- Tests and the Windows package built automatically on GitHub, with the zip's SHA-256
+
+**Changed**
+- Torch stays vertical during playback in deposition mode
+- Travel moves in gray-blue; red is reserved for errors
+- Side panel: the mode section comes right below the summary; commands and dimensions sit under "Details"
+- Number fields only react to the mouse wheel after being clicked
+- Feed rates in Settings use the same number of decimal places
+- README notes that the simulation does not replace a dry run on the machine
+
+**Fixed**
+- `G04 X` was read as a coordinate: the tool moved instead of pausing; `X` and `U` now count as time in seconds
+- `G04` without a time was silently ignored
+- Checked checkbox showed no check mark
+- "Editor" button stayed on with the editor collapsed by the handle
+
+**Security**
+- Saving writes to a temporary file first: a failure mid-save no longer corrupts the G-code or the profiles
+
 ## [0.3.1-beta] - 2026-11-15
 
 ### Português
