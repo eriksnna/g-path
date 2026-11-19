@@ -1,7 +1,6 @@
 """viewport 3D: desenha o caminho, aplica cores por profundidade e o estado da simulação."""
 from __future__ import annotations
 
-import math
 from typing import Sequence
 
 import numpy as np
@@ -12,8 +11,8 @@ from PySide6.QtCore import Qt, Signal
 
 from config import (
     CAMERA_MARGIN, CAMERA_MIN_DISTANCE, CAMERA_START_DISTANCE,
-    CUT_WIDTH, HEAD_SIZE, RAPID_WIDTH, TORCH_HEIGHT, TORCH_MAX_TILT_DEG,
-    TORCH_RADIUS, WIRE_STICKOUT, WIRE_WIDTH_PX, ZOOM_MIN_DISTANCE, ZOOM_STEP,
+    CUT_WIDTH, HEAD_SIZE, RAPID_WIDTH, TORCH_HEIGHT, TORCH_RADIUS, 
+    WIRE_STICKOUT, WIRE_WIDTH_PX, ZOOM_MIN_DISTANCE, ZOOM_STEP,
 )
 from core.layers import filter_layers, layer_indices
 from core.toolpath import Snapshot, Toolpath, interleave
@@ -29,7 +28,6 @@ VIEW_PRESETS = { # vistas de câmeras em preset
     "side": (0.0, 0.0),
     "iso": (30.0, -60.0),
 }
-MIN_DIRECTION_LENGTH = 1e-6  # abaixo disso, o deslocamento XY é tratado como nulo
 
 
 def depth_gradient(count: int) -> np.ndarray:
@@ -46,15 +44,6 @@ def _make_torch() -> gl.GLMeshItem:
     item = gl.GLMeshItem(meshdata=mesh, color=TORCH_COLOR, smooth=True, shader="shaded", drawEdges=False)
     item.setGLOptions("opaque")
     return item
-
-
-def _tilt_direction(start: np.ndarray, end: np.ndarray) -> np.ndarray | None:
-    """vetor unitário XY da direção de deslocamento, ou None se o movimento for vertical/nulo."""
-    dxy = end[:2] - start[:2]
-    length = float(np.linalg.norm(dxy))
-    if length < MIN_DIRECTION_LENGTH:
-        return None
-    return dxy / length
 
 PLAYBACK_KEYS = {Qt.Key.Key_Space, Qt.Key.Key_Left, Qt.Key.Key_Right, Qt.Key.Key_Home, Qt.Key.Key_End}
 
@@ -102,7 +91,6 @@ class ToolpathView(gl.GLViewWidget):
         self._wire_item.setVisible(False)
         self.addItem(self._wire_item)
 
-        self._last_tilt_xy = np.array([0.0, 0.0])  # direção XY mantida quando a tocha está parada
 
     # --- carregamento ---
 
@@ -116,7 +104,6 @@ class ToolpathView(gl.GLViewWidget):
         self._layer_filter = None
         self._last_started = None
         self._colors_dirty = True
-        self._last_tilt_xy = np.array([0.0, 0.0])
         self._build_colors()
 
         self._cut_item = self._make_line(toolpath, toolpath.is_cut, CUT_WIDTH)
@@ -200,26 +187,14 @@ class ToolpathView(gl.GLViewWidget):
             self._update_torch(snapshot)
 
     def _update_torch(self, snapshot: Snapshot) -> None:
-        """posiciona a tocha acima do ponto de trabalho, inclinada na direção do movimento."""
         head = snapshot.head
-        direction = _tilt_direction(snapshot.segment_start, snapshot.segment_end)
-        if direction is not None:
-            self._last_tilt_xy = direction
-        dx, dy = self._last_tilt_xy
-        heading_deg = math.degrees(math.atan2(dy, dx)) if (dx or dy) else 0.0
-
         tip = head + np.array([0.0, 0.0, WIRE_STICKOUT])
 
         self._torch_item.resetTransform()
-        # 1) move a ponta (origem local) até o ponto alvo
         self._torch_item.translate(float(tip[0]), float(tip[1]), float(tip[2]))
-        # 2) gira o corpo ao redor dessa ponta: local=True em ambas as rotações garante que
-        #    elas pivotam no ponto já transladado (tip), não na origem do mundo
-        self._torch_item.rotate(heading_deg, 0, 0, 1, local=True)
-        self._torch_item.rotate(TORCH_MAX_TILT_DEG, 0, 1, 0, local=True)
         self._torch_item.setVisible(True)
 
-        # o fio sempre liga a ponta real (tip, ponto fixo da rotação) ao ponto de trabalho
+        # o fio liga o bico da tocha ao ponto de trabalho
         self._wire_item.setData(pos=np.array([tip, head]))
         self._wire_item.setVisible(True)
 
