@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 from PySide6.QtCore import (
-    Qt, QFileSystemWatcher, QProcess, QSettings, QTimer, QEasingCurve, QPropertyAnimation,
+    Qt, QProcess, QSettings, QTimer, QEasingCurve, QPropertyAnimation,
 )
 from PySide6.QtGui import QIcon, QCloseEvent, QAction, QKeySequence
 from PySide6.QtWidgets import (
@@ -29,6 +29,7 @@ from core.stats import compute_stats
 from core.toolpath import Snapshot, Toolpath
 from core.dialect import dialect_label, get_dialect, process_codes_label
 from core.document import Document
+from core.recent_files import RecentFiles
 from core.file_safety import UnsafeFileError
 from ui.gcode_editor import GCodeEditor
 from ui.issues_panel import IssuesPanel
@@ -48,12 +49,11 @@ from ui.suggestion_banner import SuggestionBanner
 from ui.dialect_suggestion import DialectSuggestion
 from ui.start_panel import StartPanel
 from ui.playback_controller import PlaybackController
+from ui.file_watcher import FileWatcher
 
 def _gcode_filter() -> str:
     patterns = " ".join(f"*{ext}" for ext in config.GCODE_EXTENSIONS)
     return f"G-code ({patterns});;{tr('file_filter_all')} (*)"
-
-DISK_RELOAD_DELAY_MS = 400
 
 class MainWindow(QMainWindow):
 
@@ -76,12 +76,9 @@ class MainWindow(QMainWindow):
         self._editor_collapsed = False
 
         # recarrega quando outro programa regrava o arquivo aberto
-        self._watcher = QFileSystemWatcher(self)
-        self._disk_change_timer = QTimer(self)
-        self._disk_change_timer.setSingleShot(True)
-        self._disk_change_timer.setInterval(DISK_RELOAD_DELAY_MS)
-        self._disk_change_timer.timeout.connect(self._on_file_changed_on_disk)
-        self._watcher.fileChanged.connect(lambda _path: self._disk_change_timer.start())
+        self._file_watcher = FileWatcher(self)
+        self._file_watcher.changed.connect(self._on_file_changed_on_disk)
+    
         self._profiles, _active_name = load_profiles()
         self._profile = next((p for p in self._profiles if p.name == _active_name), self._profiles[0])
 
@@ -113,6 +110,8 @@ class MainWindow(QMainWindow):
         self._stack = QStackedWidget()
 
         self._settings = QSettings(str(config.WINDOW_STATE_FILE), QSettings.Format.IniFormat)
+
+        self._recent = RecentFiles(self._settings)
 
         self._dialect_suggestion = DialectSuggestion(self._banner, self._settings)
 
@@ -274,8 +273,8 @@ class MainWindow(QMainWindow):
         if not self._confirm_discard_changes():
             return
         self._doc.close()
-        self._watch_file(None)
-        self._settings.remove("window/last_file")
+        self._file_watcher.watch(None)
+        self._recent.forget_last()
         self._file_label.setText(tr("file_no_file"))
         self._editor.set_text("")
         self._show_empty()
@@ -312,11 +311,9 @@ class MainWindow(QMainWindow):
         geometry = self._settings.value("window/geometry")
         if geometry is not None:
             self.restoreGeometry(geometry)
-        last_file = self._settings.value("window/last_file")
-        if last_file:
-            path = Path(str(last_file))
-            if path.exists():
-                self.load_file(path)
+        last_file = self._recent.last_file()
+        if last_file is not None:
+            self.load_file(last_file)
 
     def _connect_signals(self) -> None:
         self._mode_controls.changed.connect(self._on_mode_changed)
@@ -413,8 +410,8 @@ class MainWindow(QMainWindow):
         if not self._confirm_discard_changes():
             return
         self._doc.new_blank()
-        self._watch_file(None)
-        self._settings.remove("window/last_file")
+        self._file_watcher.watch(None)
+        self._recent.forget_last()
         self._file_label.setText(tr("file_new_unsaved"))
         self._editor.set_text("")
         self._editor_toggle.setChecked(True)
@@ -422,22 +419,11 @@ class MainWindow(QMainWindow):
         self._show_empty(status=tr("status_program_new"))
 
     def _refresh_start_recent(self) -> None:
-        self._start_panel.set_recent([p for p in self._recent_files() if Path(p).exists()])
-
-    def _recent_files(self) -> list[str]:
-        value = self._settings.value("window/recent_files", [])
-        if isinstance(value, str):  # QSettings devolve string quando sobra só 1 item salvo
-            value = [value]
-        return list(value or [])
-
-    def _add_recent_file(self, path: Path) -> None:
-        recent = [p for p in self._recent_files() if p != str(path)]
-        recent.insert(0, str(path))
-        self._settings.setValue("window/recent_files", recent[:config.MAX_RECENT_FILES])
+        self._start_panel.set_recent(self._recent.existing())
 
     def _refresh_recent_menu(self) -> None:
         self._recent_menu.clear()
-        recent = [p for p in self._recent_files() if Path(p).exists()]
+        recent = self._recent.existing()
         if not recent:
             empty_action = QAction(tr("menu_recent_empty"), self)
             empty_action.setEnabled(False)
@@ -459,10 +445,9 @@ class MainWindow(QMainWindow):
         except OSError as err:
             self._show_open_error(tr("status_open_error").format(err=err))
             return
-        self._watch_file(path)
+        self._file_watcher.watch(path)
         self._file_label.setText(path.name, str(path))
-        self._settings.setValue("window/last_file", str(path))
-        self._add_recent_file(path)
+        self._recent.opened(path)
         self._editor.set_text(self._doc.text)
         self._enter_workspace()
         self._reload()
@@ -472,19 +457,11 @@ class MainWindow(QMainWindow):
         self._player.set_status(message)
         QMessageBox.warning(self, tr("open_error_title"), message)
 
-    def _watch_file(self, path: Path | None) -> None:
-        """passa a vigiar só o arquivo aberto (ou nenhum)."""
-        watched = self._watcher.files()
-        if watched:
-            self._watcher.removePaths(watched)
-        if path is not None:
-            self._watcher.addPath(str(path))
-
     def _on_file_changed_on_disk(self) -> None:
         path = self._doc.path
         if path is None or not path.exists():
             return
-        self._watch_file(path)  # quem regrava por substituição faz o monitor soltar o arquivo
+        self._file_watcher.watch(path)  # quem regrava por substituição faz o monitor soltar o arquivo
         new_version = self._doc.changed_on_disk()
         if new_version is None:
             return
@@ -533,7 +510,7 @@ class MainWindow(QMainWindow):
             return
         path = Path(path_str)
         if self._save_to(path, text):
-            self._watch_file(path)
+            self._file_watcher.watch(path)
             self._file_label.setText(path.name, str(path))
 
     def _save_to(self, path: Path, text: str) -> bool:
