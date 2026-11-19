@@ -358,15 +358,10 @@ _STRINGS: dict[str, dict[str, str]] = {
         EN: "G{code} not recognized; ignored",
         IT: "G{code} non riconosciuto; ignorato",
     },
-    "issue_arc_plane_unsupported": {
-        PT_BR: "arco no plano G{plane} não suportado; só G17 (XY)",
-        EN: "arc in plane G{plane} is not supported; only G17 (XY)",
-        IT: "arco nel piano G{plane} non supportato; solo G17 (XY)",
-    },
     "issue_arc_missing_center": {
-        PT_BR: "arco sem centro: informe I/J ou R",
-        EN: "arc without center: provide I/J or R",
-        IT: "arco senza centro: indica I/J o R",
+        PT_BR: "arco sem centro: informe {letters} ou R",
+        EN: "arc without center: provide {letters} or R",
+        IT: "arco senza centro: indica {letters} o R",
     },
     "issue_arc_r_full_circle": {
         PT_BR: "arco com R precisa de início e fim diferentes; para círculo completo use I/J",

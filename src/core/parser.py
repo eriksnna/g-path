@@ -29,6 +29,11 @@ G_UNITS = {20: INCH_TO_MM, 21: 1.0}
 G_ABSOLUTE = 90
 G_INCREMENTAL = 91
 G_PLANE_XY = 17
+PLANES = {
+    17: ((0, 1, 2), ("I", "J")),   # XY, normal Z
+    18: ((2, 0, 1), ("K", "I")),   # ZX, normal Y
+    19: ((1, 2, 0), ("J", "K")),   # YZ, normal X
+}
 G_SET_POSITION = 92
 G_NOT_SIMULATED = {10, 28, 30, 53}  # usam X/Y/Z, mas não como destino de corte
 G_IGNORED = {17, 18, 19, 40, 41, 42, 43, 49, 54, 55, 56, 57, 58, 59, 61, 64, 94}
@@ -95,7 +100,7 @@ def parse_gcode(text: str, default_feed: float = DEFAULT_FEED,
 
 def arc_points(start: Point, end: Point, center: tuple[float, float],
                clockwise: bool, step_deg: float = ARC_STEP_DEG) -> list[Point]:
-    """pontos intermediários de um arco no plano XY. Z varia linearmente (hélice)."""
+    """pontos de um arco nas duas primeiras coordenadas; a terceira varia linearmente (hélice)."""
     cx, cy = center
     radius = math.hypot(start[0] - cx, start[1] - cy)
     a_start = math.atan2(start[1] - cy, start[0] - cx)
@@ -128,6 +133,13 @@ def center_from_radius(start: Point, end: Point, radius: float,
     side = 1.0 if clockwise == (radius < 0) else -1.0
     middle_x, middle_y = (start[0] + end[0]) / 2, (start[1] + end[1]) / 2
     return (middle_x - side * height * dy / chord, middle_y + side * height * dx / chord)
+
+def _from_plane(point: Point, axes: tuple[int, int, int]) -> Point:
+    """devolve um ponto (u, v, normal) do plano ativo para (X, Y, Z)."""
+    xyz = [0.0, 0.0, 0.0]
+    for value, axis in zip(point, axes):
+        xyz[axis] = value
+    return (xyz[0], xyz[1], xyz[2])
 
 def _signed_sweep(delta: float, clockwise: bool) -> float:
     """ajusta o ângulo varrido para o sentido pedido pelo G2 ou G3."""
@@ -235,7 +247,7 @@ class GCodeInterpreter:
             self.absolute = True
         elif code == G_INCREMENTAL:
             self.absolute = False
-        elif code in (17, 18, 19):
+        elif code in PLANES:
             self.plane = code
         elif code not in (G_DWELL, G_SET_POSITION, *G_NOT_SIMULATED, *G_IGNORED) \
                 and code not in self._unknown_warned:
@@ -369,23 +381,28 @@ class GCodeInterpreter:
         ))
 
     def _arc(self, end: Point, words: dict[str, float]) -> None:
-        if self.plane != G_PLANE_XY:
-            raise GCodeError(tr("issue_arc_plane_unsupported").format(plane=self.plane))
-
+        axes, (center_u, center_v) = PLANES[self.plane]
         start = self.position
+        # o arco é calculado no plano ativo (u, v) e devolvido em X, Y, Z
+        plane_start = tuple(start[i] for i in axes)
+        plane_end = tuple(end[i] for i in axes)
         clockwise = self.motion == G_CW_ARC
-        if "R" in words:  # quando R e I/J aparecem juntos, vale o R, como nos controladores
-            center = center_from_radius(start, end, words["R"] * self.unit_scale, clockwise)
-        elif "I" in words or "J" in words:
+        if "R" in words:  # quando R e o centro aparecem juntos, vale o R, como nos controladores
+            center = center_from_radius(plane_start, plane_end, words["R"] * self.unit_scale, clockwise)
+        elif center_u in words or center_v in words:
             center = (
-                start[0] + words.get("I", 0.0) * self.unit_scale,
-                start[1] + words.get("J", 0.0) * self.unit_scale,
+                plane_start[0] + words.get(center_u, 0.0) * self.unit_scale,
+                plane_start[1] + words.get(center_v, 0.0) * self.unit_scale,
             )
         else:
-            raise GCodeError(tr("issue_arc_missing_center"))
+            raise GCodeError(tr("issue_arc_missing_center").format(letters="/".join(sorted((center_u, center_v)))))
 
         self._check_feed()
-        points = arc_points(start, end, center, clockwise=clockwise, step_deg=self.arc_step_deg)
+        points = [
+            _from_plane(point, axes)
+            for point in arc_points(plane_start, plane_end, center, clockwise=clockwise,
+                                    step_deg=self.arc_step_deg)
+        ]
         self._check_bounds(points)
 
         previous = start
