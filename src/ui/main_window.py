@@ -27,9 +27,9 @@ from core.i18n import tr
 from core.parser import parse_gcode
 from core.stats import compute_stats
 from core.toolpath import Snapshot, Toolpath
-from core.file_safety import UnsafeFileError, check_file_size, check_line_lengths
 from core.dialect import dialect_label, get_dialect, process_codes_label
-from core.file_io import read_gcode_text, write_text_atomic
+from core.document import Document
+from core.file_safety import UnsafeFileError
 from ui.gcode_editor import GCodeEditor
 from ui.issues_panel import IssuesPanel
 from ui.layer_controls import LayerControls
@@ -64,11 +64,9 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon(str(ICON_PATH)))
         self.setStyleSheet(DARK_QSS)
         self.setAcceptDrops(True) # arrastar e soltar
-        self._encoding = "utf-8"
 
-        self._path: Path | None = None
-        self._text: str | None = None
-        self._saved_text: str | None = None  # último texto gravado em disco (ou None se nunca salvo)
+        self._doc = Document()
+
         self._toolpath: Toolpath | None = None
         self._marks = TimelineMarks()
         self._issues: list[Issue] = []
@@ -275,10 +273,8 @@ class MainWindow(QMainWindow):
         """fecha o projeto atual e volta à tela inicial, esquecendo o último arquivo lembrado."""
         if not self._confirm_discard_changes():
             return
-        self._path = None
+        self._doc.close()
         self._watch_file(None)
-        self._text = None
-        self._saved_text = None
         self._settings.remove("window/last_file")
         self._file_label.setText(tr("file_no_file"))
         self._editor.set_text("")
@@ -416,17 +412,14 @@ class MainWindow(QMainWindow):
         """começa um programa vazio direto no editor, sem arquivo de origem."""
         if not self._confirm_discard_changes():
             return
-        self._path = None
+        self._doc.new_blank()
         self._watch_file(None)
         self._settings.remove("window/last_file")
-        self._text = ""
-        self._saved_text = ""
         self._file_label.setText(tr("file_new_unsaved"))
         self._editor.set_text("")
         self._editor_toggle.setChecked(True)
         self._enter_workspace()
         self._show_empty(status=tr("status_program_new"))
-        self._encoding = "utf-8"
 
     def _refresh_start_recent(self) -> None:
         self._start_panel.set_recent([p for p in self._recent_files() if Path(p).exists()])
@@ -459,24 +452,18 @@ class MainWindow(QMainWindow):
         if not self._confirm_discard_changes():
             return
         try:
-            check_file_size(path)
-            text, encoding = read_gcode_text(path)
-            check_line_lengths(text)
+            self._doc.open(path)
         except UnsafeFileError as err:
             self._show_open_error(tr("status_file_rejected").format(err=err))
             return
         except OSError as err:
             self._show_open_error(tr("status_open_error").format(err=err))
             return
-        self._encoding = encoding
-        self._path = path
         self._watch_file(path)
-        self._text = text
-        self._saved_text = text
         self._file_label.setText(path.name, str(path))
         self._settings.setValue("window/last_file", str(path))
         self._add_recent_file(path)
-        self._editor.set_text(text)
+        self._editor.set_text(self._doc.text)
         self._enter_workspace()
         self._reload()
 
@@ -494,17 +481,12 @@ class MainWindow(QMainWindow):
             self._watcher.addPath(str(path))
 
     def _on_file_changed_on_disk(self) -> None:
-        path = self._path
+        path = self._doc.path
         if path is None or not path.exists():
             return
-        self._watch_file(path)
-        try:
-            check_file_size(path)
-            text, encoding = read_gcode_text(path)
-            check_line_lengths(text)
-        except (UnsafeFileError, OSError):
-            return
-        if text == self._saved_text:
+        self._watch_file(path)  # quem regrava por substituição faz o monitor soltar o arquivo
+        new_version = self._doc.changed_on_disk()
+        if new_version is None:
             return
         if self._has_unsaved_changes():
             answer = QMessageBox.question(
@@ -514,10 +496,8 @@ class MainWindow(QMainWindow):
             )
             if answer != QMessageBox.StandardButton.Yes:
                 return
-        self._encoding = encoding
-        self._text = text
-        self._saved_text = text
-        self._editor.set_text(text)
+        self._doc.take_disk_version(*new_version)
+        self._editor.set_text(self._doc.text)
         self._reload()
         self._player.set_status(tr("status_reloaded_from_disk"))
 
@@ -535,16 +515,16 @@ class MainWindow(QMainWindow):
 
     def _apply_edited_text(self, text: str) -> None:
         """o usuário editou o G-code no painel e pediu para reinterpretar."""
-        self._text = text
+        self._doc.apply(text)
         self._editor.mark_applied()
         self._reload()
 
     def _save_edited_text(self, text: str) -> None:
         """salva no arquivo aberto; sem arquivo de origem, pede um caminho novo."""
-        if self._path is None:
+        if self._doc.path is None:
             self._save_edited_text_as(text)
             return
-        self._write_to_path(self._path, text)
+        self._save_to(self._doc.path, text)
 
     def _save_edited_text_as(self, text: str) -> None:
         """sempre pergunta o caminho, mesmo que já exista um arquivo aberto."""
@@ -552,33 +532,23 @@ class MainWindow(QMainWindow):
         if not path_str:
             return
         path = Path(path_str)
-        if self._write_to_path(path, text):
-            self._path = path
+        if self._save_to(path, text):
             self._watch_file(path)
             self._file_label.setText(path.name, str(path))
 
-    def _write_to_path(self, path: Path, text: str) -> bool:
+    def _save_to(self, path: Path, text: str) -> bool:
         try:
-            try:
-                write_text_atomic(path, text, self._encoding)
-            except UnicodeEncodeError:
-                # texto novo tem caractere que a codificação antiga não comporta
-                self._encoding = "utf-8"
-                write_text_atomic(path, text, self._encoding)
+            self._doc.save(text, path)
         except OSError as err:
             QMessageBox.warning(self, tr("save_error_title"), tr("save_error_text").format(err=err))
             return False
-        self._apply_edited_text(text)
-        self._saved_text = text
+        self._editor.mark_applied()
+        self._reload()
         self._player.set_status(tr("status_saved_at").format(path=path))
         return True
 
     def _has_unsaved_changes(self) -> bool:
-        if self._text is None:
-            return False
-        if self._editor.is_modified():
-            return True
-        return self._text != self._saved_text
+        return self._doc.has_unsaved_changes(self._editor.is_modified())
 
     def _update_title(self) -> None:
         mark = "* " if self._has_unsaved_changes() else ""
@@ -586,7 +556,8 @@ class MainWindow(QMainWindow):
 
     def _reload(self) -> None:
         """reinterpreta o texto atual com o modo e o dialeto escolhidos."""
-        if self._text is None:
+        text = self._doc.text
+        if text is None:
             return
         self._playback.pause()
 
@@ -594,15 +565,15 @@ class MainWindow(QMainWindow):
         dialect = get_dialect(self._profile.dialect_key)
         limits = self._profile.limits
         result = parse_gcode(
-            self._text, default_feed=self._profile.default_feed,
+            text, default_feed=self._profile.default_feed,
             dialect=dialect, limits=limits, arc_step_deg=self._profile.arc_step_deg,
         )
         moves = apply_mode(result.moves, mode)
 
-        self._source_lines = self._text.splitlines()
+        self._source_lines = text.splitlines()
         self._issues = sorted([*result.issues, *mode.validate(moves)], key=lambda i: i.line)
         self._issues_panel.show_issues(self._issues)
-        self._dialect_suggestion.update(self._text or "", self._path, self._profile.dialect_key)
+        self._dialect_suggestion.update(text, self._doc.path, self._profile.dialect_key)
 
         if not moves:
             status = (tr("status_no_moves_see_issues").format(count=len(self._issues))
