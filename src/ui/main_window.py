@@ -39,7 +39,7 @@ from core.profile_store import load_profiles, save_profiles
 from ui.settings_dialog import SettingsDialog
 from ui.player_bar import PlayerBar
 from ui.stats_panel import StatsPanel
-from ui.text import plain_tooltip
+from ui.widgets import ElidingLabel, vsep
 from ui.theme import DARK_QSS, SPACE_LG, SPACE_MD
 from ui.viewport import VIEW_SHORTCUTS, ToolpathView
 from ui.corner_overlay import CornerOverlay
@@ -55,38 +55,6 @@ def _gcode_filter() -> str:
 MAX_DISMISSED_SUGGESTIONS = 50
 
 DISK_RELOAD_DELAY_MS = 400
-
-def _vsep() -> QFrame:
-    """linha vertical fina pra separar grupos de controles na barra superior."""
-    line = QFrame()
-    line.setObjectName("headerSeparator")
-    line.setFixedWidth(1)
-    return line
-
-class _ElidingLabel(QLabel):
-    def __init__(self, text: str = "", parent=None) -> None:
-        super().__init__(parent)
-        self._full_text = text
-        self._tooltip = text
-        self.setTextFormat(Qt.TextFormat.PlainText)
-        self.setMinimumWidth(140)
-        super().setText(text)
-
-    def setText(self, text: str, tooltip: str | None = None) -> None:
-        self._full_text = text
-        self._tooltip = tooltip or text
-        self._update_elided_text()
-
-    def resizeEvent(self, event) -> None:
-        super().resizeEvent(event)
-        self._update_elided_text()
-
-    def _update_elided_text(self) -> None:
-        elided = self.fontMetrics().elidedText(
-            self._full_text, Qt.TextElideMode.ElideMiddle, self.width()
-        )
-        super().setText(elided)
-        self.setToolTip(plain_tooltip(self._tooltip))
 
 class MainWindow(QMainWindow):
 
@@ -120,7 +88,7 @@ class MainWindow(QMainWindow):
         self._profiles, _active_name = load_profiles()
         self._profile = next((p for p in self._profiles if p.name == _active_name), self._profiles[0])
 
-        self._file_label = _ElidingLabel(tr("file_no_file"))
+        self._file_label = ElidingLabel(tr("file_no_file"))
         self._file_label.setObjectName("fileLabel")
         self._profile_label = QLabel()
         self._profile_label.setObjectName("profileLabel")
@@ -177,9 +145,9 @@ class MainWindow(QMainWindow):
         header.setSpacing(SPACE_MD)
         header.addWidget(self._file_label, 1)
         header.addWidget(self._profile_label)
-        header.addWidget(_vsep())
+        header.addWidget(vsep())
         header.addWidget(self._mode_controls)
-        header.addWidget(_vsep())
+        header.addWidget(vsep())
         header.addWidget(self._editor_toggle)
 
         stats_scroll = QScrollArea()
