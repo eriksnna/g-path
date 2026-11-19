@@ -8,7 +8,7 @@ from pathlib import Path
 from PySide6.QtCore import (
     Qt, QProcess, QSettings, QTimer, QEasingCurve, QPropertyAnimation,
 )
-from PySide6.QtGui import QIcon, QCloseEvent, QAction, QKeySequence
+from PySide6.QtGui import QIcon, QCloseEvent
 from PySide6.QtWidgets import (
     QFileDialog, QFrame, QHBoxLayout, QLabel, QMainWindow, QPushButton,
     QScrollArea, QSplitter, QVBoxLayout, QWidget, QMessageBox, QStackedWidget,
@@ -16,7 +16,6 @@ from PySide6.QtWidgets import (
 )
 
 from config import APP_TITLE, ICON_PATH, WINDOW_SIZE
-from ui.icons import APPLY, DISCARD, NEW_FILE, OPEN_FILE, QUIT, SAVE, SEARCH, SETTINGS, icon
 
 import config
 from core.layers import depth_levels
@@ -50,6 +49,7 @@ from ui.dialect_suggestion import DialectSuggestion
 from ui.start_panel import StartPanel
 from ui.playback_controller import PlaybackController
 from ui.file_watcher import FileWatcher
+from ui.menu_bar import MenuHandlers, build_menu_bar
 
 def _gcode_filter() -> str:
     patterns = " ".join(f"*{ext}" for ext in config.GCODE_EXTENSIONS)
@@ -116,7 +116,20 @@ class MainWindow(QMainWindow):
         self._dialect_suggestion = DialectSuggestion(self._banner, self._settings)
 
         self._build_layout()
-        self._build_menu_bar()
+        build_menu_bar(self, MenuHandlers(
+            new=self._start_blank,
+            open=self.open_file,
+            open_recent=self.load_file,
+            recent_files=self._recent.existing,
+            save=lambda: self._save_edited_text(self._editor.text()),
+            save_as=lambda: self._save_edited_text_as(self._editor.text()),
+            close_project=self._reset_to_start,
+            quit=self.close,
+            apply=lambda: self._apply_edited_text(self._editor.text()),
+            toggle_comment=self._editor.toggle_comment,
+            find=self._show_editor_find,
+            settings=self._open_settings,
+        ))
         self.menuBar().setVisible(False)
         self._connect_signals()
         self._player.set_speed(self._playback.speed)
@@ -196,77 +209,6 @@ class MainWindow(QMainWindow):
 
         root.addWidget(self._stack, 1)
         self.setCentralWidget(central)
-
-    def _build_menu_bar(self) -> None:
-        menu_bar = self.menuBar()
-
-        file_menu = menu_bar.addMenu(tr("menu_file"))
-
-        new_action = QAction(tr("menu_new"), self)
-        new_action.setIcon(icon(NEW_FILE))
-        new_action.setShortcut(QKeySequence.StandardKey.New)
-        new_action.triggered.connect(self._start_blank)
-        file_menu.addAction(new_action)
-
-        open_action = QAction(tr("menu_open"), self)
-        open_action.setIcon(icon(OPEN_FILE))
-        open_action.setShortcut(QKeySequence.StandardKey.Open)
-        open_action.triggered.connect(lambda: self.open_file())
-        file_menu.addAction(open_action)
-        self._recent_menu = file_menu.addMenu(tr("menu_open_recent"))
-        self._recent_menu.aboutToShow.connect(self._refresh_recent_menu)
-
-        file_menu.addSeparator()
-
-        save_action = QAction(tr("menu_save"), self)
-        save_action.setIcon(icon(SAVE))
-        save_action.triggered.connect(lambda: self._save_edited_text(self._editor.text()))
-        file_menu.addAction(save_action)
-        save_action.setShortcut(QKeySequence.StandardKey.Save)
-
-        save_as_action = QAction(tr("menu_save_as"), self)
-        save_as_action.setIcon(icon(SAVE))
-        save_as_action.triggered.connect(lambda: self._save_edited_text_as(self._editor.text()))
-        file_menu.addAction(save_as_action)
-        save_as_action.setShortcut(QKeySequence.StandardKey.SaveAs)
-
-        file_menu.addSeparator()
-
-        close_project_action = QAction(tr("menu_close_project"), self)
-        close_project_action.setIcon(icon(DISCARD))
-        close_project_action.triggered.connect(self._reset_to_start)
-        file_menu.addAction(close_project_action)
-
-        file_menu.addSeparator()
-
-        quit_action = QAction(tr("menu_quit"), self)
-        quit_action.setIcon(icon(QUIT))
-        quit_action.setShortcut(QKeySequence.StandardKey.Quit)
-        quit_action.triggered.connect(self.close)
-        file_menu.addAction(quit_action)
-
-        edit_menu = menu_bar.addMenu(tr("menu_edit"))
-
-        apply_action = QAction(tr("menu_apply_changes"), self)
-        apply_action.setIcon(icon(APPLY))
-        apply_action.triggered.connect(lambda: self._apply_edited_text(self._editor.text()))
-        edit_menu.addAction(apply_action)
-
-        comment_action = QAction(tr("menu_toggle_comment"), self)
-        comment_action.triggered.connect(self._editor.toggle_comment)
-        edit_menu.addAction(comment_action)
-
-        find_action = QAction(tr("menu_find"), self)
-        find_action.setIcon(icon(SEARCH))
-        find_action.triggered.connect(self._show_editor_find)
-        edit_menu.addAction(find_action)
-
-        settings_menu = menu_bar.addMenu(tr("menu_settings"))
-
-        settings_action = QAction(tr("menu_settings_open"), self)
-        settings_action.setIcon(icon(SETTINGS))
-        settings_action.triggered.connect(self._open_settings)
-        settings_menu.addAction(settings_action)
 
     def _reset_to_start(self) -> None:
         """fecha o projeto atual e volta à tela inicial, esquecendo o último arquivo lembrado."""
@@ -420,19 +362,6 @@ class MainWindow(QMainWindow):
 
     def _refresh_start_recent(self) -> None:
         self._start_panel.set_recent(self._recent.existing())
-
-    def _refresh_recent_menu(self) -> None:
-        self._recent_menu.clear()
-        recent = self._recent.existing()
-        if not recent:
-            empty_action = QAction(tr("menu_recent_empty"), self)
-            empty_action.setEnabled(False)
-            self._recent_menu.addAction(empty_action)
-            return
-        for path_str in recent:
-            action = QAction(path_str, self)
-            action.triggered.connect(lambda checked=False, p=path_str: self.load_file(Path(p)))
-            self._recent_menu.addAction(action)
 
     def load_file(self, path: Path) -> None:
         if not self._confirm_discard_changes():
