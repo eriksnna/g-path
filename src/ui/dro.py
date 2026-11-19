@@ -39,18 +39,23 @@ class DroOverlay(QFrame):
         grid.addWidget(self._process, 2, 3, 1, 2)
 
         self.move(DRO_MARGIN, DRO_MARGIN)
+        self._shown: tuple | None = None  # último estado desenhado, para não refazer o texto à toa
         self.hide()
 
     def show_state(self, position, feed: float, active: bool) -> None:
         """position em mm; feed em mm/min (0 durante uma espera)."""
-        for label, value in zip(self._axis_values, position):
-            label.setText(f"{value:.3f}")
-        self._feed_value.setText(f"{feed:.0f}")
-        dot = ACCENT_TEXT if active else TEXT_MUTED
-        name = tr("dro_process_on" if active else "dro_process_off")
-        self._process.setText(f'<span style="color:{dot}">●</span>&nbsp;{name}')
-        self.adjustSize()
-        self.show()
+        values = (*(f"{value:.3f}" for value in position), f"{feed:.0f}", active)
+        if values != self._shown:
+            self._shown = values
+            for label, text in zip(self._axis_values, values[:3]):
+                label.setText(text)
+            self._feed_value.setText(values[3])
+            dot = ACCENT_TEXT if active else TEXT_MUTED
+            name = tr("dro_process_on" if active else "dro_process_off")
+            self._process.setText(f'<span style="color:{dot}">●</span>&nbsp;{name}')
+            self.adjustSize()
+        if self.isHidden():
+            self.show()
 
     @staticmethod
     def _name_label(text: str) -> QLabel:

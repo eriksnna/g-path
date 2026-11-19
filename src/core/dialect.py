@@ -62,8 +62,6 @@ def get_dialect(key: str) -> Dialect:
     except KeyError as err:
         raise ValueError(f"dialeto desconhecido: {key!r}") from err
 
-DIALECT_CHOICES = [(dialect.name, key) for key, dialect in DIALECTS.items()]
-
 _DIALECT_LABEL_KEYS = {
     "generico": "dialect_generic",
     "arco-m8-m9": "dialect_arc_m8_m9",

@@ -36,7 +36,7 @@ PLANES = {
 }
 G_SET_POSITION = 92
 G_NOT_SIMULATED = {10, 28, 30, 53}  # usam X/Y/Z, mas não como destino de corte
-G_IGNORED = {17, 18, 19, 40, 41, 42, 43, 49, 54, 55, 56, 57, 58, 59, 61, 64, 94}
+G_IGNORED = {40, 41, 42, 43, 49, 54, 55, 56, 57, 58, 59, 61, 64, 94}
 G_CYCLE_CANCEL = 80
 G_RETURN_INITIAL = 98  # ciclo recua ao nível em que começou
 G_RETURN_R = 99        # ciclo recua só até o plano R

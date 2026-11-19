@@ -27,15 +27,6 @@ class Snapshot:
     done: int                        # movimentos concluídos
     started: int                     # movimentos iniciados, incluindo o em curso
     active: bool = False             # processo ligado no instante
-    segment_start: np.ndarray = None # início do movimento em curso (para direção/tilt)
-    segment_end: np.ndarray = None   # fim do movimento em curso (para direção/tilt)
-
-    def __post_init__(self) -> None:
-        if self.segment_start is None:
-            object.__setattr__(self, "segment_start", self.head)
-        if self.segment_end is None:
-            object.__setattr__(self, "segment_end", self.head)
-
 
 class Toolpath:
     """movimentos com duração calculada e acumulada, prontos para consulta por tempo."""
@@ -84,17 +75,13 @@ class Toolpath:
         k = int(np.searchsorted(self.cum_end, t, side="right"))
         if k >= self.count:
             end = self.ends[-1].copy()
-            return Snapshot(head=end, done=self.count, started=self.count, active=False,
-                            segment_start=self.starts[-1], segment_end=end)
+            return Snapshot(head=end, done=self.count, started=self.count, active=False)
 
         begin = self.cum_start[k]
         progress = (t - begin) / self.durations[k]
         head = self.starts[k] + progress * (self.ends[k] - self.starts[k])
         started = k + 1 if t > begin else k
-        return Snapshot(
-            head=head, done=k, started=started, active=bool(self.active[k]),
-            segment_start=self.starts[k], segment_end=self.ends[k],
-        )
+        return Snapshot(head=head, done=k, started=started, active=bool(self.active[k]))
 
     def time_at_line(self, line: int) -> float | None:
         """instante do primeiro movimento escrito na linha dada.

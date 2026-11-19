@@ -15,6 +15,7 @@ from config import (
     WIRE_STICKOUT, WIRE_WIDTH_PX, ZOOM_MIN_DISTANCE, ZOOM_STEP,
 )
 from core.layers import filter_layers, layer_indices
+from ui.progress_colors import ProgressColors
 from core.toolpath import Snapshot, Toolpath, interleave
 from ui.theme import (
     ARC_HEAD_COLOR, BACKGROUND, BRIGHT_CUT, BRIGHT_RAPID, CUT_DEPTH_ALPHA, DEPTH_STOPS,
@@ -73,8 +74,8 @@ class ToolpathView(gl.GLViewWidget):
         self._rapid_item: gl.GLLinePlotItem | None = None
         self._head: gl.GLScatterPlotItem | None = None
 
-        self._last_started: int | None = None
-        self._colors_dirty = True    
+        self._colors: ProgressColors | None = None
+        self._colors_dirty = True 
 
         self._depth_coloring = False
         self._layer_filter: int | None = None
@@ -104,7 +105,6 @@ class ToolpathView(gl.GLViewWidget):
         self._layer_of = layer_indices(toolpath, self._levels)
         self._filter_layer_of = filter_layers(toolpath, self._levels)
         self._layer_filter = None
-        self._last_started = None
         self._colors_dirty = True
         self._build_colors()
 
@@ -165,18 +165,15 @@ class ToolpathView(gl.GLViewWidget):
         if self._toolpath is None:
             return
 
-        if self._colors_dirty or snapshot.started != self._last_started:
-            self._last_started = snapshot.started
+        if self._colors_dirty:
+            # cores do zero: novo programa, troca do colorir por profundidade ou do filtro de camada
             self._colors_dirty = False
-            lit = np.arange(self._toolpath.count) < snapshot.started
-            colors = np.where(lit[:, None], self._bright, self._dim)
-
-            if self._layer_filter is not None:
-                hidden = self._filter_layer_of != self._layer_filter
-                colors[hidden, 3] = 0.0
-
-            self._set_item_colors(self._cut_item, colors, self._is_cut)
-            self._set_item_colors(self._rapid_item, colors, ~self._is_cut)
+            hidden = None if self._layer_filter is None else self._filter_layer_of != self._layer_filter
+            self._colors = ProgressColors(self._is_cut, self._dim, self._bright, hidden)
+            self._colors.update(snapshot.started)
+            self._push_colors()
+        elif self._colors.update(snapshot.started):
+            self._push_colors()
 
         if self._head is not None:
             color = ARC_HEAD_COLOR if snapshot.active else HEAD_COLOR
@@ -201,10 +198,11 @@ class ToolpathView(gl.GLViewWidget):
         self._wire_item.setVisible(True)
 
     @staticmethod
-    def _set_item_colors(item, colors: np.ndarray, mask: np.ndarray) -> None:
-        if item is not None:
-            # cada movimento tem dois vértices; a cor vale para os dois
-            item.setData(color=np.repeat(colors[mask], 2, axis=0))
+    def _push_colors(self) -> None:
+        if self._cut_item is not None:
+            self._cut_item.setData(color=self._colors.cut)
+        if self._rapid_item is not None:
+            self._rapid_item.setData(color=self._colors.rapid)
 
     def _redraw(self) -> None:
         if self._snapshot is not None:

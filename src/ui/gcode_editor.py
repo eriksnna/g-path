@@ -155,6 +155,9 @@ class _CodeTextEdit(QPlainTextEdit):
     def set_running_line(self, line: int | None) -> None:
         """destaca a linha de origem do movimento em execução (None remove o destaque)."""
         block = self.document().findBlockByNumber(max(0, line - 1)) if line is not None else None
+        current = self._running_selection
+        if block is not None and current is not None and current.cursor.block() == block:
+            return  # mesma linha do quadro anterior: nada a repintar
         if block is not None and block.isValid():
             selection = QTextEdit.ExtraSelection()
             selection.format.setBackground(RUNNING_LINE_BACKGROUND)

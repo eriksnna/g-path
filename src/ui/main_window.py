@@ -1,55 +1,52 @@
 """janela principal: liga a interface ao modo de processo, ao modelo e à reprodução."""
 from __future__ import annotations
 
-import sys
 
+import sys
 from pathlib import Path
 
-from PySide6.QtCore import (
-    Qt, QProcess, QSettings, QTimer, QEasingCurve, QPropertyAnimation,
-)
-from PySide6.QtGui import QIcon, QCloseEvent
+from PySide6.QtCore import QEasingCurve, QProcess, QPropertyAnimation, QSettings, Qt, QTimer
+from PySide6.QtGui import QCloseEvent, QIcon
 from PySide6.QtWidgets import (
-    QFileDialog, QFrame, QHBoxLayout, QLabel, QMainWindow, QPushButton,
-    QScrollArea, QSplitter, QVBoxLayout, QWidget, QMessageBox, QStackedWidget,
-    QLayout, QGraphicsOpacityEffect, QApplication,
+    QApplication, QFileDialog, QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel, QLayout,
+    QMainWindow, QMessageBox, QPushButton, QScrollArea, QSplitter, QStackedWidget, QVBoxLayout,
+    QWidget,
 )
-
-from config import APP_TITLE, ICON_PATH, WINDOW_SIZE
 
 import config
-from core.layers import depth_levels
-from core.lexer import Issue, clean_line
-from core.timeline import TimelineMarks, build_marks
-from core.modes import apply_mode, mode_display_name
-from core.i18n import tr
-from core.parser import parse_gcode
-from core.stats import compute_stats
-from core.toolpath import Snapshot, Toolpath
+from config import APP_TITLE, ICON_PATH, WINDOW_SIZE
 from core.dialect import dialect_label, get_dialect, process_codes_label
 from core.document import Document
-from core.recent_files import RecentFiles
 from core.file_safety import UnsafeFileError
+from core.i18n import tr
+from core.layers import depth_levels
+from core.lexer import Issue, clean_line
+from core.modes import apply_mode, mode_display_name
+from core.parser import parse_gcode
+from core.profile_store import load_profiles, save_profiles
+from core.recent_files import RecentFiles
+from core.stats import compute_stats
+from core.timeline import TimelineMarks, build_marks
+from core.toolpath import Snapshot, Toolpath
+from ui.corner_overlay import CornerOverlay
+from ui.dialect_suggestion import DialectSuggestion
+from ui.dro import DroOverlay
+from ui.file_watcher import FileWatcher
 from ui.gcode_editor import GCodeEditor
+from ui.gizmo import ViewGizmo
 from ui.issues_panel import IssuesPanel
 from ui.layer_controls import LayerControls
+from ui.menu_bar import MenuHandlers, build_menu_bar
 from ui.mode_controls import ModeControls
-from core.profile_store import load_profiles, save_profiles
-from ui.settings_dialog import SettingsDialog
 from ui.player_bar import PlayerBar
+from ui.playback_controller import PlaybackController
+from ui.settings_dialog import SettingsDialog
+from ui.start_panel import StartPanel
 from ui.stats_panel import StatsPanel
-from ui.widgets import ElidingLabel, vsep
+from ui.suggestion_banner import SuggestionBanner
 from ui.theme import DARK_QSS, SPACE_LG, SPACE_MD
 from ui.viewport import VIEW_SHORTCUTS, ToolpathView
-from ui.corner_overlay import CornerOverlay
-from ui.dro import DroOverlay
-from ui.gizmo import ViewGizmo
-from ui.suggestion_banner import SuggestionBanner
-from ui.dialect_suggestion import DialectSuggestion
-from ui.start_panel import StartPanel
-from ui.playback_controller import PlaybackController
-from ui.file_watcher import FileWatcher
-from ui.menu_bar import MenuHandlers, build_menu_bar
+from ui.widgets import ElidingLabel, vsep
 
 def _gcode_filter() -> str:
     patterns = " ".join(f"*{ext}" for ext in config.GCODE_EXTENSIONS)
@@ -118,14 +115,14 @@ class MainWindow(QMainWindow):
         self._build_layout()
         build_menu_bar(self, MenuHandlers(
             new=self._start_blank,
-            open=self.open_file,
+            open=self.choose_and_open,
             open_recent=self.load_file,
             recent_files=self._recent.existing,
-            save=lambda: self._save_edited_text(self._editor.text()),
-            save_as=lambda: self._save_edited_text_as(self._editor.text()),
+            save=lambda: self._save(self._editor.text()),
+            save_as=lambda: self._save_as(self._editor.text()),
             close_project=self._reset_to_start,
             quit=self.close,
-            apply=lambda: self._apply_edited_text(self._editor.text()),
+            apply=lambda: self._apply_edit(self._editor.text()),
             toggle_comment=self._editor.toggle_comment,
             find=self._show_editor_find,
             settings=self._open_settings,
@@ -260,9 +257,9 @@ class MainWindow(QMainWindow):
     def _connect_signals(self) -> None:
         self._mode_controls.changed.connect(self._on_mode_changed)
         self._editor_toggle.toggled.connect(self._on_editor_toggled)    
-        self._editor.save_requested.connect(self._save_edited_text)
-        self._editor.save_as_requested.connect(self._save_edited_text_as)
-        self._editor.apply_requested.connect(self._apply_edited_text)
+        self._editor.save_requested.connect(self._save)
+        self._editor.save_as_requested.connect(self._save_as)
+        self._editor.apply_requested.connect(self._apply_edit)
         self._gizmo.view_requested.connect(self._viewport.set_preset_view)
 
         self._playback.changed.connect(self._refresh)
@@ -283,7 +280,7 @@ class MainWindow(QMainWindow):
         self._issues_panel.issue_selected.connect(self._editor.goto_line)
         self._banner.accepted.connect(self._use_dialect)
 
-        self._start_panel.open_requested.connect(lambda: self.open_file())
+        self._start_panel.open_requested.connect(self.choose_and_open)
         self._start_panel.blank_requested.connect(self._start_blank)
 
         self._start_panel.recent_requested.connect(lambda path: self.load_file(Path(path)))
@@ -297,7 +294,7 @@ class MainWindow(QMainWindow):
 
     # --- carregamento ---
 
-    def open_file(self) -> None:
+    def choose_and_open(self) -> None:
         path, _ = QFileDialog.getOpenFileName(self, tr("dialog_open_title"), "", _gcode_filter())
         if path:
             self.load_file(Path(path))
@@ -419,20 +416,20 @@ class MainWindow(QMainWindow):
         )
         return answer == QMessageBox.StandardButton.Discard
 
-    def _apply_edited_text(self, text: str) -> None:
+    def _apply_edit(self, text: str) -> None:
         """o usuário editou o G-code no painel e pediu para reinterpretar."""
         self._doc.apply(text)
         self._editor.mark_applied()
         self._reload()
 
-    def _save_edited_text(self, text: str) -> None:
+    def _save(self, text: str) -> None:
         """salva no arquivo aberto; sem arquivo de origem, pede um caminho novo."""
         if self._doc.path is None:
-            self._save_edited_text_as(text)
+            self._save_as(text)
             return
         self._save_to(self._doc.path, text)
 
-    def _save_edited_text_as(self, text: str) -> None:
+    def _save_as(self, text: str) -> None:
         """sempre pergunta o caminho, mesmo que já exista um arquivo aberto."""
         path_str, _ = QFileDialog.getSaveFileName(self, tr("dialog_save_title"), "", _gcode_filter())
         if not path_str:
@@ -499,7 +496,6 @@ class MainWindow(QMainWindow):
         self._player.set_enabled(True)
         self._marks = build_marks(toolpath, levels, self._issues)
         self._playback.load(toolpath, self._marks)
-        self._player.set_enabled(True)
         self._player.set_marks(self._marks)
         self._player.set_status("")
         self._refresh()

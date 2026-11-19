@@ -190,6 +190,7 @@ class PlayerBar(QFrame):
         self._layer_chip = self._make_chip()
         self._layer_total = 0
         self._chips_allowed = True
+        self._position_state: tuple | None = None  # último estado dos chips, para não refazer o texto à toa
         self._message = QLabel()
         self._message.setObjectName("playerMessage")
         self._message.setTextFormat(Qt.TextFormat.PlainText)
@@ -294,6 +295,7 @@ class PlayerBar(QFrame):
             self._total_label.setText("00:00")
             self._line_chip.setText("")
             self._layer_total = 0
+            self._position_state = None
             self._update_chips()
 
     def set_marks(self, marks: TimelineMarks) -> None:
@@ -301,6 +303,10 @@ class PlayerBar(QFrame):
 
     def set_position(self, line: int, source: str, layer: int, layer_total: int, active: bool) -> None:
         """linha do G-code em execução e camada atual. active = processo ligado."""
+        state = (line, source, layer, layer_total, active)
+        if state == self._position_state:
+            return
+        self._position_state = state
         if len(source) > LINE_CHIP_MAX_CHARS:
             source = source[:LINE_CHIP_MAX_CHARS - 1] + "…"
         dot = ACCENT_TEXT if active else TEXT_MUTED

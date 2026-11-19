@@ -22,6 +22,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Se
 - Campos numéricos só respondem à roda do mouse depois de clicados
 - Avanços nos Ajustes com o mesmo número de casas decimais
 - README avisa que a simulação não substitui o teste em vazio na máquina
+- Código da janela principal reorganizado em módulos menores, sem mudança no uso
 
 **Corrigido**
 - `G04 X` era lido como coordenada: a ferramenta se deslocava em vez de pausar; agora `X` e `U` valem como tempo em segundos
@@ -49,6 +50,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Se
 - Number fields only react to the mouse wheel after being clicked
 - Feed rates in Settings use the same number of decimal places
 - README notes that the simulation does not replace a dry run on the machine
+- Main window code split into smaller modules, with no change in use
 
 **Fixed**
 - `G04 X` was read as a coordinate: the tool moved instead of pausing; `X` and `U` now count as time in seconds
