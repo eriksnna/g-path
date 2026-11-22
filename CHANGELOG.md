@@ -3,7 +3,7 @@
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e versionamento [SemVer](https://semver.org/lang/pt-BR/).
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [SemVer](https://semver.org/) versioning.
 
-## [0.3.2-beta] - 2026-11-19
+## [0.3.2-beta] - 2026-11-22
 
 ### Português
 
@@ -16,9 +16,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Se
 - Testes e pacote do Windows gerados automaticamente no GitHub, com o SHA-256 do zip
 
 **Alterado**
+- Reprodução mais leve em programas grandes: a cada quadro, só é redesenhado o que mudou
 - Tocha fica na vertical durante a reprodução no modo deposição
 - Deslocamentos em cinza-azulado; o vermelho fica reservado para erros
 - Painel lateral: a seção do modo vem logo abaixo do resumo; comandos e dimensões ficam em "Detalhes"
+- Validação sem problemas aparece logo abaixo do título, com um visto
+- Nomes longos nos recentes são cortados no meio, mantendo a extensão visível
+- Chip de camada mostra "–" antes da primeira camada, em vez de "0"
+- Cartão "Material" sem a densidade, que já aparece no cartão do cordão
 - Campos numéricos só respondem à roda do mouse depois de clicados
 - Avanços nos Ajustes com o mesmo número de casas decimais
 - README avisa que a simulação não substitui o teste em vazio na máquina
@@ -29,6 +34,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Se
 - `G04` sem tempo era ignorado sem aviso
 - Checkbox marcado não mostrava o sinal de marcado
 - Botão "Editor" continuava aceso com o editor recolhido pela alça
+- Ajustes abriam com o seletor de perfil destacado em laranja
 
 **Segurança**
 - Salvar grava primeiro num arquivo temporário: uma falha no meio da gravação não corrompe mais o G-code nem os perfis
@@ -44,9 +50,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Se
 - Tests and the Windows package built automatically on GitHub, with the zip's SHA-256
 
 **Changed**
+- Lighter playback on large programs: each frame only redraws what changed
 - Torch stays vertical during playback in deposition mode
 - Travel moves in gray-blue; red is reserved for errors
 - Side panel: the mode section comes right below the summary; commands and dimensions sit under "Details"
+- A clean validation shows right below the title, with a check mark
+- Long names in the recent list are cut in the middle, keeping the extension visible
+- Layer chip shows "–" before the first layer instead of "0"
+- "Material" card no longer repeats the density, already shown in the bead card
 - Number fields only react to the mouse wheel after being clicked
 - Feed rates in Settings use the same number of decimal places
 - README notes that the simulation does not replace a dry run on the machine
@@ -57,6 +68,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Se
 - `G04` without a time was silently ignored
 - Checked checkbox showed no check mark
 - "Editor" button stayed on with the editor collapsed by the handle
+- Settings opened with the profile selector highlighted in orange
 
 **Security**
 - Saving writes to a temporary file first: a failure mid-save no longer corrupts the G-code or the profiles
