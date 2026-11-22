@@ -447,6 +447,7 @@ class SettingsDialog(QDialog):
 
         close_button = QPushButton(tr("btn_close"))
         close_button.clicked.connect(self.accept)
+        close_button.setFocus()
         button_row = QHBoxLayout()
         button_row.addStretch(1)
         button_row.addWidget(close_button)

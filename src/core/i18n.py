@@ -317,7 +317,6 @@ _STRINGS: dict[str, dict[str, str]] = {
     "card_deposited_material": {PT_BR: "Material", EN: "Material", IT: "Materiale"},
     "card_deposition_rate": {PT_BR: "Taxa", EN: "Rate", IT: "Tasso"},
     "card_dots": {PT_BR: "Pontos", EN: "Dots", IT: "Punti"},
-    "detail_density": {PT_BR: "densidade", EN: "density", IT: "densità"},
     "detail_arc_time": {PT_BR: "em {time} com arco ligado", EN: "in {time} with arc on", IT: "in {time} con arco acceso"},
 
     # --- dialetos (core/dialect) ---------------------------------------------

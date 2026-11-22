@@ -6,18 +6,20 @@ from core.i18n import tr
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
-    QFrame, QLabel, QListWidget, QListWidgetItem, QVBoxLayout,
+    QFrame, QHBoxLayout, QLabel, QListWidget, QListWidgetItem, QVBoxLayout, QWidget,
 )
 
 from core.lexer import group_issues
 
 from core.parser import ERROR, WARNING, Issue
 from ui.text import plain_tooltip
-from ui.theme import ERROR_COLOR, SPACE_SM, SPACE_XL, WARNING_COLOR
+from ui.icons import APPLY, icon
+from ui.theme import ERROR_COLOR, SPACE_SM, SPACE_XL, SPACE_XS, SUCCESS, WARNING_COLOR
 
 PANEL_WIDTH = 300
 LINE_ROLE = Qt.ItemDataRole.UserRole
 _SEVERITY_LABELS = {ERROR: "severity_error", WARNING: "severity_warning"}
+EMPTY_ICON_SIZE = 14
 
 
 class IssuesPanel(QFrame):
@@ -42,8 +44,17 @@ class IssuesPanel(QFrame):
         self._list.setVerticalScrollMode(QListWidget.ScrollMode.ScrollPerPixel)
         self._list.itemClicked.connect(self._on_clicked)
 
-        self._empty = QLabel(tr("validation_empty"))
-        self._empty.setObjectName("issueEmpty")
+        check = QLabel()
+        check.setPixmap(icon(APPLY, SUCCESS).pixmap(EMPTY_ICON_SIZE, EMPTY_ICON_SIZE))
+        empty_text = QLabel(tr("validation_empty"))
+        empty_text.setObjectName("issueEmpty")
+        self._empty = QWidget()
+        empty_row = QHBoxLayout(self._empty)
+        empty_row.setContentsMargins(0, 0, 0, 0)
+        empty_row.setSpacing(SPACE_XS)
+        empty_row.addWidget(check)
+        empty_row.addWidget(empty_text)
+        empty_row.addStretch()
 
         self._detail = QLabel(tr("validation_hint"))
         self._detail.setObjectName("issueDetail")
@@ -55,9 +66,10 @@ class IssuesPanel(QFrame):
         layout.setSpacing(SPACE_SM)
         layout.addWidget(title)
         layout.addWidget(self._summary)
-        layout.addWidget(self._list, 1)
         layout.addWidget(self._empty)
+        layout.addWidget(self._list, 1)
         layout.addWidget(self._detail)
+        layout.addStretch()
 
         self.show_issues([])
 
@@ -80,6 +92,7 @@ class IssuesPanel(QFrame):
         has_issues = bool(issues)
 
         self._list.setVisible(has_issues)
+        self._summary.setVisible(has_issues)
         self._empty.setVisible(not has_issues)
         self._detail.setVisible(has_issues)
         self._summary.setText(

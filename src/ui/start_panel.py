@@ -5,13 +5,14 @@ from pathlib import Path
 
 from PySide6.QtCore import QSize, Qt, Signal
 from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QVBoxLayout, QWidget
 
 import config
 from core.i18n import tr
 from ui.icons import SETTINGS, icon
 from ui.start_background import StartBackground
 from ui.text import plain_tooltip
+from ui.widgets import ElidingLabel
 from ui.theme import SPACE_LG, SPACE_MD, SPACE_SM, SPACE_XL, SPACE_XXL, SPACE_XXS, TEXT_SECONDARY
 
 TITLE = "G-Path"
@@ -34,8 +35,9 @@ class _RecentRow(QPushButton):
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setToolTip(plain_tooltip(path))
 
-        name = QLabel(Path(path).name)
+        name = ElidingLabel(Path(path).name)
         name.setObjectName("recentName")
+        name.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         folder = QLabel()
         folder.setObjectName("recentFolder")
         folder.setText(folder.fontMetrics().elidedText(
@@ -48,8 +50,7 @@ class _RecentRow(QPushButton):
         layout = QHBoxLayout(self)
         layout.setContentsMargins(SPACE_MD, 0, SPACE_MD, 0)
         layout.setSpacing(SPACE_LG)
-        layout.addWidget(name)
-        layout.addStretch()
+        layout.addWidget(name, 1)
         layout.addWidget(folder)
 
 
@@ -130,7 +131,7 @@ class StartPanel(QFrame):
         top.addStretch()
         top.addWidget(settings_button)
 
-        footer = QLabel(f"erik senna ©2026  ·  v{config.APP_VERSION}")
+        footer = QLabel(f"{config.AUTHOR_NAME} ©2026  ·  v{config.APP_VERSION}")
         footer.setObjectName("startFooter")
         footer.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 

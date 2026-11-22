@@ -245,7 +245,7 @@ QGroupBox::title {{ subcontrol-origin: margin; left: 12px; padding: 0 6px; color
 
 QFrame#issuesPanel {{ background: {SURFACE_1}; border: none; border-radius: {RADIUS_LG}; }}
 QLabel#issueSummary {{ color: {TEXT_SECONDARY}; font-size: {FONT_SMALL}; }}
-QLabel#issueEmpty {{ color: {SUCCESS}; font-size: {FONT_SMALL}; }}
+QLabel#issueEmpty {{ color: {TEXT_SECONDARY}; font-size: {FONT_SMALL}; }}
 QLabel#issueDetail {{
     color: {TEXT_SECONDARY}; font-family: {FONT_MONO}; font-size: {FONT_CAPTION};
     background: {SURFACE_2}; border-radius: {RADIUS_SM}; padding: 6px;

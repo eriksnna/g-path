@@ -197,7 +197,6 @@ class ToolpathView(gl.GLViewWidget):
         self._wire_item.setData(pos=np.array([tip, head]))
         self._wire_item.setVisible(True)
 
-    @staticmethod
     def _push_colors(self) -> None:
         if self._cut_item is not None:
             self._cut_item.setData(color=self._colors.cut)

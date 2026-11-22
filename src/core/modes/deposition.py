@@ -10,7 +10,7 @@ from core.i18n import tr
 from core.lexer import ERROR, WARNING, Issue
 from core.modes.base import ModeCard, ProcessMode
 from core.parser import Move
-from core.stats import format_duration, format_length
+from core.stats import format_duration
 from core.toolpath import Toolpath
 
 HEIGHT_TOLERANCE = 0.2   # mm: diferença aceita entre o passo de camada e a altura do cordão
@@ -67,7 +67,7 @@ class DepositionMode(ProcessMode):
 
         cards = [
             ModeCard(tr("card_deposited_material"), f"{mass_kg:.3f} kg",
-                     f"{volume / MM3_PER_CM3:.1f} cm³ · {tr('detail_density')} {self.bead.density:g} g/cm³"),
+                     f"{volume / MM3_PER_CM3:.1f} cm³"),
             ModeCard(tr("card_deposition_rate"), f"{rate:.2f} kg/h",
                      tr("detail_arc_time").format(time=format_duration(arc_time))),
         ]

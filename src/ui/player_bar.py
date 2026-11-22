@@ -313,7 +313,8 @@ class PlayerBar(QFrame):
         self._line_chip.setText(f'<span style="color:{dot}">●</span>&nbsp; L{line}&nbsp;&nbsp;{escape(source)}')
         self._line_chip.setToolTip(tr("chip_process_on" if active else "chip_process_off"))
         self._layer_total = layer_total
-        self._layer_chip.setText(tr("player_layer_chip").format(layer=layer, total=layer_total))
+        current = str(layer) if layer > 0 else "–"
+        self._layer_chip.setText(tr("player_layer_chip").format(layer=current, total=layer_total))
         self._update_chips()
 
     def set_chips_allowed(self, allowed: bool) -> None:
