@@ -119,11 +119,11 @@ The `examples/` folder (included in the `.zip`) has 10 ready-made programs:
 | `machining_02_contour_with_hole.nc` | Contour and hole at different depths |
 | `machining_03_drilling_grid.nc` | Drilling with dwell (G4) |
 | `machining_04_circles_g2_g3.nc` | Arcs with I/J |
-| `machining_05_pocket_in_passes.nc` | Variables, subroutine, and repetitiono |
+| `machining_05_pocket_in_passes.nc` | Variables, sub-routine, and repetitiono |
 | `machining_06_inches_incremental.nc` | Inches (G20) and incremental (G91) |
 | `waam_01_straight_wall.nc` | 4-layer wall |
 | `waam_02_rectangular_frame.nc` | Closed frame in layers |
-| `waam_03_cylinder_in_layers.nc` | Cylindrical wall with subroutine |
+| `waam_03_cylinder_in_layers.nc` | Cylindrical wall with sub-routine |
 | `waam_04_dots_arc_m8_m9.nc` | Point-by-point deposition, M8/M9 dialect |
 
 - 10 arquivos de exemplo (6 de usinagem, 4 de deposição WAAM), com comentários em português e inglês
@@ -148,13 +148,12 @@ Icons: [Phosphor Icons](https://phosphoricons.com) — MIT License, © Phosphor 
 
 <!-- TODO: gifs de uso aqui — abrir arquivo, reprodução da simulação, troca de modo/idioma -->
 
-Diário de Dev 🤠👇👇
-
 <details>
+<summary><b>Diário de desenvolvimento 🤠👇</b></summary>
 
-## Diário de desenvolvimento 🤠
+## Parte 1 — Aplicativo independente
 
-### 21/07 — terça-feira - Definição do projeto (~6h)
+### 21/07 — terça-feira — Definição do projeto (~6h)
 
 **Tema:**
 
@@ -162,7 +161,7 @@ Modernização e acessibilidade em sistemas CNC utilizados para impressão 3D de
 
 O projeto foi dividido em duas frentes complementares.
 
-### Parte 1 - Visualizador independente 
+#### Parte 1 — Visualizador independente 
 
 desenvolvimento de um aplicativo nativo para visualização avançada de trajetórias G-Code em ambientes 2D e 3D.
 
@@ -173,7 +172,7 @@ desenvolvimento de um aplicativo nativo para visualização avançada de trajet�
 - Arquitetura escalável;
 - Possibilidade de futura geração de G-Code.
 	
-### Parte 2 - Integração com Mach3
+#### Parte 2 — Integração com Mach3
 
 Desenvolvimento de um plugin nativo em C++ para o software mach3. 
 
@@ -183,18 +182,18 @@ Desenvolvimento de um plugin nativo em C++ para o software mach3.
 - Animações 2D e 3D integradas à máquina;
 - Fundação para uma futura renovação da interface gráfica do sistema legado.
 
-## Parte 1 - aplicativo independente
+## Parte 1 — Aplicativo independente
 
-### 23/07 — quinta-feira - Reunião inicial com cliente (~7h)
+### 23/07 — quinta-feira — Reunião inicial com cliente (~7h)
 
-### Cliente e orientador técnico
+#### Cliente e orientador técnico
 
 **[Prof. Dr. Gustavo Senna Carvalho](https://www.dief.unifi.it/vp-680-gustavo-senna.html)**
 
 - [Manufacturing Technologies Research Laboratory](https://www.dief.unifi.it/vp-207-about.html)
-- Università degli Studi Firenze (Florença - Itália)
+- Università degli Studi Firenze (Florença, Itália)
 
-### Objetivos definidos
+#### Objetivos definidos
 
 **O projeto é voltado para:**
 
@@ -209,77 +208,77 @@ Desenvolvimento de um plugin nativo em C++ para o software mach3.
 - Licenças de alto custo;
 - Baixa acessibilidade para universidades.
 
-### Objetivo principal
+#### Objetivo principal
 
 democratizar o acesso à tecnologia de ponta na manufatura, facilitando o uso dessas ferramentas através de interfaces modernas e introduzindo no mercado um novo projeto acessível, seguro e de alto impacto educacional.
 
-### 24/07 — sexta-feira - Escolha das tecnologias (~6h)
+### 24/07 — sexta-feira — Escolha das tecnologias (~6h)
 
-**Para o aplicativo independente (parte 1):** desenvolvimento estruturado em Python, aproveitando a alta eficiência da linguagem para o processamento e parsing de arquivos de texto (G-Code). A interface gráfica de usuário (GUI) e o motor de renderização 3D serão construídos utilizando frameworks robustos do ecossistema Python (como PyQt/PySide para a estruturação nativa das janelas, operando em conjunto com PyOpenGL ou bibliotecas de visualização espacial para a renderização fluida das trajetórias de corte).
+**Para o aplicativo independente (Parte 1):** desenvolvimento estruturado em Python, aproveitando a alta eficiência da linguagem no processamento e no parsing de arquivos de texto (G-code). A interface gráfica (GUI) e o motor de renderização 3D serão construídos com frameworks robustos do ecossistema Python, como PyQt/PySide para a estruturação nativa das janelas, em conjunto com PyOpenGL ou bibliotecas de visualização espacial para a renderização fluida das trajetórias de corte.
 
-### 27/07 — segunda-feira - Primeiros testes (~8h)
+### 27/07 — segunda-feira — Primeiros testes (~8h)
 
 - Protótipo inicial usando NumPy;
 - Simulações geradas artificialmente;
 - Ainda sem parser funcional de G-code;
 
-### 1/08 — sábado e 2/08 — domingo - Implementação do parser (~12h)
+### 01/08 — sábado e 02/08 — domingo — Implementação do parser (~12h)
 
-1. **Remoção do protótipo**
+1. **Remoção do protótipo:**
 
 - Removido o `plot_mock_gcode`;
 - Removida geração de espiral com NumPy;
 
-2. **Implementação do ``GCodeParser``**
+2. **Implementação do `GCodeParser`:**
 
-**Funcionalidades**
+**Funcionalidades:**
 
-- remoção de comentários (; e ( ... ));
+- remoção de comentários (`;` e `( ... )`);
 - normalização das linhas;
-- extração de pares letra + número (X10.5, G1, F300);
+- extração de pares letra + número (`X10.5`, `G1`, `F300`);
 - controle de estado modal;
 - suporte a: 
-  - (G0/G1/G2/G3), 
-  - coordenadas absolutas ou incrementais (G90/G91) 
-  - unidades (G20 polegadas / G21 mm);
-- conversão de arcos G2/G3 (centro dado por I/J, plano XY) em pequenos segmentos;
-- separação entre movimentos em cortes (G1/G2/G3) e rápidos (G0).
+  - (`G0`/`G1`/`G2`/`G3`), 
+  - coordenadas absolutas ou incrementais (`G90`/`G91`) 
+  - unidades (`G20` polegadas / `G21` mm);
+- conversão de arcos `G2`/`G3` (centro dado por `I`/`J`, plano XY) em pequenos segmentos;
+- separação entre movimentos em cortes (`G1`/`G2`/`G3`) e rápidos (`G0`).
 
-3. **Seleção de arquivos**
+1. **Seleção de arquivos:**
 
 - adicionado diálogo para escolher o arquivo.
 
-4. **Visualização**
+4. **Visualização:**
 
 - Vermelho translúcido: movimentos rápidos;
 - Azul: movimentos de corte.
 
-5. **Câmera**
+5. **Câmera:**
 
 - Centralização automática na peça;
 - Distância proporcional ao tamanho do modelo.
 
-6. **Limpeza de cena**
+6. **Limpeza de cena:**
 
 - Remoção automática dos elementos anteriores ao recarregar arquvios.
 
-7. **Status**
+7. **Status:**
 
 Exibição de:
 
 - Quantidade de segmentos;
 - Avisos do parser.
 
-### 6/08 — quinta-feira - Reunião de acompanhamento (~2h)
+### 06/08 — quinta-feira — Reunião de acompanhamento (~2h)
 
-**Próximos objetivos**
+**Próximos objetivos:**
 
-- [X] Trajeto animado
-- [X] Melhoria na interface
+- [x] Trajeto animado
+- [x] Melhoria na interface
 
-### 13/08 — quinta-feira a 16/08 — domingo - Sistema de reprodução (~27h)
+### 13/08 — quinta-feira a 16/08 — domingo — Sistema de reprodução (~27h)
 
-1. **Ajuste dos movimentos**
+1. **Ajuste dos movimentos:**
 
 Antes:
 
@@ -289,7 +288,7 @@ Agora:
 
 - guarda uma única lista `moves`, na sequência do arquivo, com a flag `is_cut`.
 
-2. **Animação por cor, não por redesenho**
+2. **Animação por cor, não por redesenho:**
 
 Substituição de redesenho por atualização de cores.
 
@@ -298,7 +297,7 @@ Benefícios:
 - Menor consumo de processamento, mantendo a fluidez da animação;
 - Melhor desempenho em arquivos grandes.
 
-3. **Controles de mídia**
+3. **Controles de mídia:**
 
 Adicionados:
 
@@ -306,45 +305,45 @@ Adicionados:
 - ⏪ e ⏩: retrocedem e avançam 2% do arquivo por clique.
 - ▶ / ⏸: reproduzem ou pausam. Ao chegar ao fim, o próximo clique recomeça do zero.
 - Timeline: arrastar a barra pausa a reprodução e posiciona o trajeto.
-- Velocidade: 0.5x, 1.0x, 1.5x e 2.0x, aplicados em tempo real.
+- Velocidade: 0.5x, 1x, 1.5x e 2x, aplicados em tempo real.
 
 Recursos adicionais:
 
 - Timeline interativa;
 - Controle de velocidade:
   - 0.5x
-  - 1.0x
+  - 1x
   - 1.5x
-  - 2.0x
+  - 2x
 
-4. **Tempo adaptativo**
+4. **Tempo adaptativo:**
 
 - Arquivos grandes: ~15 segundos;
 - Arquivos pequenos: duração mínima automática.
 
-5. **Interface**
+5. **Interface:**
 
 - Tema escuro;
 - barra de reprodução destacada;
 - cabeçalho com o nome do arquivo;
 - linha de status.
 
-**Limitações**
+**Limitações:**
 
-   - Todas as linhas usam a mesma espessura. O `GLLinePlotItem` aceita apenas uma largura por item, então os rápidos não aparecem mais finos que os cortes.
-   - Reprodução baseada em movimentos, não em tempo real de máquina.
+- Todas as linhas usam a mesma espessura. O `GLLinePlotItem` aceita apenas uma largura por item, então os rápidos não aparecem mais finos que os cortes.
+- Reprodução baseada em movimentos, não em tempo real de máquina.
 
-### 20/08 — quinta-feira - Tempo real e melhorias visuais (~6h)
+### 20/08 — quinta-feira — Tempo real e melhorias visuais (~6h)
 
-1. **Adição de espessuras independentes**
+1. **Adição de espessuras independentes:**
 
-Agora cada tipo de movimento virou uma camada própria, um ``GLLinePlotItem`` com sua espessura. Rápidos usam ``RAPID_WIDTH`` e cortes usam ``CUT_WIDTH``.
+Agora cada tipo de movimento virou uma camada própria, um `GLLinePlotItem` com sua espessura. Rápidos usam `RAPID_WIDTH` e cortes usam `CUT_WIDTH`.
 
-2. **Tempo real proporcional** 
+2. **Tempo real proporcional:** 
 
 O parser calcula a duração de cada movimento como `distância / velocidade`. Para cortes, a velocidade é o `F` modal, convertido para mm/min quando o arquivo está em G20. Para G0, usa-se `RAPID_FEED`. Os arcos são divididos em pequenos segmentos, e cada um recebe o seu tempo. A animação passa a ser controlada por tempo acumulado (`cum_start` e `cum_end` 😳), e a cabeça da ferramenta é interpolada dentro de cada movimento, então ela desliza em vez de pular de ponto em ponto.
 
-3. **Controle de velocidade mais preciso** 
+3. **Controle de velocidade mais preciso:** 
 
 Novas Velocidades:
 
@@ -354,7 +353,7 @@ Novas Velocidades:
 - 2x
 - 4x
 
-4. **Novo painel de status** 
+4. **Novo painel de status:** 
 
 Exibição de:
 
@@ -363,27 +362,27 @@ Exibição de:
 - Tempo total no formato mm:ss;
 - Velocidade.
 	
-### 21/08 — sexta-feira a 28/08 — sexta-feira - Refatoração GERAL (~35h)
+### 21/08 — sexta-feira a 28/08 — sexta-feira — Refatoração GERAL (~35h)
 
-**Principais mudanças**
+**Principais mudanças:**
 
 - Refatoração completa do projeto;
 - Separação por módulos;
 - Melhor organização e manutenção do código.
 
-	Deu trabalho 😥😥😭😭
+Deu trabalho 😥😥😭😭
 
-### 3/09 — quinta-feira - Correções e testes (~4h)
+### 03/09 — quinta-feira — Correções e testes (~4h)
 
-**Atividades**
+**Atividades:**
 
 - Correção de pequenos bugs 🐛;
 - realização de testes;
 - validação geral do sistema.
 
-### 11/09 — sexta-feira e 12/09 — sábado - Estatísticas e monitoramento (~10h)
+### 11/09 — sexta-feira e 12/09 — sábado — Estatísticas e monitoramento (~10h)
 
-1. **Adição de painel com estatísticas**
+1. **Adição de painel com estatísticas:**
 
 Cálculos ao abrir o arquivo: 
 
@@ -394,7 +393,7 @@ Cálculos ao abrir o arquivo:
 - quantidade de movimentos;
 - dimensões da peça.
 
-2. **Estatísticas de Simulação**
+2. **Estatísticas de Simulação:**
 
 Atualização em tempo real:
 
@@ -404,13 +403,13 @@ Atualização em tempo real:
 - tempo restante;
 - tempo decorrido.
 
-3. **Sistema de avisos**
+3. **Sistema de avisos:**
 
 - lista completa dos problemas encontrados no parser.
 
-### 17/09 — quinta-feira a 21/09 — segunda-feira - Validações e sistema de Issues (~26h)
+### 17/09 — quinta-feira a 21/09 — segunda-feira — Validações e sistema de issues (~26h)
 
-1. **Novo sistema de Issues**
+1. **Novo sistema de Issues:**
 
 Antes: 
 
@@ -422,7 +421,7 @@ passa a devolver `Issue(line, severity, message)`
 
 Cada `Move` guarda a linha de origem.
 
-2. **Novas validações**
+2. **Novas validações:**
 
 Implementadas verificações para:
 
@@ -430,95 +429,95 @@ Implementadas verificações para:
 - arco com `R` (agora um erro com número de linha)
 - movimento fora da área de trabalho (`MACHINE_LIMITS`).
 
-3. **Navegação por problemas**
+3. **Navegação por problemas:**
 
 Ao clicar em um problema:
 
 - A reprodução salta para o ponto correspondente;
 - O código relacionado é destacado.
 
-4. **visualização por profundidade**
+4. **visualização por profundidade:**
 
 Novidades:
 
 - Colorização dos cortes por eixo Z;
 - Filtro de visualização por camada.
 
-5. **estabilidade e manutenção**
+5. **estabilidade e manutenção:**
 
 - Correção de bugs 🐛;
 - execução de bateria de testes.
 
-### 24/09 — quinta-feira - Ajuste e responsividade na interface (~4h)
+### 24/09 — quinta-feira — Ajuste e responsividade na interface (~4h)
 
 1. **Adição de scroll no painel**
 
-2. **Responsividade dos números dentro dos cards**
+2. **Responsividade dos números dentro dos cartões**
 
-### 26/09 — sábado - Aprofundamento no painel de estatísticas (~3h)
+### 26/09 — sábado — Aprofundamento no painel de estatísticas (~3h)
 
-1. **Mais detalhamento no painel de estatísticas**
+1. **Mais detalhamento no painel de estatísticas:**
 
--  O cartão agora mostra o número de comandos de movimento;
--  O detalhe mostra a divisão por tipo, como ``G0 1 | G1 1 | G2 1``
+- O cartão agora mostra o número de comandos de movimento;
+- O detalhe mostra a divisão por tipo, como ``G0 1 | G1 1 | G2 1``
 
-### 03/10 — sábado - Adição de sub-rotinas e separação do parser (~5h)
+### 03/10 — sábado — Adição de sub-rotinas e separação do parser (~5h)
 
-1. **Expansão de sub-rotinas, repetições (L) e variáveis (#n)**
+1. **Expansão de sub-rotinas, repetições (`L`) e variáveis (`#n`):**
 
-### 06/10 — terça-feira a 07/10 — quarta-feira - Adição de dialetos de G-code e preparação para adicionar modos de processos de usinagem e deposição (WAAM) (~7h)
+### 06/10 — terça-feira e 07/10 — quarta-feira — Adição de dialetos de G-code e preparação para os modos de processo de usinagem e deposição (WAAM) (~7h)
 
-1. **Interpretação de dialetos**
+1. **Interpretação de dialetos:**
 
 - Agora o programa tem um modo de interpretação separado para usinagem e deposição (WAAM);
 - Suporte a códigos de processo (M-codes);
 
-2. **Integração e compatibilidade**
+2. **Integração e compatibilidade:**
    
-- Integra expander ao parser; adiciona dialect, active, dwell e rapid
+- Integra expander ao parser; adiciona `dialect`, `active`, `dwell` e `rapid`
 
-### 09/10 — sexta-feira a 11/10 — domingo - Integração dos modos na interface: seletor, cartões e validação (~13h)
+### 09/10 — sexta-feira a 11/10 — domingo — Integração dos modos na interface: seletor, cartões e validação (~13h)
 
-1. **Agora é possível selecionar o modo de processo diretamente na interface**
+1. **Agora é possível selecionar o modo de processo diretamente na interface:**
 
 - Painel de estatística diferente para cada modo;
 - Adição de configurações adicionais para o modo de deposição (WAAM);
 
-### 14/10 — quarta-feira a 17/10 — sábado - Adição de editor de texto integrado — finalmente! 🎉 (~18h)
+### 14/10 — quarta-feira a 17/10 — sábado — Adição do editor de texto integrado, finalmente! 🎉 (~18h)
 
-1. **Finalmente, agora o aplicativo tem um Editor de Texto nativo.**
+1. **Finalmente, agora o aplicativo tem um Editor de Texto nativo:**
 
 - É possível agora inserir diretamente o código no Editor de texto
 
 **Próximos objetivos:**
 
-- Realce de sintaxe (G/M-codes, eixos, comentários, variáveis ``#n``) no código GCode;
+- Realce de sintaxe (G/M-codes, eixos, comentários, variáveis `#n`) no código GCode;
 - Números de linha na margem;
 - Atalhos e salvar de volta no arquivo em disco (alteração)
 
-### 18/10 — domingo - Realização dos objetivos (~3h)
+### 18/10 — domingo — Realização dos objetivos (~3h)
 
 **Agora:**
 
-- Realce de sintaxe (G/M-codes, eixos, comentários, variáveis ``#n``) no código GCode;
+- Realce de sintaxe (G/M-codes, eixos, comentários, variáveis `#n`) no código GCode;
 - Números de linha na margem;
 - Atalhos e salvar de volta no arquivo em disco (alteração)
 
-### 19/10 — segunda-feira - Implementações no modo deposição (WAAM) (~5h)
+### 19/10 — segunda-feira — Implementações no modo deposição (WAAM) (~5h)
 
 **Agora:**
 
 - Adiciona tocha e fio visual no modo deposição;
 - Adiciona inclinação da tocha;
-- Configurações pode ser feita manualmente no ``visualizador/config.py``
+- Configurações pode ser feita manualmente no `visualizador/config.py`
 
-### 21/10 — quarta-feira - Adição de tela inicial (~3h)
+### 21/10 — quarta-feira — Adição de tela inicial (~3h)
 
 1. **Adiciona tela inicial**
 
 - Opcao de abrir arquivo ou comecar do zero no editor;
 
-### 22/10 — quinta-feira - Adição de funcionalidades extras (~5h)
+### 22/10 — quinta-feira — Adição de funcionalidades extras (~5h)
 
 1. **Mudanças no editor e fluxo de uso do aplicativo**
 
@@ -529,21 +528,21 @@ Novidades:
 
 2. **Correção de bugs gerais**
 
-### 23/10 — sexta-feira a 24/10 — sábado - Adição de tela de ajustes (~12h)
+### 23/10 — sexta-feira e 24/10 — sábado — Adição de tela de ajustes (~12h)
 
 **Novidades:**
 
 - Nova tela de ajuste;
-- Persistência de perfis em json (salvo em ``%APPDATA%\GCodeTools\profiles.json``)
+- Persistência de perfis em json (salvo em `%APPDATA%\GCodeTools\profiles.json`)
 
-### 25/10 — domingo - Adição de barra de menu (~7h)
+### 25/10 — domingo — Adição de barra de menu (~7h)
 
 1. **Nova barra de menu**:
 
 - Agora é possivel acessar as opções Arquivo, Editar e Ajustes;
 - Permanência de perfil com Modo, Dialeto e Limites
 
-### 26/10 — segunda-feira a 29/10 — quinta-feira - Adições extras e ajustes gerais (~23h)
+### 26/10 — segunda-feira a 29/10 — quinta-feira — Adições extras e ajustes gerais (~23h)
 
 1. **Identidade:**
 
@@ -560,7 +559,7 @@ Novidades:
 - Remoção de código morto (não utilizado);
 - Correção de bugs
 
-### 30/10 — sexta-feira a 31/10 — sábado - Adição de licença MIT e outras melhorias (~12h)
+### 30/10 — sexta-feira e 31/10 — sábado — Adição de licença MIT e outras melhorias (~12h)
 
 1. **Licença**:
 
@@ -571,28 +570,28 @@ Novidades:
 - Adição de pasta de exemplos, com modelos de código G-Code de usinagem e WAAM.
 - Correção de bug de redimensionamento da janela.
 
-### 01/11 — domingo a 03/11 — terça-feira - Suporte à outras línguas (~15h)
+### 01/11 — domingo a 03/11 — terça-feira — Suporte a outros idiomas (~15h)
 
 1. **Novidade:**
 
 - Agora o software suporta outras linguagens!
-  - Linguagens suportadas no momento: PT-BR e ENG-US
+  - Idiomas suportados no momento: PT-BR e ENG-US
 
 2. **Misc:**
 
 - Correção de bugs na interface
 - Adição de animações simples
 
-### 04/11 — quarta-feira a 06/11 — sexta-feira - Empacotamento em executável (~12h)
+### 04/11 — quarta-feira a 06/11 — sexta-feira — Empacotamento em executável (~12h)
 
-1. **Identidade visual**
+1. **Identidade visual:**
 
 - Novo ícone e logo do G-Path, aplicados na janela, na taskbar e na tela inicial;
 - Agrupamento visual e contraste ajustados na barra superior e no trajeto;
 
-2. **Correções de bugs**
+2. **Correções de bugs:**
 
-- Card de comandos de movimento com tradução inconsistente;
+- cartão de comandos de movimento com tradução inconsistente;
 - Texto cortado no painel de Validação;
 
 3. **Empacotamento (PyInstaller)**
@@ -601,29 +600,32 @@ Novidades:
 - `config.py` preparado pra achar os assets dentro do build (`sys._MEIPASS`);
 - `.gitignore` atualizado (`build/`, `dist/`);
 
-### 07/11 — sábado - Primeira Release!! 🥳 (~6h)
+### 07/11 — sábado — Primeira release! 🥳 (~6h)
 
-1. **Processo de release**
+1. **Processo de release:**
 
-- Definição de versionamento (semver + beta);
-- Preparação do primeiro release de teste.
+- Definição de versionamento (SemVer + beta);
+- Preparação do primeira release de teste
 
-### 08/11 — domingo a 9/11 — segunda-feira - Segunda Release e correção de bugs (~4h)
+### 08/11 — domingo e 09/11 — segunda-feira — Segunda release e correção de bugs (~4h)
 
-2. **Segunda Release**
+1. **Segunda Release**
 
-**Novidades**:
+**Novidades:**
+
 - Suporte ao idioma Italiano
 - Adição de abrir arquivos recentes
-- Adição de drag and drop
+- Adição de arrastar e soltar arquivos
 - Adição de botões de vistas de câmeras diferentes
 
 **Correções:**
+
 - Ajuste de labels hardcodadas em PT-BR
 
-### 10/11 — terça-feira e 11/11 — quarta-feira - Correção geral de bugs (~12h)
+### 10/11 — terça-feira e 11/11 — quarta-feira — Correção geral de bugs (~12h)
 
 **Novidades:**
+
 - Novos ícones
 - Player bar repaginada: novos ícones e novas cores
 - Chips de status em tempo real
@@ -631,51 +633,108 @@ Novidades:
 
 **Correções:**
 
-- Bug subrotina
-- Bugs G92, G28, planos, arcos sem centro e G desconhecido
+- Bug na sub-rotina
+- Bugs `G92`, `G28`, planos, arcos sem centro e G desconhecido
 - Ajuste no filtro de arquivos G-Code
-- Bug - no moves found
+- Bug "no moves found"
 
-### 11/11 — quarta-feira - Reunião com cliente para revisão, teste e brainstorm (~4h)
+### 11/11 — quarta-feira — Reunião com cliente para revisão, teste e brainstorm (~4h)
 
 **Próximos objetivos:**
 
-- [X] Mais detalhamento no processo
-- [X] Tela inicial mais autoral
-- [X] Identidade visual mais definida
+- [x] Mais detalhamento no processo
+- [x] Tela inicial mais autoral
+- [x] Identidade visual mais definida
 - [] Visualização do Arco em 3D
 
-### 12/11 — quinta-feira - Refinamento e novas funcionalidades (~7h)
+### 12/11 — quinta-feira — Refinamento e novas funcionalidades (~7h)
 
 **Novidades:**
+
 - Visualização de Leitura Digital (DRO)
 - Sugestão de troca de Dialeto
 - Tela inicial repaginada
 - Arrastar e Soltar arquivos direto na tela inicial
 
 **Correções:**
+
 - Ajuste na player bar: agora ocupa uma só linha
 - Ajuste no aviso de sugestão
 - Painel de issues mais enxuto
 - Diversos ajustes e padronização estética
 
-### 13/11 — sexta-feira - Padronização e lançamento da v0.3.0 (~5h)
+### 13/11 — sexta-feira — Padronização e lançamento da v0.3.0 (~5h)
 
 **Novidades:**
+
 - CHANGELOG adicionado de acordo com o padrão universal
 - Adição de licensas e créditos no código
 
 **Correções:**
+
 - Limpeza do código e uso de regras de padronização estética
 
-### 15/11 — domingo - Correção da release v0.3.0 quebrada e novas funcionalidades (~7h)
+### 15/11 — domingo — Correção da release v0.3.0 quebrada e novas funcionalidades (~7h)
 
 **Novidades:**
-- Lançamento da v0.3.1, corrigindo a v0.3.0 quebrada
+
+- Lançamento da v0.3.1 totalmente funcional e agora zipada corretamente, corrigindo a v0.3.0 quebrada
 - Novo Gizmo tridimensional, substituindo os botões de vistas adicionados na v0.2.0-beta
-- Versão 0.3.1 totalmente funcional, agora zipada corretamente
-- Novo grupo de cards com informações do cordão
+- Novo grupo de cartões com informações do cordão
 - Novo cabeçalho removendo informações redundantes do painel
-- Novo botão de reiniciar ao trocar língua
+- Novo botão de reiniciar ao trocar idioma
 - Novos exemplos de código em inglês (10 no total)
+
+### 16/11 — segunda-feira — Correções, automações (~6h)
+
+**Novidades:**
+
+- Adiciona Dependabot -> automatiza a gestão e a segurança das dependências
+- Adiciona bateria de testes a cada `git push` via `pytest`
+- Adiciona release automática
+- Novo reload quando o arquivo é alterado no disco
+- Novo salvamento de arquivo mais robusto
+- Regra de arcos com `R`
+
+**Correções:**
+
+- Torna deslocamento um pouco mais sutil
+- Corrige checkbox
+- Reorganização do painel de issues
+- Comportamento do botão do editor acompanha a alça
+- Corrige Spin nas caixas de parâmetros
+- Ajusta spin para evitar scroll acidental
+
+### 19/11 — quinta-feira — Refatoração e otimização do código (~8h)
+
+**Novidades:**
+
+- Novos atalhos para visualização
+- Adicionado arcos nos planos `G18` e `G19`
+- Adicionado mais ciclos de furação
+
+**Correções:**
+
+- Limpa código morto
+- Renomeia funções com nomes longos e confusos
+- Corrige pausa com `X` lida como coordenada
+- Corrige inclinação da tocha
+
+**Refatoração:**
+
+- Move recentes para `core/recent_files.py` e o monitor de disco para `ui/file_watcher.py`
+- Move o estado do arquivo aberto para `core/document.py`
+- Move o relógio da reprodução para `ui/playback_controller.py`
+- Move a sugestão de dialeto para `ui/dialect_suggestion.py`
+- Move rótulo do arquivo e separador para `ui/widgets.py`
+
+### 22/11 — domingo — Refinamentos e lançamento da v0.3.2-beta (~3h)
+
+**Correções:**
+
+- Ajuste nos arquivos recentes
+- Ajuste no chip de camada
+- Correção de validação vazia
+- Correção no cartão de material
+- Correção do foco nos ajustes
 
