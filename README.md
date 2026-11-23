@@ -151,8 +151,6 @@ Icons: [Phosphor Icons](https://phosphoricons.com) — MIT License, © Phosphor 
 <details>
 <summary><b>Diário de desenvolvimento 🤠👇</b></summary>
 
-## Parte 1 — Aplicativo independente
-
 ### 21/07 — terça-feira — Definição do projeto (~6h)
 
 **Tema:**
