@@ -326,6 +326,38 @@ _STRINGS: dict[str, dict[str, str]] = {
     "dialect_plasma": {PT_BR: "Plasma (tocha em M3/M5)", EN: "Plasma (torch on M3/M5)", IT: "Plasma (torcia su M3/M5)"},
     "dialect_waam": {PT_BR: "WAAM (arco em M10/M11)", EN: "WAAM (arc on M10/M11)", IT: "WAAM (arco su M10/M11)"},
 
+    "dialect_custom": {PT_BR: "Personalizado", EN: "Custom", IT: "Personalizzato"},
+    "dialect_error_not_code": {
+        PT_BR: "\"{text}\" não é um M-code: use, por exemplo, M10 ou M10, M12",
+        EN: "\"{text}\" is not an M-code: use, for example, M10 or M10, M12",
+        IT: "\"{text}\" non è un M-code: usa, per esempio, M10 o M10, M12",
+    },
+    "dialect_error_empty": {
+        PT_BR: "informe ao menos um código para ligar e um para desligar o processo",
+        EN: "provide at least one code to turn the process on and one to turn it off",
+        IT: "indica almeno un codice per accendere e uno per spegnere il processo",
+    },
+    "dialect_error_overlap": {
+        PT_BR: "{codes} não pode ligar e desligar ao mesmo tempo",
+        EN: "{codes} cannot turn the process both on and off",
+        IT: "{codes} non può accendere e spegnere allo stesso tempo",
+    },
+    "dialect_error_reserved": {
+        PT_BR: "{codes} já tem outro uso (pausa, fim de programa ou sub-rotina)",
+        EN: "{codes} already has another use (pause, program end or subprogram)",
+        IT: "{codes} ha già un altro uso (pausa, fine programma o sottoprogramma)",
+    },
+    "dialect_error_range": {
+        PT_BR: "use até {limit} códigos, de M0 a M{highest}",
+        EN: "use up to {limit} codes, from M0 to M{highest}",
+        IT: "usa fino a {limit} codici, da M0 a M{highest}",
+    },
+    "dialect_error_dwell_unit": {
+        PT_BR: "a unidade do G04 deve ser segundos ou milissegundos",
+        EN: "the G04 unit must be seconds or milliseconds",
+        IT: "l'unità del G04 deve essere secondi o millisecondi",
+    },
+
     # --- mensagens de validação (parser/expander/modos) ----------------------
     "severity_error": {PT_BR: "Erro", EN: "Error", IT: "Errore"},
     "severity_warning": {PT_BR: "Aviso", EN: "Warning", IT: "Avviso"},

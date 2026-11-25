@@ -9,7 +9,9 @@ import json
 import math
 
 import config
-from core.dialect import DIALECTS
+from core.dialect import (
+    CUSTOM_DIALECT, DIALECTS, DialectError, default_custom_dialect, make_custom_dialect,
+)
 from core.file_io import write_text_atomic
 from core.machine_profile import DEFAULT_LIMITS, MachineProfile, default_profiles
 from core.modes import mode_choices
@@ -45,6 +47,12 @@ def _limits(raw) -> dict[str, tuple[float, float]]:
 def _known(value, valid, default: str) -> str:
     return value if value in valid else default
 
+def _custom_dialect(raw):
+    """dialeto personalizado salvo; qualquer coisa inválida volta ao padrão."""
+    try:
+        return make_custom_dialect(raw["on"], raw["off"], float(raw["dwell_unit"]))
+    except (DialectError, KeyError, TypeError, ValueError):
+        return default_custom_dialect()
 
 def load_profiles() -> tuple[list[MachineProfile], str | None]:
     """carrega perfis salvos e o nome do perfil ativo. sem arquivo ou corrompido -> padrões."""
@@ -53,16 +61,18 @@ def load_profiles() -> tuple[list[MachineProfile], str | None]:
     try:
         data = json.loads(config.PROFILES_FILE.read_text(encoding="utf-8"))
         modes = {key for _, key in mode_choices()}
+        dialects = {*DIALECTS, CUSTOM_DIALECT}
         profiles = [
             MachineProfile(
                 name=str(item["name"])[:MAX_NAME_LENGTH],
                 limits=_limits(item.get("limits")),
                 mode_key=_known(item.get("mode"), modes, config.DEFAULT_MODE),
-                dialect_key=_known(item.get("dialect"), DIALECTS, config.DEFAULT_DIALECT),
+                dialect_key=_known(item.get("dialect"), dialects, config.DEFAULT_DIALECT),
                 rapid_feed=_number(item.get("rapid_feed"), config.RAPID_FEED, *FEED_RANGE),
                 default_feed=_number(item.get("default_feed"), config.DEFAULT_FEED, *FEED_RANGE),
                 min_feed=_number(item.get("min_feed"), config.MIN_FEED, *FEED_RANGE),
                 arc_step_deg=_number(item.get("arc_step_deg"), config.ARC_STEP_DEG, *ARC_STEP_RANGE),
+                custom_dialect=_custom_dialect(item.get("custom_dialect")),
             )
             for item in data["profiles"]
         ]
@@ -87,6 +97,11 @@ def save_profiles(profiles: list[MachineProfile], active_name: str) -> None:
                 "default_feed": p.default_feed,
                 "min_feed": p.min_feed,
                 "arc_step_deg": p.arc_step_deg,
+                "custom_dialect": {
+                    "on": sorted(p.custom_dialect.process_on),
+                    "off": sorted(p.custom_dialect.process_off),
+                    "dwell_unit": p.custom_dialect.dwell_unit,
+                },
             }
             for p in profiles
         ],

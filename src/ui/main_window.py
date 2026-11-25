@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
 
 import config
 from config import APP_TITLE, ICON_PATH, WINDOW_SIZE
-from core.dialect import dialect_label, get_dialect, process_codes_label
+from core.dialect import dialect_label, process_codes_label
 from core.document import Document
 from core.file_safety import UnsafeFileError
 from core.i18n import tr
@@ -328,7 +328,7 @@ class MainWindow(QMainWindow):
         name = tr("profile_label").format(name=self._profile.name)
         self._profile_label.setText(f"{name}  ·  {dialect_label(self._profile.dialect_key)}")
         self._profile_label.setToolTip(tr("profile_dialect_tooltip").format(
-            codes=process_codes_label(self._profile.dialect_key)))
+            codes=process_codes_label(self._profile.dialect)))
 
     def _use_dialect(self, key: str) -> None:
         """troca o dialeto do perfil ativo pelo sugerido e reinterpreta o programa."""
@@ -466,7 +466,7 @@ class MainWindow(QMainWindow):
         self._playback.pause()
 
         mode = self._mode_controls.current_mode()
-        dialect = get_dialect(self._profile.dialect_key)
+        dialect = self._profile.dialect
         limits = self._profile.limits
         result = parse_gcode(
             text, default_feed=self._profile.default_feed,
@@ -477,7 +477,7 @@ class MainWindow(QMainWindow):
         self._source_lines = text.splitlines()
         self._issues = sorted([*result.issues, *mode.validate(moves)], key=lambda i: i.line)
         self._issues_panel.show_issues(self._issues)
-        self._dialect_suggestion.update(text, self._doc.path, self._profile.dialect_key)
+        self._dialect_suggestion.update(text, self._doc.path, self._profile.dialect_key, self._profile.dialect)
 
         if not moves:
             status = (tr("status_no_moves_see_issues").format(count=len(self._issues))

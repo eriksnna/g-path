@@ -5,7 +5,7 @@ from pathlib import Path
 
 from PySide6.QtCore import QSettings
 
-from core.dialect import dialect_label, process_codes_label, suggest_dialect
+from core.dialect import Dialect, dialect_label, get_dialect, process_codes_label, suggest_dialect
 from core.i18n import tr
 from ui.suggestion_banner import SuggestionBanner
 
@@ -23,16 +23,16 @@ class DialectSuggestion:
         self._path: Path | None = None
         banner.dismissed.connect(self._dismiss)
 
-    def update(self, text: str, path: Path | None, current_key: str) -> None:
+    def update(self, text: str, path: Path | None, current_key: str, current: Dialect) -> None:
         self._path = path
-        key = suggest_dialect(text, current_key)
+        key = suggest_dialect(text, current)
         if key is None or self._dismissal_id(key) in self._dismissed():
             self._banner.hide()
             return
         self._banner.show_suggestion(
             key,
             tr("dialect_suggestion").format(
-                codes=process_codes_label(key), current=dialect_label(current_key)),
+                codes=process_codes_label(get_dialect(key)), current=dialect_label(current_key)),
             tr("dialect_suggestion_action").format(name=dialect_label(key)),
         )
 

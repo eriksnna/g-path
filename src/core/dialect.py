@@ -1,9 +1,10 @@
 """dialetos de G-code. as diferenças entre controladores ficam aqui, fora do núcleo.
 
 cada perfil responde a perguntas sobre a máquina: em que unidade o G04 espera e
-quais M-codes ligam e desligam o processo (spindle, arco, tocha). para uma máquina
-nova, basta acrescentar um perfil em DIALECTS.
+quais M-codes ligam e desligam o processo (spindle, arco, tocha). além dos prontos em
+DIALECTS, cada perfil de máquina guarda um dialeto personalizado, editável nos Ajustes.
 """
+
 from __future__ import annotations
 
 import re
@@ -12,6 +13,19 @@ from dataclasses import dataclass
 from core.lexer import clean_line
 
 M_CODE_RE = re.compile(r"M\s*(\d+)")
+
+CUSTOM_DIALECT = "personalizado"   # chave do dialeto que o usuário define no perfil
+SECONDS, MILLISECONDS = 1.0, 0.001  # unidades aceitas para o P do G04
+DWELL_UNITS = (SECONDS, MILLISECONDS)
+MAX_M_CODE = 999
+MAX_PROCESS_CODES = 8
+# pausa, fim de programa e sub-rotinas: o interpretador já usa esses, não podem ligar o processo
+RESERVED_M_CODES = frozenset({0, 1, 2, 30, 98, 99})
+_CODE_TEXT_RE = re.compile(r"M?\s*(\d+)", re.IGNORECASE)
+_CODE_SEPARATORS_RE = re.compile(r"[\s,;/]+")
+
+class DialectError(ValueError):
+    """dialeto personalizado inválido. a mensagem já vem traduzida, pronta para a tela."""
 
 
 @dataclass(frozen=True)
@@ -55,6 +69,54 @@ DIALECTS: dict[str, Dialect] = {
     ),
 }
 
+def parse_m_codes(text: str) -> frozenset[int]:
+    """lê o que o usuário digitou: 'M10', 'M10, M12', '10 12' ou 'm10/m12'."""
+    from core.i18n import tr
+    codes = set()
+    for part in _CODE_SEPARATORS_RE.split(text.strip()):
+        if not part:
+            continue
+        match = _CODE_TEXT_RE.fullmatch(part)
+        if match is None:
+            raise DialectError(tr("dialect_error_not_code").format(text=part))
+        codes.add(int(match.group(1)))
+    return frozenset(codes)
+
+
+def format_m_codes(codes) -> str:
+    return ", ".join(f"M{code}" for code in sorted(codes))
+
+
+def make_custom_dialect(process_on, process_off, dwell_unit: float) -> Dialect:
+    from core.i18n import tr
+    on, off = _valid_codes(process_on), _valid_codes(process_off)
+    if not on or not off:
+        raise DialectError(tr("dialect_error_empty"))
+    if on & off:
+        raise DialectError(tr("dialect_error_overlap").format(codes=format_m_codes(on & off)))
+    reserved = (on | off) & RESERVED_M_CODES
+    if reserved:
+        raise DialectError(tr("dialect_error_reserved").format(codes=format_m_codes(reserved)))
+    if dwell_unit not in DWELL_UNITS:
+        raise DialectError(tr("dialect_error_dwell_unit"))
+    return Dialect(name=CUSTOM_DIALECT, dwell_unit=dwell_unit, process_on=on, process_off=off)
+
+
+def default_custom_dialect() -> Dialect:
+    """ponto de partida do personalizado: os mesmos códigos do genérico."""
+    generic = DIALECTS["generico"]
+    return make_custom_dialect(generic.process_on, generic.process_off, generic.dwell_unit)
+
+
+def _valid_codes(codes) -> frozenset[int]:
+    from core.i18n import tr
+    try:
+        result = frozenset(int(code) for code in codes)
+    except (TypeError, ValueError) as err:
+        raise DialectError(tr("dialect_error_empty")) from err
+    if len(result) > MAX_PROCESS_CODES or any(not 0 <= code <= MAX_M_CODE for code in result):
+        raise DialectError(tr("dialect_error_range").format(limit=MAX_PROCESS_CODES, highest=MAX_M_CODE))
+    return result
 
 def get_dialect(key: str) -> Dialect:
     try:
@@ -68,16 +130,16 @@ _DIALECT_LABEL_KEYS = {
     "fanuc": "dialect_fanuc",
     "plasma-m3-m5": "dialect_plasma",
     "waam-m10-m11": "dialect_waam",
+    CUSTOM_DIALECT: "dialect_custom",
 }
 
 def dialect_label(key: str) -> str:
     from core.i18n import tr
-    return tr(_DIALECT_LABEL_KEYS.get(key, get_dialect(key).name))
+    return tr(_DIALECT_LABEL_KEYS[key]) if key in _DIALECT_LABEL_KEYS else get_dialect(key).name
 
 
-def process_codes_label(key: str) -> str:
+def process_codes_label(dialect: Dialect) -> str:
     """códigos de liga/desliga do dialeto, para mostrar ao usuário: 'M8/M9'."""
-    dialect = get_dialect(key)
     return "/".join(f"M{code}" for code in (*sorted(dialect.process_on), *sorted(dialect.process_off)))
 
 
@@ -89,7 +151,7 @@ def m_codes_in(text: str) -> set[int]:
     return codes
 
 
-def suggest_dialect(text: str, current_key: str) -> str | None:
+def suggest_dialect(text: str, current: Dialect) -> str | None:
     """dialeto que combina com o arquivo quando o atual não combina.
 
     só sugere se o programa não usa nenhum código de ligar do dialeto atual e
@@ -97,10 +159,10 @@ def suggest_dialect(text: str, current_key: str) -> str | None:
     programa com M3/M5 não dispara a sugestão.
     """
     used = m_codes_in(text)
-    if used & get_dialect(current_key).process_on:
+    if used & current.process_on:
         return None
     for key, dialect in DIALECTS.items():
-        if key != current_key and used & dialect.process_on and used & dialect.process_off:
+        if dialect is not current and used & dialect.process_on and used & dialect.process_off:
             return key
     return None
 

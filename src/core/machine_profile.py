@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from core.dialect import CUSTOM_DIALECT, Dialect, default_custom_dialect, get_dialect
+
 from config import (
     ARC_STEP_DEG, DEFAULT_DIALECT, DEFAULT_FEED, DEFAULT_MODE, MIN_FEED, RAPID_FEED,
 )
@@ -26,11 +28,20 @@ class MachineProfile:
     default_feed: float = DEFAULT_FEED
     min_feed: float = MIN_FEED
     arc_step_deg: float = ARC_STEP_DEG
+    custom_dialect: Dialect = field(default_factory=default_custom_dialect)
+
+    @property
+    def dialect(self) -> Dialect:
+        """o dialeto em uso: um dos prontos ou o personalizado deste perfil."""
+        if self.dialect_key == CUSTOM_DIALECT:
+            return self.custom_dialect
+        return get_dialect(self.dialect_key)
 
     def clone(self) -> "MachineProfile":
         return MachineProfile(
             self.name, dict(self.limits), self.mode_key, self.dialect_key,
             self.rapid_feed, self.default_feed, self.min_feed, self.arc_step_deg,
+            self.custom_dialect,
         )
 
 
