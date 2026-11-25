@@ -438,6 +438,7 @@ class MainWindow(QMainWindow):
         if self._save_to(path, text):
             self._file_watcher.watch(path)
             self._file_label.setText(path.name, str(path))
+            self._recent.opened(path)  # o arquivo novo entra nos recentes e reabre ao iniciar
 
     def _save_to(self, path: Path, text: str) -> bool:
         try:
