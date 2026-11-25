@@ -104,3 +104,7 @@ def test_old_profiles_without_custom_dialect_still_load(tmp_path, monkeypatch):
     monkeypatch.setattr(config, "PROFILES_FILE", path)
     loaded = load_profiles()[0][0]
     assert loaded.dialect is get_dialect("fanuc")
+
+def test_custom_dialect_is_offered_last():
+    from core.dialect import dialect_choices
+    assert dialect_choices()[-1][1] == CUSTOM_DIALECT

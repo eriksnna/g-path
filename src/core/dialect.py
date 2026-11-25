@@ -169,7 +169,8 @@ def suggest_dialect(text: str, current: Dialect) -> str | None:
 
 def dialect_choices() -> list[tuple[str, str]]:
     from core.i18n import tr  # import tardio: evita ciclo e garante tradução na hora certa
-    return [
+    choices = [
         (tr(_DIALECT_LABEL_KEYS.get(key, dialect.name)), key)
         for key, dialect in DIALECTS.items()
     ]
+    return [*choices, (tr(_DIALECT_LABEL_KEYS[CUSTOM_DIALECT]), CUSTOM_DIALECT)]

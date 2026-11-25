@@ -327,6 +327,12 @@ _STRINGS: dict[str, dict[str, str]] = {
     "dialect_waam": {PT_BR: "WAAM (arco em M10/M11)", EN: "WAAM (arc on M10/M11)", IT: "WAAM (arco su M10/M11)"},
 
     "dialect_custom": {PT_BR: "Personalizado", EN: "Custom", IT: "Personalizzato"},
+    "label_process_on": {PT_BR: "Liga o processo", EN: "Process on", IT: "Accende il processo"},
+    "label_process_off": {PT_BR: "Desliga o processo", EN: "Process off", IT: "Spegne il processo"},
+    "label_dwell_unit": {PT_BR: "Unidade do G04 P", EN: "G04 P unit", IT: "Unità del G04 P"},
+    "placeholder_m_codes": {PT_BR: "ex.: M10, M12", EN: "e.g. M10, M12", IT: "es.: M10, M12"},
+    "dwell_unit_seconds": {PT_BR: "Segundos", EN: "Seconds", IT: "Secondi"},
+    "dwell_unit_milliseconds": {PT_BR: "Milissegundos", EN: "Milliseconds", IT: "Millisecondi"},
     "dialect_error_not_code": {
         PT_BR: "\"{text}\" não é um M-code: use, por exemplo, M10 ou M10, M12",
         EN: "\"{text}\" is not an M-code: use, for example, M10 or M10, M12",

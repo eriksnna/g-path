@@ -11,11 +11,14 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (
     QDialog, QDoubleSpinBox, QFrame, QGridLayout, QHBoxLayout, QInputDialog,
-    QLabel, QListWidget, QMessageBox, QPushButton, QStackedWidget, QVBoxLayout, QWidget,
+    QLabel, QLineEdit, QListWidget, QMessageBox, QPushButton, QStackedWidget, QVBoxLayout, QWidget,
 )
 
 import config
-from core.dialect import dialect_choices
+from core.dialect import (
+    CUSTOM_DIALECT, MILLISECONDS, SECONDS, DialectError, dialect_choices, format_m_codes,
+    make_custom_dialect, parse_m_codes,
+)
 from core.i18n import LANGUAGES, get_language, tr
 from core.machine_profile import MachineProfile, default_profiles
 from core.modes import mode_choices
@@ -116,6 +119,7 @@ class _ProfilesPage(QWidget):
         config_grid.addWidget(self._mode_combo, 0, 1)
         config_grid.addWidget(QLabel(tr("label_dialect_colon").rstrip(":")), 1, 0)
         config_grid.addWidget(self._dialect_combo, 1, 1)
+        self._custom_widgets = self._build_custom_dialect_fields(config_grid, first_row=2)
         config_grid.setColumnStretch(1, 1)
 
         limits_card, limits_grid = _card()
@@ -170,6 +174,70 @@ class _ProfilesPage(QWidget):
 
         self._load_active_into_fields()
 
+    def _build_custom_dialect_fields(self, grid: QGridLayout, first_row: int) -> list[QWidget]:
+        """campos do dialeto personalizado, no mesmo cartão; só aparecem com ele escolhido."""
+        self._process_on_edit = QLineEdit()
+        self._process_off_edit = QLineEdit()
+        for edit in (self._process_on_edit, self._process_off_edit):
+            edit.setPlaceholderText(tr("placeholder_m_codes"))
+            edit.editingFinished.connect(self._on_custom_dialect_edited)
+        self._dwell_unit_combo = ComboBox()
+        self._dwell_unit_combo.addItem(tr("dwell_unit_seconds"), SECONDS)
+        self._dwell_unit_combo.addItem(tr("dwell_unit_milliseconds"), MILLISECONDS)
+        self._dwell_unit_combo.currentIndexChanged.connect(self._on_custom_dialect_edited)
+        self._custom_error = QLabel()
+        self._custom_error.setObjectName("fieldError")
+        self._custom_error.setWordWrap(True)
+        self._custom_error.setTextFormat(Qt.TextFormat.PlainText)
+
+        widgets: list[QWidget] = []
+        rows = (
+            ("label_process_on", self._process_on_edit),
+            ("label_process_off", self._process_off_edit),
+            ("label_dwell_unit", self._dwell_unit_combo),
+        )
+        for offset, (key, field) in enumerate(rows):
+            label = QLabel(tr(key))
+            grid.addWidget(label, first_row + offset, 0)
+            grid.addWidget(field, first_row + offset, 1)
+            widgets += [label, field]
+        grid.addWidget(self._custom_error, first_row + len(rows), 1)
+        return widgets
+
+    def _update_custom_visibility(self) -> None:
+        # linhas com tudo escondido não ocupam espaço na grade
+        custom = self._dialect_combo.currentData() == CUSTOM_DIALECT
+        for widget in self._custom_widgets:
+            widget.setVisible(custom)
+        self._custom_error.setVisible(custom and bool(self._custom_error.text()))
+
+    def _show_custom_dialect(self) -> None:
+        dialect = self._active.custom_dialect
+        self._process_on_edit.setText(format_m_codes(dialect.process_on))
+        self._process_off_edit.setText(format_m_codes(dialect.process_off))
+        self._dwell_unit_combo.setCurrentIndex(max(0, self._dwell_unit_combo.findData(dialect.dwell_unit)))
+        self._custom_error.setText("")
+
+    def _on_custom_dialect_edited(self) -> None:
+        """valida ao sair do campo. com erro, o perfil continua com o último dialeto válido."""
+        if self._loading:
+            return
+        try:
+            dialect = make_custom_dialect(
+                parse_m_codes(self._process_on_edit.text()),
+                parse_m_codes(self._process_off_edit.text()),
+                self._dwell_unit_combo.currentData(),
+            )
+        except DialectError as err:
+            self._custom_error.setText(str(err))
+            self._update_custom_visibility()
+            return
+        self._custom_error.setText("")
+        self._update_custom_visibility()
+        if dialect != self._active.custom_dialect:
+            self._active.custom_dialect = dialect
+            self.changed.emit()
+
     def profiles(self) -> list[MachineProfile]:
         return self._profiles
 
@@ -197,6 +265,8 @@ class _ProfilesPage(QWidget):
         self._default_feed_spin.setValue(self._active.default_feed)
         self._min_feed_spin.setValue(self._active.min_feed)
         self._arc_step_spin.setValue(self._active.arc_step_deg)
+        self._show_custom_dialect()
+        self._update_custom_visibility()
         self._loading = False
 
     def _on_fields_edited(self) -> None:
@@ -204,6 +274,7 @@ class _ProfilesPage(QWidget):
             return
         self._active.mode_key = self._mode_combo.currentData()
         self._active.dialect_key = self._dialect_combo.currentData()
+        self._update_custom_visibility()
         for axis, (lo, hi) in self._spinboxes.items():
             self._active.limits[axis] = (lo.value(), hi.value())
         self._active.rapid_feed = self._rapid_feed_spin.value()

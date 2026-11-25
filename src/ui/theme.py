@@ -170,6 +170,7 @@ QFrame#statsPanel {{ background: {SURFACE_1}; border: none; border-radius: {RADI
 
 QFrame#settingsCard {{ background: {SURFACE_1}; border: none; border-radius: {RADIUS_MD}; }}
 QLabel#fieldCaption {{ color: {TEXT_MUTED}; font-size: {FONT_SMALL}; }}
+QLabel#fieldError {{ color: {ERROR_COLOR}; font-size: {FONT_SMALL}; }}
 QLabel#aboutTitle {{ font-size: {FONT_VALUE}; font-weight: {WEIGHT_STRONG}; }}
 QLabel#kbd {{
     color: {TEXT_PRIMARY}; background: {SURFACE_2}; border: 1px solid {BORDER};
