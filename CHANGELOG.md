@@ -3,6 +3,32 @@
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e versionamento [SemVer](https://semver.org/lang/pt-BR/).
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [SemVer](https://semver.org/) versioning.
 
+## [0.3.3-beta] - 2026-11-25
+
+### Português
+
+**Adicionado**
+- Dialeto personalizado por perfil: escolha nos Ajustes os M-codes que ligam e desligam o processo e a unidade do `G04 P`
+
+**Alterado**
+- Botões da barra de reprodução com ícones preenchidos, no mesmo estilo do play
+- Exemplo `machining_03_drilling_grid` reescrito com os ciclos `G82` e `G83`
+
+**Corrigido**
+- "Salvar como" não colocava o arquivo nos recentes nem o reabria ao iniciar
+
+### English
+
+**Added**
+- Custom dialect per profile: pick in Settings the M-codes that turn the process on and off and the `G04 P` unit
+
+**Changed**
+- Player bar buttons with filled icons, matching the play button
+- `machining_03_drilling_grid` example rewritten with the `G82` and `G83` cycles
+
+**Fixed**
+- "Save as" did not add the file to the recent list nor reopen it at startup
+
 ## [0.3.2-beta] - 2026-11-22
 
 ### Português
