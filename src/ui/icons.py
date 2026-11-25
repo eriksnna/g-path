@@ -14,10 +14,10 @@ from ui.theme import TEXT_MUTED, TEXT_PRIMARY
 # player (fill só no play/pause, para eles terem mais peso que o resto)
 PLAY = "play-fill"
 PAUSE = "pause-fill"
-SKIP_BACK = "skip-back"
-SKIP_FORWARD = "skip-forward"
-REWIND = "rewind"
-FAST_FORWARD = "fast-forward"
+SKIP_BACK = "skip-back-fill"
+SKIP_FORWARD = "skip-forward-fill"
+REWIND = "rewind-fill"
+FAST_FORWARD = "fast-forward-fill"
 
 # menus e editor
 NEW_FILE = "file-plus"
