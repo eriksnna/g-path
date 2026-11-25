@@ -49,7 +49,7 @@ A pasta `examples/` (incluída no `.zip`) traz 10 programas prontos:
 |---|---|
 | `machining_01_face_milling.nc` | Passadas em zigue-zague |
 | `machining_02_contour_with_hole.nc` | Contorno e furo em profundidades diferentes |
-| `machining_03_drilling_grid.nc` | Furação com espera (G4) |
+| `machining_03_drilling_grid.nc` | Furação com ciclos `G82` e `G83` |
 | `machining_04_circles_g2_g3.nc` | Arcos com I/J |
 | `machining_05_pocket_in_passes.nc` | Variáveis, sub-rotina e repetição |
 | `machining_06_inches_incremental.nc` | Polegadas (G20) e incremental (G91) |
@@ -117,7 +117,7 @@ The `examples/` folder (included in the `.zip`) has 10 ready-made programs:
 |---|---|
 | `machining_01_face_milling.nc` | Zigzag passes |
 | `machining_02_contour_with_hole.nc` | Contour and hole at different depths |
-| `machining_03_drilling_grid.nc` | Drilling with dwell (G4) |
+| `machining_03_drilling_grid.nc` | Drilling with `G82` and `G83` cycles |
 | `machining_04_circles_g2_g3.nc` | Arcs with I/J |
 | `machining_05_pocket_in_passes.nc` | Variables, sub-routine, and repetitiono |
 | `machining_06_inches_incremental.nc` | Inches (G20) and incremental (G91) |
